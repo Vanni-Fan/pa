@@ -1,0 +1,61 @@
+<?php
+if(!empty($setting_items)) {
+    $page_active = isset($setting_items[$c->getRuleId()]);
+?>
+<style>
+.attribute label,.attribute div{
+    width:100%;
+}
+.attribute label{
+    padding-top:15px;
+}
+</style>
+<!-- Control Sidebar -->
+<aside class="control-sidebar control-sidebar-dark">
+    <!-- Create the tabs -->
+    <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+        <?php if($page_active) { ?>
+        <li class="active"><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-gear"></i> 页面配置</a></li>
+        <?php } ?>
+        <?php if($setting_items[0]){ ?>
+        <li class="<?=$page_active?'':'active'?>"><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i> 系统配置</a></li>
+        <?php } ?>
+    </ul>
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <?php if($page_active) { ?>
+        <!-- Home tab content -->
+        <div class="tab-pane active" id="control-sidebar-home-tab">
+            <form method="post" action="<?=$c->url('update',['action'=>'setting'])?>">
+            <div class="attribute"><?=$setting_items[$c->getRuleId()]?></div>
+            <button type="button" onclick="updateAttribute(event)" class="btn btn-block btn-info" style="width: calc(100% - 30px);margin: auto;">保存</button>
+            </form>
+        </div>
+        <?php } ?>
+    
+        <?php if($setting_items[0]){ ?>
+        <!-- Settings tab content -->
+        <div class="tab-pane <?=$page_active?'':'active'?>" id="control-sidebar-settings-tab">
+            <form method="post" action="<?=$c->url('update',['action'=>'setting'])?>">
+            <div class="attribute"><?=$setting_items[0]?></div>
+            <button type="button" onclick="updateAttribute(event)" class="btn btn-block btn-info" style="width: calc(100% - 30px);margin: auto;">保存</button>
+            </form>
+        </div>
+        <?php } ?>
+    </div>
+</aside>
+<!-- /.control-sidebar -->
+<!-- Add the sidebar's background. This div must be placed immediately after the control sidebar -->
+<div class="control-sidebar-bg"></div>
+<script>
+function updateAttribute(e){
+    var form = $(e.target).parent();
+    $.ajax(form.attr('action'), {
+        method:form.attr('method'),
+        data:form.serializeArray()
+    }).done(function(d){
+        showDialogs({body:'保存成功，刷新页面新配置将生效',delay:1500});
+    });
+}
+</script>
+<?php } ?>

@@ -1,0 +1,49 @@
+<style>
+
+</style>
+<div id="user_list" class="box">
+    <div class="box-header with-border">
+        <h3 class="box-title">插件列表</h3>
+        <?php if($c->isAllowed('new', 0, $c->getUserId())) { ?>
+            <a href="<?=$c->url('new')?>" type="button" class="btn btn-success btn-sm" style="margin-left:20px;">安装新插件</a>
+        <?php } ?>
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+        <table class="table table-bordered table-striped">
+            <tr>
+                <th class="col-sm-4"><input type="checkbox"> 插件</th>
+                <th class="col-sm-8">插件描述</th>
+            </tr>
+            <?php foreach($plugins as $p){ ?>
+            <tr>
+                <td>
+                    <input type="checkbox"> <strong><?=$p->name?></strong>
+                    <div>
+                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'setting'])?>">设置</a> |
+                        <?php if($p->enabled) { ?>
+                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'disable'])?>">停用</a> |
+                        <?php } else { ?>
+                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'enable'])?>">启用</a> |
+                        <?php } ?>
+                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'delete'])?>">删除</a> |
+                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'upgrade'])?>">更新</a>
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <?=$p->description?>
+                    </div>
+                    <div>
+                        <?=$p->version?>版本 |
+                        由<a href="<?=$p->author_url?>"><?=$p->author?></a> |
+                        <a href="<?=$p->official_url?>">官网首页</a>
+                    </div>
+                </td>
+            </tr>
+            <?php } ?>
+        </table>
+    </div>
+    <!-- /.box-body -->
+    <?=$page??''?>
+</div>

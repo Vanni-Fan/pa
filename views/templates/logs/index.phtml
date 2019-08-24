@@ -1,0 +1,50 @@
+<style>
+    .json-code{
+        width: calc(30% - 20px);
+        cursor: pointer;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        height: 25px;
+        white-space: nowrap;
+        position: absolute;
+    }
+</style>
+<div id="user_list" class="box">
+    <!-- /.box-header -->
+    <div class="box-body">
+        <table class="table table-bordered table-striped">
+            <tr>
+                <th width="50">#</th>
+                <th>用户</th>
+                <th>菜单</th>
+                <th>URL</th>
+                <th width="30%">请求参数</th>
+                <th width="30%">环境变量</th>
+                <th>操作时间</th>
+            </tr>
+            <?php foreach($logs as $log){ ?>
+            <tr>
+                <td><?=$log->log_id?></td>
+                <td><?=$log->User->name?></td>
+                <td><?=$log->name?></td>
+                <td><?=$log->url?></td>
+                <td><div class="json-code"><?=$log->request?></div></td>
+                <td><div class="json-code"><?=$log->server?></div></td>
+                <td><?=$log->created_time?></td>
+            </tr>
+            <?php } ?>
+        </table>
+    </div>
+    <!-- /.box-body -->
+    <?=$page?>
+</div>
+<script>
+    $(function(){
+        $('.json-code').click(function(e){
+            showDialogs({
+                body:'<pre style="max-height:400px;">' + JSON.stringify(JSON.parse(e.target.innerText),'',4) + '</pre>',
+                close:{text:"关闭",click:function(_){_.close()}}
+            })
+        });
+    });
+</script>

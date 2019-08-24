@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <?=$this->partial(POWER_VIEW_DIR . 'include/html-header')?>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+    <div class="wrapper">
+        <!-- 页面头部 -->
+        <?=$this->partial(POWER_VIEW_DIR . 'include/main-header')?>
+        
+        <!-- 左边的菜单栏 -->
+        <?=$this->partial(POWER_VIEW_DIR . 'include/main-sidebar')?>
+        
+        <div class="content-wrapper">
+            <!-- 页面的标题，面包屑，导航栏 -->
+            <?=$this->partial(POWER_VIEW_DIR . 'include/content-header')?>
+            
+            <section class="content">
+                <!-- 具体的内容页 -->
+                <?php
+                    $_file = $template_file;
+                    $file  = substr(realpath($_file.'.phtml'),0,-6);
+                    if(file_exists($file.'.phtml')){
+                        $this->partial($file);
+                    }else{
+                        echo "没有 {$_file}.phtml 文件";
+                    }
+                ?>
+            </section>
+            <div id="over_bg"></div>
+            <div id="over_wrap"></div>
+        </div>
+        
+        <!-- 页面底部 -->
+        <?=$this->partial(POWER_VIEW_DIR . 'include/main-footer')?>
+        
+        <!-- 右边的控制栏 -->
+        <?=$this->partial(POWER_VIEW_DIR . 'include/control-sidebar')?>
+    </div>
+    
+    <!-- HTML的底部脚本区域 -->
+    <?=$this->partial(POWER_VIEW_DIR . 'include/html-bottom')?>
+</body>
+</html>

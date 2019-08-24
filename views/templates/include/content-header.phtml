@@ -1,0 +1,12 @@
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1><?=$title?><small><?=$subtitle?></small>
+    </h1>
+    <ol class="breadcrumb">
+        <?php $last=count($breadcrumbs)-1; foreach($breadcrumbs as $index=>$item){ ?>
+            <li<?=$index===$last ? ' class="active"' : ''?>>
+                <?=$item['icon']?('<i class="'.$item['icon'].'"></i>'):''?><?=$item['name']?>
+            </li>
+        <?php } ?>
+    </ol>
+</section>

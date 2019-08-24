@@ -1,0 +1,87 @@
+<!--<pre>-->
+<?php
+//print_r($fields);
+//print_r($primary);
+//print_r($conditions);
+//?>
+<!--    </pre>-->
+<div id="user_list" class="box">
+    <div class="box-header with-border">
+        <h3 class="box-title"><?=$table?> Listing</h3>
+        <a href="<?=$c->url('new')?>" type="button" class="btn btn-success btn-sm" style="margin-left:20px;">Add <?=$table?></a>
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+        <form id="filter_form" method="get" action="<?=$c->url();?>">
+            <input id="sort_field" type="hidden" name="sort_field">
+            <input id="sort_method" type="hidden" name="sort_method">
+        <div style="display: flex;align-items: flex-end;">
+            <div id="all_field" class="col-lg-6" style="padding:0">
+                <div id="field_template" class="input-group margin">
+                    <div class="input-group-btn">
+                        <div class="filter_btn btn btn-info">
+                            <button type="button" class="btn filter_field" data-toggle="dropdown">Field</button>
+                            <input class="field_form" type="hidden" name="field[]">
+                            <ul class="dropdown-menu" role="menu" style="z-index: 999;">
+                                <?php foreach($fields as $field=>$schema){ ?>
+                                    <li><a onclick="return selectField(event);" data-field="<?=$field?>" href="#"><?=$schema['name']?></a></li>
+                                <?php } ?>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="input-group-btn">
+                        <div class="filter_btn btn btn-success">
+                            <button type="button" class="btn filter_operations" data-toggle="dropdown" >Operations</button>
+                            <input class="operations_form"  type="hidden" name="operations[]">
+                            <ul class="dropdown-menu" role="menu" style="z-index: 999;">
+                                <?php foreach($conditions as $cond){ ?>
+                                <li><a onclick="return selectOperations(event);" href="#"><?=$cond?></a></li>
+                                <?php } ?>
+                            </ul>
+                        </div>
+                    </div>
+                    <input name="value[]" type="text" class="form-control filter_input" placeholder="value">
+                    <span class="input-group-btn"><button onclick="addOrDelField(event);" type="button" class="btn btn-warning btn-flat operation_filter">+</button></span>
+                </div>
+            </div>
+            <div class="col-lg-1" style="padding:0">
+                <button type="submit" class="btn btn-block btn-primary" style="margin:0;margin-left:5px;margin-bottom: 5px;">Query</button>
+            </div>
+        </div>
+    </form>
+        
+        <table id="dataTable" class="table table-bordered table-striped dataTable">
+            <thead>
+                <tr>
+                    <?php
+                    foreach($fields as $field=>$schema){
+                        $sort_field = $where['order'] ?? '';
+                        $sort = $sort_field == "$field asc" ? 'sorting_asc' : ($sort_field == "$field desc" ? 'sorting_desc' : 'sorting');
+                    ?>
+                    <th data-field="<?=$field?>" class="<?=$sort?>"><?=$schema['name']?></th>
+                    <?php } ?>
+                    <th style="width: 150px" class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach($data as $row){ ?>
+                <tr>
+                <?php foreach($fields as $field=>$schema) {?>
+                    <td><?=$row->$field?></td>
+                <?php } ?>
+                    <td class="text-center">
+                        <a href="<?=$c->url('update',['item_id'=>$row->{array_key_first($primary)}])?>">Update</a>
+                        <a onclick="return deleteItem(event);" href="<?=$c->url('delete',['item_id'=>$row->{array_key_first($primary)}])?>">Delete</a>
+                    </td>
+                </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+        <?=$page?>
+    </div>
+    <!-- /.box-body -->
+    <div class="box-footer clearfix">
+        <ul class="pagination pagination-sm no-margin pull-right"></ul>
+    </div>
+</div>
+

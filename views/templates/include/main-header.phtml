@@ -1,0 +1,151 @@
+<header class="main-header">
+    <!-- Logo -->
+    <a href="/" class="logo">
+        <!-- mini logo for sidebar mini 50x50 pixels -->
+        <span class="logo-mini"><b><?=$c->getSettings('site_domain_logogram')?></b></span>
+        <!-- logo for regular state and mobile devices -->
+        <span class="logo-lg"><b><?=$c->getSettings('site_name')?></b><?=$c->getSettings('site_subname')?></span>
+    </a>
+    <!-- Header Navbar: style can be found in header.less -->
+    <nav class="navbar navbar-static-top">
+        <!-- Sidebar toggle button-->
+        <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+            <span class="sr-only">Toggle navigation</span>
+        </a>
+        
+        <div class="navbar-custom-menu">
+            <ul class="nav navbar-nav">
+                <?php if($messages) { $total = count($messages); ?>
+                <!-- Messages: style can be found in dropdown.less-->
+                <!-- 消息：活动审核成功、活动审核拒绝、活动已经上线、活动下线 -->
+                <li class="dropdown messages-menu">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-envelope-o"></i>
+                        <span class="label label-success"><?=$total?></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="header">您有<?=$total?>个邮件</li>
+                        <li>
+                            <!-- inner menu: contains the actual data -->
+                            <ul class="menu">
+                                <?php foreach($messages as $message) { ?>
+                                <!-- start message -->
+                                <li>
+                                    <a href="/messages/<?=$message['id']?>">
+                                        <div class="pull-left"><i class="<?=$message['icon']??'fa fa-info btn-lg'?>"></i></div>
+                                        <h4>
+                                            <?=$message['title']?>
+                                            <small><i class="fa fa-clock-o"></i> <?=$message['time']?></small>
+                                        </h4>
+                                        <p><?=$message['content']?></p>
+                                    </a>
+                                </li>
+                                <!-- end message -->
+                                <?php } ?>
+                            </ul>
+                        </li>
+                        <li class="footer"><a href="#">查看全部邮件</a></li>
+                    </ul>
+                </li>
+                <?php } ?>
+                
+                <?php if($notifications) { $total = count($notifications); ?>
+                <!-- Notifications: style can be found in dropdown.less -->
+                <!-- 通知：某某新应用上线、某某新数据源上线、数据源下线提示 -->
+                <li class="dropdown notifications-menu">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-bell-o"></i><span class="label label-warning"><?=$total?></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="header">您有<?=$total?>个通知</li>
+                        <li>
+                            <!-- inner menu: contains the actual data -->
+                            <ul class="menu">
+                                <?php foreach($notifications as $item){ ?>
+                                <li>
+                                    <a href="/notifications/<?=$item['id']?>">
+                                        <?=$item['icon']?('<i class="'.$item['icon'].'"></i>'):''?><?=$item['content']?>
+                                    </a>
+                                </li>
+                                <?php } ?>
+                            </ul>
+                        </li>
+                        <li class="footer"><a href="#">查看全部通知</a></li>
+                    </ul>
+                </li>
+                <?php } ?>
+                
+                <?php if($tasks) { $total = count($tasks); ?>
+                <!-- Tasks: style can be found in dropdown.less -->
+                <!-- 任务：某某活动发放数据失败、某某数据源监听或者查询出错等 -->
+                <li class="dropdown tasks-menu">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-flag-o"></i>
+                        <span class="label label-danger"><?=$total?></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="header">共有<?=$total?>个进行中的活动</li>
+                        <li>
+                            <!-- inner menu: contains the actual data -->
+                            <ul class="menu">
+                                <?php foreach($tasks as $item){ ?>
+                                <li><!-- Task item -->
+                                    <a href="#">
+                                        <h3><?=$item['name']?><small class="pull-right"><?=$item['percent']?>%</small></h3>
+                                        <div class="progress xs">
+                                            <div class="progress-bar progress-bar-aqua" style="width: <?=$item['percent']?>%" role="progressbar"
+                                                 aria-valuenow="<?=$item['percent']?>" aria-valuemin="0" aria-valuemax="100">
+                                                <span class="sr-only"><?=$item['percent']?>%</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <!-- end task item -->
+                                <?php } ?>
+                            </ul>
+                        </li>
+                        <li class="footer">
+                            <a href="#">查看活动列表</a>
+                        </li>
+                    </ul>
+                </li>
+                <?php }?>
+                
+                <!-- User Account: style can be found in dropdown.less -->
+                <li class="dropdown user user-menu">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <img src="<?=$userinfo['image']?:'/dist/adminlte/img/user1-128x128.jpg'?>" class="user-image" alt="User Image">
+                        <span class="hidden-xs"><?=$userinfo['name']?></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <!-- User image -->
+                        <li class="user-header">
+                            <img src="<?=$userinfo['image']?:'/dist/adminlte/img/user1-128x128.jpg'?>" class="img-circle" alt="User Image">
+                            <p>
+                                <?=$userinfo['name']?> - <?=$userinfo['role']?>
+                                <small>来自:<?=$tokeninfo['login_ip']??'未知'?>, 时间:<?=$tokeninfo['login_time']?></small>
+                            </p>
+                        </li>
+                        <!-- Menu Body
+                        <li class="user-body">
+                            <div class="row">
+                                <div class="col-xs-4 text-center"><a href="#">Followers</a></div>
+                                <div class="col-xs-4 text-center"><a href="#">Sales</a></div>
+                                <div class="col-xs-4 text-center"><a href="#">Friends</a></div>
+                            </div>
+                        </li> -->
+                        <!-- Menu Footer-->
+                        <li class="user-footer">
+                            <div class="pull-left"><a href="#" class="btn btn-default btn-flat">个人信息</a></div>
+                            <div class="pull-right"><a href="<?=PA_URL_PATH.'logout'?>" class="btn btn-default btn-flat">登出系统</a></div>
+                        </li>
+                    </ul>
+                </li>
+                <!-- Control Sidebar Toggle Button -->
+                <li>
+                    <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>

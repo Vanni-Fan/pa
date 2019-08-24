@@ -1,0 +1,99 @@
+<style>
+    .must-start::after {
+        content: '*';
+        color: red;
+        font-size: 20px;
+        position: absolute;
+        top: 7px;
+        padding-left: 5px;
+    }
+</style>
+<!--<pre>-->
+<!--    --><?php //
+//    print_r($fields)
+//    ?>
+<!--</pre>-->
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title">Table Form</h3>
+    </div>
+    <!-- /.box-header -->
+    <!-- form start -->
+    <form class="form-horizontal" method="post" action="<?=isset($default) ? $c->url('update') : $c->url('new')?>">
+        <div class="box-body">
+            <?php foreach($fields as $field=>$schema) { ?>
+            <div class="form-group">
+                <label for="id_<?=$field?>" class="col-sm-2 control-label<?=$schema['null']?'':' must-start'?>"><?=$schema['name']?></label>
+                <div class="col-sm-10">
+                <?php switch($schema['Type']){
+                    case (preg_match('/text/',$schema['Type'])===1):
+                    case (preg_match('/char/',$schema['Type'])===1):
+                    case (preg_match('/string/',$schema['Type'])===1):
+                    case (preg_match('/blob/',$schema['Type'])===1):
+                    case 'json':
+                        echo '<input ',
+                            $schema['disabled'] ? 'disabled ' : '',
+                            'type="text" name="', $field,'" ',
+                            'value="', $default[$field]??$schema['Default']?:'', '" ',
+                            'class="form-control" ',
+                            'id="id_',$field,'" ',
+                            'placeholder="Please input ',$schema['name'],'">';
+                    break;
+                    case (preg_match('/int/',$schema['Type'])===1):
+                    case (preg_match('/decimal/',$schema['Type'])===1):
+                    case (preg_match('/double/',$schema['Type'])===1):
+                    case (preg_match('/float/',$schema['Type'])===1):
+                    case (preg_match('/numeric/',$schema['Type'])===1):
+                    case (preg_match('/real/',$schema['Type'])===1):
+                        echo '<input ',
+                        $schema['disabled'] ? 'disabled ' : '',
+                        'type="number" name="', $field,'" ',
+                        'value="', $default[$field]??$schema['Default']?:'', '" ',
+                        'class="form-control" ',
+                        'id="id_',$field,'" ',
+                        'placeholder="Please input ',$schema['name'],'">';
+                    break;
+                    case 'select':
+                        echo '<select class="form-control">';
+                        foreach($schema['Default'] as $value){
+                            echo '<option value="',$value,'">',$value,'</option>';
+                        }
+                        echo '</select>';
+                        break;
+                    case 'time':
+                        echo '<input ',
+                        $schema['disabled'] ? 'disabled ' : '',
+                        'type="time" name="', $field,'" ',
+                        'value="', $default[$field]??$schema['Default']?:'', '" ',
+                        'class="form-control" ',
+                        'id="id_',$field,'" ',
+                        'placeholder="Please input ',$schema['name'],'">';
+                        break;
+                    case 'date':
+                        
+                        break;
+                    case 'timestamp':
+                    case 'datetime':
+                        $d = $default[$field]??$schema['Default']?:'';
+//                        $d = $schema['Type'] == 'timestamp' ? date('Y-m-d H:i:s', $d) : '';
+                        echo '<input ',
+                        $schema['disabled'] ? 'disabled ' : '',
+                        'type="date" name="', $field,'" ',
+                        'value="', $d, '" ',
+                        'class="form-control" ',
+                        'id="id_',$field,'" data="',$d,'"',
+                        'placeholder="Please input ',$schema['name'],'">';
+                    }
+                ?>
+                </div>
+            </div>
+            <?php } ?>
+        </div>
+        <!-- /.box-body -->
+        <div class="box-footer">
+            <a href="<?=$c->url()?>" class="btn btn-default">Cancel</a>
+            <button type="submit" class="btn btn-info pull-right">Submit</button>
+        </div>
+        <!-- /.box-footer -->
+    </form>
+</div>

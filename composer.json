@@ -1,10 +1,10 @@
 {
     "version"     : "2.0.0-alpha",
-    "name"        : "hoopower/admin",
+    "name"        : "permissionadmin/base",
     "type"        : "project",
     "description" : "通用权限管理后台",
     "keywords"    : ["power", "access control"],
-    "homepage"    : "https://github.com/hoopower/admin/",
+    "homepage"    : "https://github.com/Vanni-Fan/pa",
     "license"     : "LGPL-2.1",
     "authors"     : [
         {
@@ -15,9 +15,9 @@
     "autoload"  : {
         "psr-4" : {
             "Power\\"             : "library/",
-            "Power\\Controller\\" : "controller/",
-            "Power\\Model\\"      : "model/",
-            "Power\\Plugin\\"     : "plugin/"
+            "Power\\Controller\\" : "controllers/",
+            "Power\\Model\\"      : "models/",
+            "Power\\Plugin\\"     : "plugins/"
         }
     }
 }
