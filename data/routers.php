@@ -52,7 +52,7 @@ $routers = [
         '/dist/:params' => [
             'namespace'  => 'Power\Controllers',
             'controller' => 'resource',
-            'action'     => 'rander',
+            'action'     => 'render',
             'priority'  => 10,
         ], # 显示资源文件
         PA_URL_PATH.'menu/{rule_id:[0-9]+}/index/:params' => [

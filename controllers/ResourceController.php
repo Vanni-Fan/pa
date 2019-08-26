@@ -151,9 +151,12 @@ class ResourceController extends Controller{
      *
      * 渲染资源，会被缓存
      */
-    function randerAction(){
+    public function renderAction():void{
         $this->view->disable();
-        $dist_dirs = [POWER_BASE_DIR . 'views'];
+        $dist_dirs = [
+            POWER_BASE_DIR . 'views',
+            POWER_BASE_DIR . 'public',
+        ];
         
         if(PA::$config['modules']){ # 添加模块下的文件
             $dists = glob(PA::$config['modules'].'*/views',GLOB_ONLYDIR );
