@@ -45,7 +45,7 @@ class RulesController extends AdminBaseController {
     }
     
     function getIconsAction(){
-        $file = POWER_BASE_DIR.'views/dist/bower_components/font-awesome\scss\_icons.scss';
+        $file = POWER_BASE_DIR.'public/dist/bower_components/font-awesome/scss/_icons.scss';
         $fa = '';
         foreach(file($file) as $row){
             if($index = strpos($row,':')){

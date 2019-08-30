@@ -11,7 +11,7 @@ class AuthorizationController extends Controller{
     function loginPageAction(){
         $config = Extensions::getExtensionsByUser();
         $this->view->site = $config['attribute'][0];
-        $this->view->setViewsDir('../../PA/views/templates/');
+        $this->view->setViewsDir(POWER_VIEW_DIR);
         $this->view->pick('index/login');
     }
     
