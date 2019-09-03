@@ -30,7 +30,7 @@ final class PA{
      */
     static public $dispatch;
     /**
-     * @var \Phalcon\Events\Manager
+     * @var Phalcon\Events\Manager
      */
     static public $em;
 }

@@ -1,6 +1,6 @@
 <?php
 namespace plugins\Tables\Controllers;
-use AdminBaseController;
+use Power\Controllers\AdminBaseController;
 
 class TablesController extends AdminBaseController
 {

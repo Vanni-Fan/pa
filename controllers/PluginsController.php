@@ -18,7 +18,10 @@ class PluginsController extends AdminBaseController {
         $event  = $this->getParam('event');
         $plugin = Plugins::findFirst($this->item_id);
         $class  = '\\plugins\\'.$plugin->name.'\\Settings';
-        if(class_exists($class) && function_exists("$class::$event")) call_user_func("$class::$event", $this, $plugin);
+        $redirect = true;
+        if(class_exists($class) && method_exists($class,$event)){
+            $redirect = call_user_func("$class::$event", $this, $plugin);
+        }
         switch($event){
             case 'enable':
             case 'disable':
@@ -32,6 +35,6 @@ class PluginsController extends AdminBaseController {
             case 'upgrade':
             
         }
-        $this->response->redirect($this->url(),true);
+        if($redirect) $this->response->redirect($this->url(),true);
     }
 }
