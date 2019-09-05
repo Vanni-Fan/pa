@@ -6,7 +6,7 @@ namespace HtmlBuilder;
  * Class Element
  * @package FormBuilder
  */
-class Element{
+abstract class Element{
     /**
      * @var string 类型
      */
@@ -20,10 +20,7 @@ class Element{
         $this->name = $name;
     }
 
-    public function toArray():array {
-        return get_object_vars($this);
-    }
-    
+
     /**
      * @var string 子分类
      */
@@ -42,10 +39,10 @@ class Element{
      * 创建一个元素
      * @param $type
      * @param $name
-     * @return Element
+     * @return mixed
      */
-    public static function create($type, $name):Element{
-        return new Element($type, $name);
+    public static function create($type, $name){
+        return new static($type, $name);
     }
     
     /**
@@ -275,5 +272,15 @@ class Element{
             $this->elements[] = $element;
         }
         return $this;
+    }
+
+
+    /**
+     * 渲染，替换模板中的 {{变量}}
+     */
+    public abstract function render():string;
+
+    public function __toString():string {
+        return $this->render();
     }
 }
