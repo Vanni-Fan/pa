@@ -265,15 +265,55 @@ config = {
 - 标签（tags）
 - 取色器
 - 地图
+- table 表格
+```js
 
+```
 
-布局：Layout
-- 列
-- 字段集
-- 面板
-- 内容面板（标题、段落、图片、视频、地图、验证码、背景等）
-- 表格
-- 标签（tabs、page页）
-- Well
-
+#### 布局：Layout [参考自<form.io>](https://formio.github.io/formio.js/app/builder)
+- columns 列
+```js
+config = {
+    type: "columns",
+    label: "Columnszz",
+    columns: [
+        {
+            components: [ /* 可以是组件，可以是独立元素，也可以是form元素 */ ],
+            width: 5,   // 列宽 12 分之几
+            offset: 0,  // 空白多少
+            push: 0,    // 浮动后移多少 
+            pull: 0,    // 浮动前移多少
+            type: "column",
+        }
+    ]
+ }
+```
+- box 盒子（面板、字段集、卡片）（有标题，内容，有底部）(可用来设置：标题、段落、图片、视频、地图、验证码、背景等)
+```js
+config = {
+    label: "Field Set",
+    type: "fieldset",
+    header:{ // 是否有头部
+        type:"fieldset|title", // fieldset
+        text:"内容", 
+        components:[{/*..*/}], // 可以包含一些组件
+    },
+    body:{ /* 和 header 一致 */ },
+    footer:{ /* 和 header 一致 */ },
+    badges:"",
+}
+```
+- tabs 标签（tabs、page页）
+```js
+config = {
+    label: "Tabs",
+    type: "tabs",
+    components: [
+        {
+            /* ... */
+        }
+    ],
+    attributes: {}
+}
+```
 ### 
