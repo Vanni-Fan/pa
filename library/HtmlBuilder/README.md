@@ -258,13 +258,13 @@ config = {
 }
 ```
 #### 组件
-- 多级联动下拉列表
-- 日期+时间
-- 日期段
-- 时间段
-- 标签（tags）
-- 取色器
-- 地图
+- multiselect 多级联动下拉列表
+- datetime 日期+时间
+- daterange 日期段
+- timerange 时间段
+- tags 标签（tags）
+- color 取色器
+- map 地图
 - table 表格
 ```js
 

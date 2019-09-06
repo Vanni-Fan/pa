@@ -2,7 +2,7 @@
 
 namespace HtmlBuilder;
 
-class FormElement extends Element {
+class Forms extends Element {
 
     /**
      * @var string 模板
@@ -11,13 +11,22 @@ class FormElement extends Element {
     /**
      * 设置模板
      * @param string $template
-     * @return Element
+     * @return self
      */
-    public function template(string $template):FormElement{
-        $this->template = file_get_contents(__DIR__."/elements/$template.inc");
+    public function template(string $template):self{
+        $this->template = $template;//file_get_contents(__DIR__."/elements/$template.inc");
         return $this;
     }
-
+    
+    public static function input():self{return static::create('','');}
+    public static function checkbox():self{return static::create('','');}
+    public static function radio():self{ return static::create('','');}
+    public static function select():self{ return static::create('','');}
+    public static function button():self{ return static::create('','');}
+    public static function file():self{ return static::create('','');}
+    public static function textarea():self{ return static::create('','');}
+    public static function form(string $name):self{ return static::create('form','a')->template('form');}
+    
     public function render(): string {
         return preg_replace_callback('#\{\{([a-z][^\{]+)\}\}#i',function($match){
             $key = $match[1];
@@ -34,23 +43,20 @@ class FormElement extends Element {
             return $return;
         },$this->template);
     }
-
-    /**
-     * @param string $name
-     * @param array  $arguments
-     * @return Element
-     * @throws \Exception
-     */
-    public static function __callStatic(string $name, array $arguments):FormElement{
+//
+//    /**
+//     * @param string $name
+//     * @param array  $arguments
+//     * @return self
+//     * @throws \Exception
+//     */
+    public static function __callStatic(string $name, array $arguments){
         if(!in_array($name, ['input','checkbox','radio','select','button','file','textarea'])) {
             throw new \Exception('不支持的元素:'.$name);
         }
         return static::create($name,current($arguments))->template($name);
     }
     
-    public static function form(string $name):FormElement{
-        return static::create('form','a')->template('form');
-    }
 }
 
 //FormElement::form()->add(

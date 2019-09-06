@@ -6,7 +6,7 @@ namespace HtmlBuilder;
  * Class Element
  * @package FormBuilder
  */
-abstract class Element{
+class Element{
     /**
      * @var string 类型
      */
@@ -28,9 +28,9 @@ abstract class Element{
     /**
      * 设置子类型
      * @param $subtype
-     * @return Element
+     * @return self
      */
-    public function subtype($subtype):Element{
+    public function subtype($subtype):self{
         $this->subtype = $subtype;
         return $this;
     }
@@ -41,7 +41,7 @@ abstract class Element{
      * @param $name
      * @return mixed
      */
-    public static function create($type, $name){
+    public static function create($type, $name):self{
         return new static($type, $name);
     }
     
@@ -52,9 +52,9 @@ abstract class Element{
     /**
      * 设置标签
      * @param string $label
-     * @return Element
+     * @return self
      */
-    public function label(string $label):Element{
+    public function label(string $label):self{
         $this->label = $label;
         return $this;
     }
@@ -67,9 +67,9 @@ abstract class Element{
     /**
      * 设置标签的位置
      * @param string $position
-     * @return Element
+     * @return self
      */
-    public function labelPosition(string $position):Element{
+    public function labelPosition(string $position):self{
         $this->labelPosition = $position;
         return $this;
     }
@@ -82,9 +82,9 @@ abstract class Element{
     /**
      * 设置标签占的宽度，12分之几
      * @param int $labelWidth
-     * @return Element
+     * @return self
      */
-    public function labelWidth(int $labelWidth):Element{
+    public function labelWidth(int $labelWidth):self{
         $this->labelWidth = $labelWidth;
         return $this;
     }
@@ -97,9 +97,9 @@ abstract class Element{
     /**
      * 设置是否可用
      * @param bool $enabled=true
-     * @return Element
+     * @return self
      */
-    public function enabled(bool $enabled=true):Element{
+    public function enabled(bool $enabled=true):self{
         $this->enabled = $enabled;
         return $this;
     }
@@ -112,9 +112,9 @@ abstract class Element{
     /**
      * 设置是否可视
      * @param bool $visible=true
-     * @return Element
+     * @return self
      */
-    public function visible(bool $visible=true):Element{
+    public function visible(bool $visible=true):self{
         $this->visible = $visible;
         return $this;
     }
@@ -127,9 +127,9 @@ abstract class Element{
     /**
      * 设置是否必须
      * @param bool $required=true
-     * @return Element
+     * @return self
      */
-    public function required(bool $required=true):Element{
+    public function required(bool $required=true):self{
         $this->required = $required;
         return $this;
     }
@@ -142,9 +142,9 @@ abstract class Element{
     /**
      * 设置默认值
      * @param mixed $value
-     * @return Element
+     * @return self
      */
-    public function value($value):Element{
+    public function value($value):self{
         $this->value = $value;
         return $this;
     }
@@ -157,9 +157,9 @@ abstract class Element{
     /**
      * 设置占位符
      * @param string $placeHolder
-     * @return Element
+     * @return self
      */
-    public function placeHolder(string $placeHolder):Element{
+    public function placeHolder(string $placeHolder):self{
         $this->placeHolder = $placeHolder;
         return $this;
     }
@@ -172,9 +172,9 @@ abstract class Element{
     /**
      * 设置在标签后面的提示信息，用问号显示，鼠标移动上去，则显示此内容
      * @param string $tooltip
-     * @return Element
+     * @return self
      */
-    public function tooltip(string $tooltip):Element{
+    public function tooltip(string $tooltip):self{
         $this->tooltip = $tooltip;
         return $this;
     }
@@ -187,9 +187,9 @@ abstract class Element{
     /**
      * 设置说明信息，位于组件下方
      * @param string $description
-     * @return Element
+     * @return self
      */
-    public function description(string $description):Element{
+    public function description(string $description):self{
         $this->description = $description;
         return $this;
     }
@@ -202,12 +202,11 @@ abstract class Element{
     /**
      * 添加额外的属性
      * @param string $name
-     * @param $arguments
-     * @return Element
+     * @param $values
+     * @return self
      */
-    public function __call(string $name, array $arguments):Element
-    {
-        $this->attributes[$name] = current($arguments);
+    public function attr(string $name, $values):self{
+        $this->attributes[$name] = $values;
         return $this;
     }
 
@@ -219,10 +218,9 @@ abstract class Element{
     /**
      * 添加验证器
      * @param string $validate
-     * @return Element
+     * @return self
      */
-    public function validate($validate):Element
-    {
+    public function validate($validate):self{
         $this->validators[] = $validate;
         return $this;
     }
@@ -235,9 +233,9 @@ abstract class Element{
     /**
      * 设置说明信息，位于组件下方
      * @param string $labelIcon
-     * @return Element
+     * @return self
      */
-    public function labelIcon(string $labelIcon):Element{
+    public function labelIcon(string $labelIcon):self{
         $this->labelIcon = $labelIcon;
         return $this;
     }
@@ -250,9 +248,9 @@ abstract class Element{
     /**
      * 设置说明信息，位于组件下方
      * @param string $badgeIcon
-     * @return Element
+     * @return self
      */
-    public function badgeIcon(string $badgeIcon):Element{
+    public function badgeIcon(string $badgeIcon):self{
         $this->badgeIcon = $badgeIcon;
         return $this;
     }
@@ -265,22 +263,26 @@ abstract class Element{
     /**
      * 添加元素到子元素列表
      * @param Element ...$elements
-     * @return Element
+     * @return self
      */
-    public function add(Element ... $elements):Element{
+    public function add(Element ... $elements):self{
         foreach($elements as $element){
             $this->elements[] = $element;
         }
         return $this;
     }
-
-
-    /**
-     * 渲染，替换模板中的 {{变量}}
-     */
-    public abstract function render():string;
-
+//
+//
+//    /**
+//     * 渲染，替换模板中的 {{变量}}
+//     */
+//    public abstract function render():string;
+//
     public function __toString():string {
-        return $this->render();
+        return json_encode($this, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+    
+    public static function __callStatic(string $name, array $arguments){
+        return static::create($name,current($arguments));
     }
 }
