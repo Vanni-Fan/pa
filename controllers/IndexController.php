@@ -10,7 +10,7 @@ class IndexController extends AdminBaseController{
     public function indexAction(){
         $this->title = 'The PermissionAdmin System.';
     
-        $a = new Parser(
+        $a = //new Parser(
             Layouts::columns(2)->add(
                 Layouts::box('右边搜索栏')->add(
                     Forms::form('search')->add(
@@ -20,18 +20,17 @@ class IndexController extends AdminBaseController{
                 ),
                 Layouts::box('左边注册栏')->add(
                     Forms::form('register')->add(
-                        Layouts::image('register_images.jpg'),
                         Forms::input('username'),
-                        Components::data('expire_data'),
+                        Components::datetime('expire_data'),
                         Forms::button('Register','s')->attr('sdf','')->enabled()->value('ss')
                             ->labelPosition('')
                             ->label(''),
                         Forms::file(),
                     )
                 )
-            )
+//            )
         );
-        print_r($a->parse());
+//        print_r($a->parse());
 //        $a = FormElement::form('user_name')->add(
 //            FormElement::input('user_name')->class("SSS"),
 //            FormElement::input('sex'),
@@ -66,7 +65,7 @@ class IndexController extends AdminBaseController{
 //            'scripts'   => '',
 //        ];
 //
-//        exit(" this is [$a] ");
+        exit(" this is $a ");
 
 //        $this->render();
     }

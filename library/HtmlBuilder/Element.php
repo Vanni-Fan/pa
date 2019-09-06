@@ -15,7 +15,7 @@ class Element{
      * @var string 字段名称
      */
     public $name   = '';
-    public function __construct($type, $name){
+    public function __construct($type, $name=''){
         $this->type = $type;
         $this->name = $name;
     }
@@ -41,7 +41,7 @@ class Element{
      * @param $name
      * @return mixed
      */
-    public static function create($type, $name):self{
+    public static function create($type, $name=''):self{
         return new static($type, $name);
     }
     
@@ -271,18 +271,27 @@ class Element{
         }
         return $this;
     }
-//
-//
-//    /**
-//     * 渲染，替换模板中的 {{变量}}
-//     */
-//    public abstract function render():string;
-//
+
+
+    /**
+     * 直接输出JSON
+     * @return string
+     */
     public function __toString():string {
         return json_encode($this, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
-    
-    public static function __callStatic(string $name, array $arguments){
-        return static::create($name,current($arguments));
+
+    public function __set($name, $value)
+    {
+        $this->$name = $value;
+    }
+
+    public function __call($name, $arguments)
+    {
+        $this->attributes[$name] = current($arguments);
+    }
+
+    public function toArray():array{
+        return json_decode(json_encode($this),1);
     }
 }

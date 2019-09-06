@@ -85,23 +85,9 @@ config = {
   value:"默认值", 
   required:true,      // 是否必须
   inputMask:"99:99",
-  placeHolder:"占位符",
-  tooltip:"帮助提示语",// 显示在后面的问号信息，移动上去就显示
-  description:"",     // 固定显示到下面的提示语
-  newLine:true,       // 是否新行显示，会清除浮动，开启新行
-  attributes:{        // 扩展属性,展示在 html 标签里
-    AA:1,
-    BB:2
-  },
-  validators:[{       // 验证器
-    type:"numeric, text, regex, e-mail, expression",
-    text:"错误提示语", // 显示在左下角、显示在表单上方、红边框
-    OTHER:"其他具体的验证字段"
-  }],
   statistics:true,    // 显示在右下角，字符长度，单词个数
   appendIcon:"",      // 后面的图标
   prependIcon:""      // 前面的图标
-  // elements/components  // 子元素或者组件 todo ?
 }
 ```
 - checkbox 复选框(多选)
@@ -278,7 +264,7 @@ config = {
     label: "Columnszz",
     columns: [
         {
-            components: [ /* 可以是组件，可以是独立元素，也可以是form元素 */ ],
+            elements: [ /* 可以是组件，可以是独立元素，也可以是form元素 */ ],
             width: 5,   // 列宽 12 分之几
             offset: 0,  // 空白多少
             push: 0,    // 浮动后移多少 
