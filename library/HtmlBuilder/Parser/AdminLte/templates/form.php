@@ -2,6 +2,12 @@
 <script src="{{__DRI__}}/cached.php?t=1539765004&amp;f=/js/common.js"></script>
 <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
 
+<?= $labelPosition ?>
+
+<?= print_r($this) ?>
+
+<?php print_r($elements); ?>
+
 <style>
     .#{{id}{
 

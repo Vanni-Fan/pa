@@ -2,6 +2,8 @@
 
 namespace HtmlBuilder;
 
+use HtmlBuilder\Forms\Input;
+
 class Forms extends Element {
 
     /**
@@ -18,7 +20,9 @@ class Forms extends Element {
         return $this;
     }
     
-    public static function input():self{return static::create('','');}
+    public static function input($name,$label=''):Input{
+        return new Input($name, $label);
+    }
     public static function checkbox():self{return static::create('','');}
     public static function radio():self{ return static::create('','');}
     public static function select():self{ return static::create('','');}

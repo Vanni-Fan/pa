@@ -8,6 +8,10 @@ namespace HtmlBuilder;
  */
 class Element{
     /**
+     * @var string DOM ID
+     */
+    public $id = '';
+    /**
      * @var string 类型
      */
     public $type;
@@ -220,8 +224,8 @@ class Element{
      * @param string $validate
      * @return self
      */
-    public function validate($validate):self{
-        $this->validators[] = $validate;
+    public function validate(Validate ... $validate):self{
+        foreach($validate as $v) $this->validators[] = $v;
         return $this;
     }
     
