@@ -19,40 +19,100 @@ class Element{
      * @var string 字段名称
      */
     public $name   = '';
-    public function __construct($type, $name=''){
-        $this->type = $type;
-        $this->name = $name;
-    }
-
-
     /**
      * @var string 子分类
      */
     public $subtype = '';
     /**
+     * @var string 标签名称
+     */
+    public $label  = '';
+    /**
+     * @var string 标签位置： top,bottom,left,right,left-right,right-left
+     */
+    public $labelPosition = 'top';
+    /**
+     * @var int 标签占的宽度 12分之几
+     */
+    public $labelWidth = 0;
+    /**
+     * @var bool 是否可用
+     */
+    public $enabled=true;
+    /**
+     * @var bool 是否可视
+     */
+    public $visible=true;
+    /**
+     * @var bool 是否必须
+     */
+    public $required=false;
+    /**
+     * @var mixed 默认值
+     */
+    public $value='';
+    /**
+     * @var string 占位符
+     */
+    public $placeHolder='';
+    /**
+     * @var string 在标签后面的提示信息，用问号显示，鼠标移动上去，则显示此内容
+     */
+    public $tooltip='';
+    /**
+     * @var string 说明信息，位于组件下方
+     */
+    public $description='';
+    /**
+     * @var array HTML标签的扩展属性
+     */
+    public $attributes=[];
+    /**
+     * @var array 验证器
+     */
+    public $validators=[];
+    /**
+     * @var string 在标签前面添加的图标
+     */
+    public $labelIcon='';
+    /**
+     * @var string 在输入框后面条件的图标
+     */
+    public $badgeIcon='';
+    /**
+     * @var array 子元素
+     */
+    public $elements=[];
+    
+    /**
+     * Element constructor.
+     * @param string $type 标签名称
+     * @param string $name
+     */
+    public function __construct(string $type, string $name=''){
+        $this->type = $type;
+        $this->name = $name;
+    }
+
+    /**
      * 设置子类型
-     * @param $subtype
+     * @param string $subtype
      * @return self
      */
-    public function subtype($subtype):self{
+    public function subtype(string $subtype):self{
         $this->subtype = $subtype;
         return $this;
     }
     
     /**
      * 创建一个元素
-     * @param $type
-     * @param $name
+     * @param $params
      * @return mixed
      */
-    public static function create($type, $name=''):self{
-        return new static($type, $name);
+    public static function create(...$params):self{
+        return new static(...$params);
     }
     
-    /**
-     * @var string 标签名称
-     */
-    public $label  = '';
     /**
      * 设置标签
      * @param string $label
@@ -62,12 +122,7 @@ class Element{
         $this->label = $label;
         return $this;
     }
-
     
-    /**
-     * @var string 标签位置： top,bottom,left,right,left-right,right-left
-     */
-    public $labelPosition = 'top';
     /**
      * 设置标签的位置
      * @param string $position
@@ -77,12 +132,7 @@ class Element{
         $this->labelPosition = $position;
         return $this;
     }
-    
-    
-    /**
-     * @var int 标签占的宽度 12分之几
-     */
-    public $labelWidth = 0;
+
     /**
      * 设置标签占的宽度，12分之几
      * @param int $labelWidth
@@ -93,11 +143,6 @@ class Element{
         return $this;
     }
     
-    
-    /**
-     * @var bool 是否可用
-     */
-    public $enabled=true;
     /**
      * 设置是否可用
      * @param bool $enabled=true
@@ -108,11 +153,6 @@ class Element{
         return $this;
     }
     
-    
-    /**
-     * @var bool 是否可视
-     */
-    public $visible=true;
     /**
      * 设置是否可视
      * @param bool $visible=true
@@ -123,11 +163,6 @@ class Element{
         return $this;
     }
     
-    
-    /**
-     * @var bool 是否必须
-     */
-    public $required=false;
     /**
      * 设置是否必须
      * @param bool $required=true
@@ -138,11 +173,6 @@ class Element{
         return $this;
     }
     
-    
-    /**
-     * @var mixed 默认值
-     */
-    public $value='';
     /**
      * 设置默认值
      * @param mixed $value
@@ -153,11 +183,6 @@ class Element{
         return $this;
     }
     
-    
-    /**
-     * @var string 占位符
-     */
-    public $placeHolder='';
     /**
      * 设置占位符
      * @param string $placeHolder
@@ -168,11 +193,6 @@ class Element{
         return $this;
     }
   
-  
-    /**
-     * @var string 在标签后面的提示信息，用问号显示，鼠标移动上去，则显示此内容
-     */
-    public $tooltip='';
     /**
      * 设置在标签后面的提示信息，用问号显示，鼠标移动上去，则显示此内容
      * @param string $tooltip
@@ -183,11 +203,6 @@ class Element{
         return $this;
     }
  
- 
-    /**
-     * @var string 说明信息，位于组件下方
-     */
-    public $description='';
     /**
      * 设置说明信息，位于组件下方
      * @param string $description
@@ -197,12 +212,7 @@ class Element{
         $this->description = $description;
         return $this;
     }
-   
     
-    /**
-     * @var array HTML标签的扩展属性
-     */
-    public $attributes=[];
     /**
      * 添加额外的属性
      * @param string $name
@@ -213,12 +223,7 @@ class Element{
         $this->attributes[$name] = $values;
         return $this;
     }
-
     
-    /**
-     * @var array 验证器
-     */
-    public $validators=[];
     /**
      * 添加验证器
      * @param string $validate
@@ -229,11 +234,6 @@ class Element{
         return $this;
     }
     
-    
-    /**
-     * @var string 在标签前面添加的图标
-     */
-    public $labelIcon='';
     /**
      * 设置说明信息，位于组件下方
      * @param string $labelIcon
@@ -244,11 +244,6 @@ class Element{
         return $this;
     }
     
-    
-    /**
-     * @var string 在输入框后面条件的图标
-     */
-    public $badgeIcon='';
     /**
      * 设置说明信息，位于组件下方
      * @param string $badgeIcon
@@ -259,11 +254,6 @@ class Element{
         return $this;
     }
   
-  
-    /**
-     * @var array 子元素
-     */
-    public $elements=[];
     /**
      * 添加元素到子元素列表
      * @param Element ...$elements
@@ -276,7 +266,6 @@ class Element{
         return $this;
     }
 
-
     /**
      * 直接输出JSON
      * @return string
@@ -284,17 +273,35 @@ class Element{
     public function __toString():string {
         return json_encode($this, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
-
-    public function __set($name, $value)
+    
+    /**
+     * @param string $name
+     * @param $value
+     */
+    public function __set(string $name, $value)
     {
         $this->$name = $value;
     }
-
-    public function __call($name, $arguments)
+    
+    public function __get(string $name){
+        return $this->$name;
+    }
+    
+    /**
+     * @param string $name
+     * @param  array $arguments
+     * @return Element
+     */
+    public function __call(string $name, array $arguments):self
     {
         $this->attributes[$name] = current($arguments);
+        return $this;
     }
-
+    
+    /**
+     * 转换成数组
+     * @return array
+     */
     public function toArray():array{
         return json_decode(json_encode($this),1);
     }

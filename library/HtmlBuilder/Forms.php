@@ -2,65 +2,27 @@
 
 namespace HtmlBuilder;
 
+use HtmlBuilder\Forms\CheckBox;
 use HtmlBuilder\Forms\Input;
+use HtmlBuilder\Forms\Radio;
 
 class Forms extends Element {
 
-    /**
-     * @var string 模板
-     */
-    public $template = '';
-    /**
-     * 设置模板
-     * @param string $template
-     * @return self
-     */
-    public function template(string $template):self{
-        $this->template = $template;//file_get_contents(__DIR__."/elements/$template.inc");
-        return $this;
+    public static function input($name, $label='', $subtype='text'):Input{
+        return new Input($name, $subtype, $label);
     }
     
-    public static function input($name,$label=''):Input{
-        return new Input($name, $label);
+    public static function checkbox():CheckBox{
+        return new CheckBox();
     }
-    public static function checkbox():self{return static::create('','');}
-    public static function radio():self{ return static::create('','');}
+    public static function radio():Radio{
+        return new Radio();
+    }
     public static function select():self{ return static::create('','');}
     public static function button():self{ return static::create('','');}
     public static function file():self{ return static::create('','');}
     public static function textarea():self{ return static::create('','');}
     public static function form(string $name):self{ return static::create('form','a')->template('form');}
-    
-    public function render(): string {
-        return preg_replace_callback('#\{\{([a-z][^\{]+)\}\}#i',function($match){
-            $key = $match[1];
-            if(!isset($this->{$key})) return '';
-            $value  = $this->{$key};
-            $return = '';
-            if($key==='elements' || $key==='attributes'){
-                foreach($value as $_k=>$_v) $return .= $_v;
-            }elseif($key==='validators'){
-                # todo ?
-            }else{
-                $return = $value;
-            }
-            return $return;
-        },$this->template);
-    }
-//
-//    /**
-//     * @param string $name
-//     * @param array  $arguments
-//     * @return self
-//     * @throws \Exception
-//     */
-    public static function __callStatic(string $name, array $arguments){
-        if(!in_array($name, ['input','checkbox','radio','select','button','file','textarea'])) {
-            throw new \Exception('不支持的元素:'.$name);
-        }
-        return static::create($name,current($arguments))->template($name);
-    }
-    
 }
 
 //FormElement::form()->add(

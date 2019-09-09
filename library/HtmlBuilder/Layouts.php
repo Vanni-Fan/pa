@@ -7,13 +7,13 @@ use HtmlBuilder\Layouts\Tabs;
 
 class Layouts extends Element{
 
-    public static function columns(int $columns):Columns{
-        return new Columns($columns);
+    public static function columns():Columns{
+        return new Columns();
     }
-    public static function box():Box{
-        return new Box('');
+    public static function box($body, $title='', $footer=''):Box{
+        return new Box($body, $title, $footer);
     }
     public static function tabs():Tabs{
-        return new Tabs('');
+        return new Tabs();
     }
 }

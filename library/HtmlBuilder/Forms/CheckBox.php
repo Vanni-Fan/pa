@@ -1,14 +1,14 @@
 <?php
 
-namespace HtmlBuilder\Layouts;
+namespace HtmlBuilder\Forms;
 
 use HtmlBuilder\Element;
 
-class Tabs extends Element
+class CheckBox extends Element
 {
     public function __construct()
     {
-        parent::__construct('tabs');
+        parent::__construct('checkbox');
     }
     
     public function tab(string $name, Element $element, $visible=false): self

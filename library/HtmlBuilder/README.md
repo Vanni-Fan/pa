@@ -72,6 +72,16 @@ config = {
 
 #### 单独属性
 - input 单行输入（邮件、URL、电话、地址、货币、数字、密码、隐藏元素、时间、日期 ~~自动完成~~）
+    - 邮件: 添加验证器
+    - URL： 添加验证器
+    - 电话： 添加 mask、验证器
+    - 货币： 添加前缀
+    - 数组： 添加验证器
+    - 密码： password
+    - 隐藏元素： 设置 vis
+    - 时间： 添加额外控件
+    - 日期： 添加额外控件
+    - 颜色： 添加额外控件
 ```js
 config = {
   type:"text",        //类型 
@@ -249,12 +259,8 @@ config = {
 - daterange 日期段
 - timerange 时间段
 - tags 标签（tags）
-- color 取色器
 - map 地图
 - table 表格
-```js
-
-```
 
 #### 布局：Layout [参考自<form.io>](https://formio.github.io/formio.js/app/builder)
 - columns 列

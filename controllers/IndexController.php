@@ -13,40 +13,37 @@ class IndexController extends AdminBaseController{
         $this->title = 'The PermissionAdmin System.';
         $parser = new Parser();
         $inputs = [];
-        $inputs[] = $parser->parse(
-            Forms::input('c','手机号有验证')->statistics()->inputBeforeIcon('fa fa-users')->validate(
-                Validate::number('请输入数字',1,8888),
-                Validate::regex('必须全是8','^8+$'),
-            )
-        );
-        
-        $inputs[] = $parser->parse(
-            Forms::input('a','用户名')->statistics()->subtype('email')
-        );
-
-        $inputs[] = $parser->parse(
-            Forms::input('b','个人说明')->required()->placeHolder('填写你的说明')->description('xxxx')->labelWidth(3)->tooltip('hhhh')
-        );
-    
-        $inputs[] = $parser->parse(
-            Forms::input('c','手机号')->inputBeforeIcon('fa fa-users')->required()->inputMask("'mask':'(999) 999-9999'")
-        );
-
-        $inputs[] = $parser->parse(
-            Forms::input('c','手机号')->inputBeforeIcon('fa fa-star')->required()->subtype('date')
-        );
-        $inputs[] = $parser->parse(
-            Forms::input('c','手机号')->inputBeforeIcon('fa fa-users')->required()->subtype('time')
-        );
-
-
-        
-        $inputs[] = $parser->parse(Forms::input('c','ABCD')->labelWidth(2)->labelPosition('right-right')->visible(false));
-        $inputs[] = $parser->parse(Forms::input('c','xxx')->labelWidth(3)->labelPosition('right-left'));
-        $inputs[] = $parser->parse(Forms::input('c','xxx')->labelWidth(4)->labelPosition('left-right'));
-        $inputs[] = $parser->parse(Forms::input('c','xxx')->labelWidth(5)->labelPosition('left-left')->enabled(false));
-        $inputs[] = $parser->parse(Forms::input('c','xxx')->inputBeforeIcon('fa fa-users')->labelWidth(5)->labelPosition('left-left')->inputAfterIcon('fa fa-users'));
-    
+//        $inputs[] = $parser->parse(
+//            Forms::input('c','手机号有验证')->statistics()->inputBeforeIcon('fa fa-users')->validate(
+//                Validate::number('请输入数字',1,8888),
+//                Validate::regex('必须全是8','^8+$'),
+//            )
+//        );
+//        $inputs[] = $parser->parse(Forms::input('a','用户名')->statistics()->subtype('email'));
+//        $inputs[] = $parser->parse(Forms::input('a','用户名')->statistics()->subtype('email'));
+//        $inputs[] = $parser->parse(Forms::input('b','个人说明')->required()->placeHolder('填写你的说明')->description('xxxx')->labelWidth(3)->tooltip('hhhh'));
+//        $inputs[] = $parser->parse(Forms::input('c','手机号')->inputBeforeIcon('fa fa-users')->required()->inputMask("'mask':'(999) 999-9999'"));
+//        $inputs[] = $parser->parse(Forms::input('c','手机号')->inputBeforeIcon('fa fa-star')->required()->subtype('date'));
+//        $inputs[] = $parser->parse(Forms::input('c','手机号')->inputBeforeIcon('fa fa-users')->required()->subtype('time'));
+//        $inputs[] = $parser->parse(Forms::input('c','ABCD')->labelWidth(2)->labelPosition('right-right')->visible(false));
+//        $inputs[] = $parser->parse(Forms::input('c','xxx')->labelWidth(3)->labelPosition('right-left'));
+//        $inputs[] = $parser->parse(Forms::input('c','xxx')->labelWidth(4)->labelPosition('left-right'));
+//        $inputs[] = $parser->parse(Forms::input('c','xxx')->labelWidth(5)->labelPosition('left-left')->enabled(false));
+//        $inputs[] = $parser->parse(Forms::input('c','xxx')->inputBeforeIcon('fa fa-users')->labelWidth(5)->labelPosition('left-left')->inputAfterIcon('fa fa-users'));
+//        $inputs[] = $parser->parse(Layouts::columns()->column(Forms::input('a'),4)->column(Forms::input('a'),8));
+//        $ttt = $parser->parse(Layouts::columns()->column(Forms::input('a','用户名')->labelWidth(3),4)->column(Forms::input('a'),8));
+//        $inputs[] = $parser->parse(Layouts::box($ttt,'标题',Forms::input('a','模块名称')->labelWidth(4))->style('Success')->labelIcon('fa fa-users')->canClose()->canMini()->class('ttt'));
+//        $inputs[] = $parser->parse(
+//            Layouts::columns()->column(
+//                Layouts::tabs()->tab('PageA', Forms::input('a','ahhh'))->tab('PageB', Forms::input('b','tttt'),true),
+//                3
+//            )->column(
+//                Forms::input('cccc','kkkk'),
+//                9
+//            )
+//        );
+//print_r($inputs);
+//exit;
     
         $this->addStyle($parser->getStyles());
         $this->addScript($parser->getScripts());
