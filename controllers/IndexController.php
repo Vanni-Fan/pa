@@ -42,6 +42,13 @@ class IndexController extends AdminBaseController{
 //                9
 //            )
 //        );
+        $inputs[] = $parser->parse(
+            Forms::button()->label('ssssssssss')
+//            Forms::textarea()->subtype('wysihtml5'),
+//            Forms::textarea()->subtype('simple')->label('xxxxx')->labelWidth(3),
+//            Forms::textarea()->subtype('ckeditor'),
+        );
+
 //print_r($inputs);
 //exit;
     

@@ -9,6 +9,8 @@ class TextArea extends Element
     public function __construct()
     {
         parent::__construct('textarea');
+        $this->rows = 3;
+
     }
     
     public function tab(string $name, Element $element, $visible=false): self
