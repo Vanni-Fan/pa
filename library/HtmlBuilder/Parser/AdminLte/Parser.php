@@ -25,13 +25,15 @@ class Parser{
         return $this->css_files;
     }
     public function parse(Element $element){
-        $_file = POWER_BASE_DIR.'library/HtmlBuilder/Parser/AdminLte/templates/'.$element->type.'.php';
-        
+        $template_dir  = POWER_BASE_DIR.'library/HtmlBuilder/Parser/AdminLte/templates/';
+        $template_file = $template_dir . $element->type.'.php';
+        if(!file_exists($template_file)) $template_file = $template_dir . 'default.php';
+
         if(empty($element->id)) $element->id = 'E-'.uniqid();
         
-        $parse = function()use($_file,$element){
+        $parse = function()use($template_file,$element){
             extract(get_object_vars($element),EXTR_OVERWRITE);
-            require $_file;
+            require $template_file;
         };
         
         ob_start();

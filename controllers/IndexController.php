@@ -42,12 +42,35 @@ class IndexController extends AdminBaseController{
 //                9
 //            )
 //        );
+//        $inputs[] = $parser->parse(
+//            Forms::button()->label('ssssssssss')->add(
+//                Forms::button()->subtype('default')->label('AAA'),
+//                Forms::button()->subtype('default')->label('BBB')->style('default'),
+//                Forms::button()->subtype('default')->label('CCC')->style('danger'),
+//                )
+//        );
+
+//        $inputs[] = $parser->parse(
+//            Forms::button()->btnBeforeIcon('fa fa-users')->btnAfterIcon(
+//                Forms::button()->subtype('default')->label('sss')
+////                Forms::button()->add(
+////                    Forms::button()->subtype('default')->label('sss')
+////                )
+//            )->subtype('input')
+//        );
+//        print_r(Forms::checkbox('asdfsdfa','bb','ssss')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'1']]));
+//        exit;
         $inputs[] = $parser->parse(
-            Forms::button()->label('ssssssssss')
+            Forms::checkbox('asdfsdfa','bb','ssss')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'1']])
+        );
+        $inputs[] = $parser->parse(
+            Forms::radio('asdfsdfa','bbx','ssss')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'1']])
+        );
+
 //            Forms::textarea()->subtype('wysihtml5'),
 //            Forms::textarea()->subtype('simple')->label('xxxxx')->labelWidth(3),
 //            Forms::textarea()->subtype('ckeditor'),
-        );
+//        );
 
 //print_r($inputs);
 //exit;

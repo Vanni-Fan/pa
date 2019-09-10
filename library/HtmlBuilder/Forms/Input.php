@@ -23,8 +23,9 @@ class Input extends Element{
     public $statistics=false;        // 显示在右下角，字符长度，单词个数
     public $inputAfterIcon="";       // 后面的图标
     public $inputBeforeIcon="";      // 前面的图标
-    public function __construct($name, $subtype='text', $label=''){
+    public function __construct($name, $subtype='text', $value='', $label=''){
         parent::__construct('input',$name);
+        $this->value = $value;
         $this->subtype = $subtype;
         switch($subtype){
             case 'mail':
