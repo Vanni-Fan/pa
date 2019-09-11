@@ -41,4 +41,9 @@ class Check extends Element
         $this->choices = $choices;
         return $this;
     }
+    
+    public function other($other):self{
+        $this->other = $other;
+        return $this;
+    }
 }

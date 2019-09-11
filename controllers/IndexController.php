@@ -10,7 +10,7 @@ use HtmlBuilder\Validate;
 
 class IndexController extends AdminBaseController{
     public function indexAction(){
-        $this->title = 'The PermissionAdmin System.';
+//        $this->title = 'The PermissionAdmin System.';
         $parser = new Parser();
         $inputs = [];
 //        $inputs[] = $parser->parse(
@@ -64,7 +64,9 @@ class IndexController extends AdminBaseController{
             Forms::checkbox('asdfsdfa','bb','ssss')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'1']])
         );
         $inputs[] = $parser->parse(
-            Forms::radio('asdfsdfa','bbx','ssss')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'1']])
+            Forms::radio('asdfsdfa','bbx','ssss')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'1']])->other(
+                Forms::input('xxx')
+            )
         );
 
 //            Forms::textarea()->subtype('wysihtml5'),
