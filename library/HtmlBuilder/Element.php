@@ -99,7 +99,7 @@ class Element{
      * @param string $subtype
      * @return self
      */
-    public function subtype(string $subtype):self{
+    public function subtype(string $subtype){
         $this->subtype = $subtype;
         return $this;
     }
@@ -109,7 +109,7 @@ class Element{
      * @param $params
      * @return mixed
      */
-    public static function create(...$params):self{
+    public static function create(...$params){
         return new static(...$params);
     }
     
@@ -118,7 +118,7 @@ class Element{
      * @param string $label
      * @return self
      */
-    public function label(string $label):self{
+    public function label(string $label){
         $this->label = $label;
         return $this;
     }
@@ -128,7 +128,7 @@ class Element{
      * @param string $position
      * @return self
      */
-    public function labelPosition(string $position):self{
+    public function labelPosition(string $position){
         $this->labelPosition = $position;
         return $this;
     }
@@ -138,7 +138,7 @@ class Element{
      * @param int $labelWidth
      * @return self
      */
-    public function labelWidth(int $labelWidth):self{
+    public function labelWidth(int $labelWidth){
         $this->labelWidth = $labelWidth;
         return $this;
     }
@@ -148,7 +148,7 @@ class Element{
      * @param bool $enabled=true
      * @return self
      */
-    public function enabled(bool $enabled=true):self{
+    public function enabled(bool $enabled=true){
         $this->enabled = $enabled;
         return $this;
     }
@@ -158,7 +158,7 @@ class Element{
      * @param bool $visible=true
      * @return self
      */
-    public function visible(bool $visible=true):self{
+    public function visible(bool $visible=true){
         $this->visible = $visible;
         return $this;
     }
@@ -168,7 +168,7 @@ class Element{
      * @param bool $required=true
      * @return self
      */
-    public function required(bool $required=true):self{
+    public function required(bool $required=true){
         $this->required = $required;
         return $this;
     }
@@ -178,7 +178,7 @@ class Element{
      * @param mixed $value
      * @return self
      */
-    public function value($value):self{
+    public function value($value){
         $this->value = $value;
         return $this;
     }
@@ -188,7 +188,7 @@ class Element{
      * @param string $placeHolder
      * @return self
      */
-    public function placeHolder(string $placeHolder):self{
+    public function placeHolder(string $placeHolder){
         $this->placeHolder = $placeHolder;
         return $this;
     }
@@ -198,7 +198,7 @@ class Element{
      * @param string $tooltip
      * @return self
      */
-    public function tooltip(string $tooltip):self{
+    public function tooltip(string $tooltip){
         $this->tooltip = $tooltip;
         return $this;
     }
@@ -208,7 +208,7 @@ class Element{
      * @param string $description
      * @return self
      */
-    public function description(string $description):self{
+    public function description(string $description){
         $this->description = $description;
         return $this;
     }
@@ -219,7 +219,7 @@ class Element{
      * @param $values
      * @return self
      */
-    public function attr(string $name, $values):self{
+    public function attr(string $name, $values){
         $this->attributes[$name] = $values;
         return $this;
     }
@@ -229,7 +229,7 @@ class Element{
      * @param string $validate
      * @return self
      */
-    public function validate(Validate ... $validate):self{
+    public function validate(Validate ... $validate){
         foreach($validate as $v) $this->validators[] = $v;
         return $this;
     }
@@ -239,7 +239,7 @@ class Element{
      * @param string $labelIcon
      * @return self
      */
-    public function labelIcon(string $labelIcon):self{
+    public function labelIcon(string $labelIcon){
         $this->labelIcon = $labelIcon;
         return $this;
     }
@@ -249,7 +249,7 @@ class Element{
      * @param string $badgeIcon
      * @return self
      */
-    public function badgeIcon(string $badgeIcon):self{
+    public function badgeIcon(string $badgeIcon){
         $this->badgeIcon = $badgeIcon;
         return $this;
     }
@@ -259,7 +259,7 @@ class Element{
      * @param Element ...$elements
      * @return self
      */
-    public function add(Element ... $elements):self{
+    public function add(Element ... $elements){
         foreach($elements as $element){
             $this->elements[] = $element;
         }
@@ -292,7 +292,7 @@ class Element{
      * @param  array $arguments
      * @return Element
      */
-    public function __call(string $name, array $arguments):self
+    public function __call(string $name, array $arguments)
     {
         $this->attributes[$name] = current($arguments);
         return $this;

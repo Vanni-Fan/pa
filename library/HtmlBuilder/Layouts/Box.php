@@ -26,25 +26,25 @@ class Box extends Element{
         if($footer) $this->footer($footer);
     }
     // 三款样式选择 : box-danger,Primary, Info, Success, Warning, Danger, Gray
-    public function style($style):self{
+    public function style($style){
         $this->style = 'box-'.strtolower($style);
         return $this;
     }
-    public function canClose(bool $close=true):self{
+    public function canClose(bool $close=true){
         $this->canClose = $close;
         return $this;
     
     }
-    public function canMini(bool $mini=true):self{
+    public function canMini(bool $mini=true){
         $this->canMini = $mini;
         return $this;
     }
-    public function canMove(bool $move=true):self{
+    public function canMove(bool $move=true){
         $this->canMove = $move;
         return $this;
     }
     
-    public function body($body):self {
+    public function body($body) {
         if($body instanceof Element){
             $this->body->element = $body;
         }else{
@@ -53,7 +53,7 @@ class Box extends Element{
         return $this;
     }
     
-    public function header($header):self{
+    public function header($header){
         if($header instanceof Element){
             $this->header->element = $header;
         }else{
@@ -62,7 +62,7 @@ class Box extends Element{
         return $this;
     }
     
-    public function footer($footer):self{
+    public function footer($footer){
         if($footer instanceof Element){
             $this->footer->element = $footer;
         }else{

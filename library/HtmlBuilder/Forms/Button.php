@@ -22,39 +22,39 @@ class Button extends Element
         parent::__construct('button');
         $this->label = $label;
     }
-    public function flat(bool $flat=true):self{
+    public function flat(bool $flat=true){
         $this->flat = $flat;
         return $this;
     }
-    public function block(bool $block=true):self{
+    public function block(bool $block=true){
         $this->block = $block;
         return $this;
     }
-    public function style(string $style):self{
+    public function style(string $style){
         $this->style = $style;
         return $this;
     }
-    public function btnBeforeIcon($icon_or_button):self{
+    public function btnBeforeIcon($icon_or_button){
         $this->btnBeforeIcon = $icon_or_button;
         return $this;
     }
-    public function btnAfterIcon($icon_or_button):self{
+    public function btnAfterIcon($icon_or_button){
         $this->btnAfterIcon = $icon_or_button;
         return $this;
     }
-    public function badgeColor(string $color):self{
+    public function badgeColor(string $color){
         $this->badgeColor = $color;
         return $this;
     }
-    public function badge(string $text):self{
+    public function badge(string $text){
         $this->badge = $text;
         return $this;
     }
-    public function action(string $action):self{
+    public function action(string $action){
         $this->action = $action;
         return $this;
     }
-    public function vertical(bool $vertical=true):self{
+    public function vertical(bool $vertical=true){
         $this->vertical = $vertical;
         return $this;
     }

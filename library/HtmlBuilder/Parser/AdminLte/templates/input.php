@@ -16,7 +16,9 @@
     <?php if($description){?>
         <span id="<?=$id?>-description" class="help-block pull-left"><?=$description?></span>
     <?php }?>
+    <?php if($validators || $statistics){ ?>
     <span id="<?=$id?>-message" class="help-block pull-right"></span>
+    <?php } ?>
 </div>
 
 <?php

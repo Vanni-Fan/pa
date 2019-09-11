@@ -29,8 +29,8 @@ class Forms extends Element {
         return new Check($label, $name, $value,'radio');
     }
 
-    public static function select():Select{
-        return new Select();
+    public static function select($label, $name, $value):Select{
+        return new Select($label, $name, $value);
     }
     public static function file():File{
         return new File();

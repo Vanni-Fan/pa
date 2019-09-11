@@ -29,8 +29,8 @@ class Check extends Element
         parent::__construct('check');
         $this->label = $label;
         $this->name = $name;
-        $this->value = $value;
         $this->subtype = $subtype;
+        $this->value($value);
     }
 
     public function choicesByUrl($url, $path, $titleName='', $valueName=''){
@@ -42,8 +42,13 @@ class Check extends Element
         return $this;
     }
     
-    public function other($other):self{
+    public function other($other){
         $this->other = $other;
+        return $this;
+    }
+
+    public function value($value){
+        $this->value = is_array($value) ? $value : [$value];
         return $this;
     }
 }

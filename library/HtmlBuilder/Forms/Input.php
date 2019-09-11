@@ -64,22 +64,22 @@ class Input extends Element{
         if($label) $this->label = $label;
     }
     
-    public function inputAfterIcon($icon):self{
+    public function inputAfterIcon($icon){
         $this->inputAfterIcon = $icon;
         return $this;
     }
     
-    public function inputBeforeIcon($icon):self{
+    public function inputBeforeIcon($icon){
         $this->inputBeforeIcon = $icon;
         return $this;
     }
     
-    public function inputMask($mask):self{
+    public function inputMask($mask){
         $this->inputMask = $mask;
         return $this;
     }
     
-    public function statistics(bool $enable=true):self{
+    public function statistics(bool $enable=true){
         $this->statistics = $enable;
         return $this;
     }

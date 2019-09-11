@@ -14,7 +14,7 @@ class Columns extends Element{
         parent::__construct('columns');
     }
     
-    public function column(Element $element,int $width, int $offset=0, int $push=0, int $pull=0):self{
+    public function column(Element $element,int $width, int $offset=0, int $push=0, int $pull=0){
         $this->add((new static())->width($width)->offset($offset)->pull($pull)->push($push)->add($element));
         return $this;
     }

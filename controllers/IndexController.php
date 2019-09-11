@@ -60,14 +60,21 @@ class IndexController extends AdminBaseController{
 //        );
 //        print_r(Forms::checkbox('asdfsdfa','bb','ssss')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'1']]));
 //        exit;
+//        $inputs[] = $parser->parse(
+//            Forms::checkbox('asdfsdfa','bb','1')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'2']])->other(
+//               '其他选项'
+//            )
+//        );
+//        $inputs[] = $parser->parse(
+//            Forms::radio('asdfsdfa','bbx','2')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'2']])->other(
+//                Forms::input('xxx')->placeHolder('其他')->disabled()
+//            )
+//        );
+
         $inputs[] = $parser->parse(
-            Forms::checkbox('asdfsdfa','bb','ssss')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'1']])
+            Forms::select('asdfsdfa','bbx','2')
         );
-        $inputs[] = $parser->parse(
-            Forms::radio('asdfsdfa','bbx','ssss')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'1']])->other(
-                Forms::input('xxx')
-            )
-        );
+
 
 //            Forms::textarea()->subtype('wysihtml5'),
 //            Forms::textarea()->subtype('simple')->label('xxxxx')->labelWidth(3),
