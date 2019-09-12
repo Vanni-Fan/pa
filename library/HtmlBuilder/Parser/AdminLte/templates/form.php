@@ -1,3 +1,3 @@
 <form id="<?=$id?>" action="<?=$action?>" method="<?=$method?>">
-    <?php echo $this->parse($elements); ?>
+    <?php foreach($elements as $element) echo $this->parse($element); ?>
 </form>

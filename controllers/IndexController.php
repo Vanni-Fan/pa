@@ -71,10 +71,20 @@ class IndexController extends AdminBaseController{
 //            )
 //        );
 
-        $inputs[] = $parser->parse(
-            Forms::select('asdfsdfa','bbx','2')
-        );
+//        $inputs[] = $parser->parse(
+//            Forms::select('asdfsdfa','bbx','2','select')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'2']])->isTags(true)//->multiple(true)
+//            ->labelWidth(3)->rows(1)
+//        );
 
+        $inputs[] = $parser->parse(
+            Forms::form('aaa.php')->add(
+                Forms::input('aaa','用户'),
+                Forms::input('bbb','秘密')->subtype('password'),
+                Forms::button('提交')->action('submit'),
+                Forms::button('重置')->action('reset')
+            )
+        );
+        
 
 //            Forms::textarea()->subtype('wysihtml5'),
 //            Forms::textarea()->subtype('simple')->label('xxxxx')->labelWidth(3),

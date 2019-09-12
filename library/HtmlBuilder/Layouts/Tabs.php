@@ -11,6 +11,13 @@ class Tabs extends Element
         parent::__construct('tabs');
     }
     
+    /**
+     * 添加一个Tab
+     * @param string  $name
+     * @param Element $element
+     * @param bool    $visible
+     * @return Tabs
+     */
     public function tab(string $name, Element $element, $visible=false): self
     {
         $tab = (new static())->add($element);

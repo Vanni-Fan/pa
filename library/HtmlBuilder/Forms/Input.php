@@ -17,13 +17,32 @@ namespace HtmlBuilder\Forms;
 use HtmlBuilder\Element;
 use HtmlBuilder\Validate;
 
-
 class Input extends Element{
+    /**
+     * @var string 输入蒙版
+     */
     public $inputMask="99:99";
+    /**
+     * @var bool 是否在右下方显示统计，包含长度和单词个数
+     */
     public $statistics=false;        // 显示在右下角，字符长度，单词个数
+    /**
+     * @var string 标签前部分的图标
+     */
     public $inputAfterIcon="";       // 后面的图标
+    /**
+     * @var string 标签后部分的图标
+     */
     public $inputBeforeIcon="";      // 前面的图标
-    public function __construct($name, $subtype='text', $value='', $label=''){
+    
+    /**
+     * Input constructor.
+     * @param string $name 表单中的名称
+     * @param string $subtype 子类型：mail, url, tel, mobile, currency, number, hidden, password, time, date, color
+     * @param string $value 默认值
+     * @param string $label 标签
+     */
+    public function __construct(string $name, string $subtype='text', string $value='', string $label=''){
         parent::__construct('input',$name);
         $this->value = $value;
         $this->subtype = $subtype;
@@ -64,21 +83,41 @@ class Input extends Element{
         if($label) $this->label = $label;
     }
     
+    /**
+     * 设置标签前部分的图标
+     * @param $icon
+     * @return $this
+     */
     public function inputAfterIcon($icon){
         $this->inputAfterIcon = $icon;
         return $this;
     }
     
+    /**
+     * 设置标签后部分的图标
+     * @param $icon
+     * @return $this
+     */
     public function inputBeforeIcon($icon){
         $this->inputBeforeIcon = $icon;
         return $this;
     }
     
+    /**
+     * 设置输入蒙版
+     * @param $mask
+     * @return $this
+     */
     public function inputMask($mask){
         $this->inputMask = $mask;
         return $this;
     }
     
+    /**
+     * 开启输入统计
+     * @param bool $enable
+     * @return $this
+     */
     public function statistics(bool $enable=true){
         $this->statistics = $enable;
         return $this;

@@ -2,29 +2,63 @@
 
 namespace HtmlBuilder\Parser\AdminLte;
 use HtmlBuilder\Element;
-use PA;
-use Phalcon\Mvc\View;
-use Phalcon\Mvc\View\Engine\Volt;
 
 class Parser{
+    /**
+     * @var array 分析【parse()】后获得的js文件，通过 $this->js(...）添加的，文件名一样会去重
+     */
     private $js_files  = [];
+    /**
+     * @var array 分析【parse()】后获得的css文件，通过 $this->css(...）添加的，文件名一样会去重
+     */
     private $css_files = [];
+    /**
+     * @var array 分析【parse()】后获得的样式片段，通过 $this->style(...）添加的
+     */
     private $styles    = [];
+    /**
+     * @var array 分析【parse()】后获得的脚本片段，通过 $this->script(...）添加的
+     */
     private $scripts   = [];
     
+    /**
+     * 获得所有的样式片段
+     * @return string
+     */
     public function getStyles(){
         return implode('',$this->styles);
     }
+    
+    /**
+     * 获得所有的脚本片段
+     * @return string
+     */
     public function getScripts(){
         return implode('',$this->scripts);
     }
+    
+    /**
+     * 获得所有的脚本文件
+     * @return array
+     */
     public function getJs(){
         return $this->js_files;
     }
+    
+    /**
+     * 获得所有的样式文件
+     * @return array
+     */
     public function getCss(){
         return $this->css_files;
     }
-    public function parse(Element $element){
+    
+    /**
+     * 分析元素，记得样式和脚本到对应的成员变量，并返回分析后的HTML片段
+     * @param Element $element
+     * @return string
+     */
+    public function parse(Element $element):string {
         $template_dir  = POWER_BASE_DIR.'library/HtmlBuilder/Parser/AdminLte/templates/';
         $template_file = $template_dir . $element->type.'.php';
         if(!file_exists($template_file)) $template_file = $template_dir . 'default.php';
@@ -40,20 +74,44 @@ class Parser{
         $parse(); // $parse->call($this);
         return ob_get_clean();
     }
-    public function css($file){
+    
+    /**
+     * 设置css文件，文件相同会去重
+     * @param string $file
+     */
+    public function css(string $file):void{
         if(!isset($this->css_files[$file])) $this->css_files[$file] = $file;
     }
-    public function style($type, $content){
-        if(!isset($this->styles[$type])){
+    
+    /**
+     * 设置样式片段，内容相同会去重，前后的 <style> 标签会去除
+     * @param $file
+     */
+    public function style(string $content):void{
+        $hash = md5($content);
+        if(!isset($this->styles[$hash])){
             $content = preg_replace('#^(\s*<style[^>]*>)|(</style>\s*)$#i','',$content);
-            $this->styles[$type] = $content;
+            $this->styles[$hash] = $content;
         }
     }
-    public function script($content){
-        $content = preg_replace('#^(\s*<script[^>]*>)|(</script>\s*)$#i','',$content);
-        $this->scripts[] = $content;
+    
+    /**
+     * 设置脚本片段，内容相同会去重，前后的 <script> 标签会去除
+     * @param string $content
+     */
+    public function script(string $content):void{
+        $hash = md5($content);
+        if(!isset($this->js[$hash])){
+            $content = preg_replace('#^(\s*<script[^>]*>)|(</script>\s*)$#i','',$content);
+            $this->scripts[$hash] = $content;
+        }
     }
-    public function js($file){
+    
+    /**
+     * 添加js文件，文件相同会去重
+     * @param string $file
+     */
+    public function js(string $file):void{
         if(!isset($this->js_files[$file])) $this->js_files[$file] = $file;
     }
 }

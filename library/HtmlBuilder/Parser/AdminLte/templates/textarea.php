@@ -3,11 +3,7 @@
 <?php if($subtype === 'simple' && $label){ ?>
 <div id="<?=$id?>-wrap" class="form-group htmlbuild-form <?=$attributes['lableClass']??''?>">
 
-    <label id="<?=$id?>-label" for="<?=$id?>" class="<?=$labelWidth?('col-sm-'.$labelWidth):''?> control-label input-label input-label-<?=$labelPosition?>">
-        <?php if($labelIcon) {?><i id="<?=$id?>-labeIcon" class="<?=$labelIcon?>"></i><?php }?>
-        <span id="<?=$id?>-label"><?=$label?><?php if($required){ ?><i class="require-star">*</i><?php }?></span>
-        <?php if($tooltip){ ?><i id="<?=$id?>-tooltip" data-placement="bottom" class="fa fa-question-circle" data-toggle="tooltip" data-original-title="<?=$tooltip?>"></i><?php }?>
-    </label>
+<?php include(__DIR__.'/_label.php'); ?>
 
 <?php }elseif($subtype === 'ckeditor'){
     $this->js('/dist/bower_components/ckeditor/ckeditor.js');
