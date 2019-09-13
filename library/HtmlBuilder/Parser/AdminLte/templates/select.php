@@ -1,6 +1,5 @@
 <?php
 if($subtype === 'select2') {
-    $this->css('/dist/htmlbuilder.css');
     $this->css('/dist/bower_components/select2/dist/css/select2.min.css');
     $this->js('/dist/bower_components/select2/dist/js/select2.full.min.js');
     $script = "$('#$id-select').select2(" . ($isTags ? '{tags:true}' : '') . ");\n";

@@ -1,5 +1,4 @@
 <?php
-<?php
 $this->css('/dist/htmlbuilder.css');
 
 if($subtype === 'input') { ?>

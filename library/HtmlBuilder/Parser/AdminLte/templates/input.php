@@ -1,5 +1,3 @@
-<?php $this->css('/dist/htmlbuilder.css'); ?>
-
 <div id="<?=$id?>" class="form-group htmlbuild-form <?=$attributes['class']??''?>" style="<?=$visible?'':'display:none;'?>">
     <?php include(__DIR__.'/_label.php'); ?>
     <div class="<?=($inputAfterIcon||$inputBeforeIcon)?'input-group':''?> <?=$labelWidth?('col-sm-'.(12-$labelWidth)):''?>" style="<?=($inputAfterIcon||$inputBeforeIcon)?'':'padding:0'?>">

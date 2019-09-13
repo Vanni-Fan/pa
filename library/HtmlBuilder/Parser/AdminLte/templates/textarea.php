@@ -1,5 +1,3 @@
-<?php $this->css('/dist/htmlbuilder.css'); ?>
-
 <?php if($subtype === 'simple' && $label){ ?>
 <div id="<?=$id?>-wrap" class="form-group htmlbuild-form <?=$attributes['lableClass']??''?>">
 

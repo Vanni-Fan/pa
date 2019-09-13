@@ -2,7 +2,7 @@
 # 管理系统框架本身的配置
 return [
     # 调试开关
-    'debug'       => true,
+    'debug'       => 0,
     'trace'       => false,
 
     # 应用的基础目录

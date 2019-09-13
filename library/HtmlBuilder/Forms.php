@@ -92,7 +92,7 @@ class Forms extends Element {
      * 创建一个 File 文件对象
      * @return File
      */
-    public static function file():File{
-        return new File();
+    public static function file($name):File{
+        return new File($name);
     }
 }

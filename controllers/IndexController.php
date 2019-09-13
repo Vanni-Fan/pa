@@ -10,6 +10,8 @@ use HtmlBuilder\Validate;
 
 class IndexController extends AdminBaseController{
     public function indexAction(){
+//        phpinfo();
+//        exit;
 //        $this->title = 'The PermissionAdmin System.';
         $parser = new Parser();
         $inputs = [];
@@ -77,11 +79,13 @@ class IndexController extends AdminBaseController{
 //        );
 
         $inputs[] = $parser->parse(
-            Forms::form('aaa.php')->add(
+            Forms::form($this->url('update'))->add(
                 Forms::input('aaa','用户'),
                 Forms::input('bbb','秘密')->subtype('password'),
+                Forms::file('xxxx')->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
+                Forms::file('yyyy[]')->subtype('multiple'),//->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
+                Forms::button('重置')->action('reset'),
                 Forms::button('提交')->action('submit'),
-                Forms::button('重置')->action('reset')
             )
         );
         
@@ -199,5 +203,10 @@ class IndexController extends AdminBaseController{
 //        exit(" this is $a ");
 
         $this->render();
+    }
+
+    public function updateAction(){
+        print_r($_POST);
+        print_r($_FILES);
     }
 }

@@ -1,3 +1,4 @@
+<?php $this->css('/dist/htmlbuilder.css'); ?>
 <?php if($label){ ?>
     <label for="<?=$id?>-input" class="<?=$labelWidth?('col-sm-'.$labelWidth):''?> control-label htmlbuild-input-label htmlbuild-input-label-<?=$labelPosition?>">
         <?php if($labelIcon) {?><i id="<?=$id?>-labeIcon" class="<?=$labelIcon?>"></i><?php }?>
