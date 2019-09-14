@@ -1,8 +1,9 @@
 <?php
 $this->css('/dist/plugins/jQuery-File-Upload/css/jquery.fileupload.css');
+$this->css('/dist/plugins/cropperjs/cropper.css');
 $this->js('/dist/plugins/jQuery-File-Upload/js/jquery.fileupload.js');
 $this->js('/dist/plugins/jQuery-File-Upload/js/jquery.iframe-transport.js');
-
+$this->js('/dist/plugins/cropperjs/cropper.js');
 # 图片缩放
 $this->js('/dist/plugins/jQuery-File-Upload/js/jquery.fileupload-process.js');
 $this->js('/dist/plugins/jQuery-File-Upload/js/jquery.fileupload-image.js');
@@ -37,14 +38,14 @@ $('#$id-file').fileupload(
 //        ,imageCrop: true
         
         
-        ,previewMaxWidth: 120
-        ,previewMaxHeight: 120
-        ,previewCrop: false
-
-        ,disableImageResize:false
-        ,imageMaxWidth: 1024
-        ,imageMaxHeight: 1024
-        ,imageCrop: false // Force cropped images
+//        ,previewMaxWidth: 120
+//        ,previewMaxHeight: 120
+//        ,previewCrop: false
+//
+//        ,disableImageResize:false
+//        ,imageMaxWidth: 1024
+//        ,imageMaxHeight: 1024
+//        ,imageCrop: false // Force cropped images
         
         
 //        ,imageMaxWidth:800
@@ -55,6 +56,26 @@ $('#$id-file').fileupload(
     $('#$id-text').val(data.files[0].name);
     updateFileTypeIcon($('#$id-icon'), data.files[0].type);
     updateFileStatMsg($('#$id-message'),data.files[0]);
+    
+    loadImage(
+        data.files[0],
+        function(img){
+            var t = document.body.appendChild(img);
+            const cropper = new Cropper(document.getElementById('A1'), {
+              aspectRatio: 16 / 9,
+              crop(event) {
+                console.log(event.detail.x);
+                console.log(event.detail.y);
+                console.log(event.detail.width);
+                console.log(event.detail.height);
+                console.log(event.detail.rotate);
+                console.log(event.detail.scaleX);
+                console.log(event.detail.scaleY);
+              },
+            });
+        },
+        { maxWidth: 600 }
+    );
     console.log(data);
 }).bind('fileuploaddrop', function(e){
     $('#$id-no-file').css('display','none');
