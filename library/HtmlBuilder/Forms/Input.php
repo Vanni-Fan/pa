@@ -21,7 +21,7 @@ class Input extends Element{
     /**
      * @var string 输入蒙版
      */
-    public $inputMask="99:99";
+    public $inputMask="";
     /**
      * @var bool 是否在右下方显示统计，包含长度和单词个数
      */
@@ -78,6 +78,7 @@ class Input extends Element{
                 $this->subtype('date');
                 break;
             case 'color':
+                $this->subtype('color');
                 break;
         }
         if($label) $this->label = $label;

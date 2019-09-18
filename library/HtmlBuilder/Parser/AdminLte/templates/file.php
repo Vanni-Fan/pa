@@ -7,7 +7,6 @@ $this->js('/dist/plugins/cropperjs/cropper.js');
 # 图片缩放
 $this->js('/dist/plugins/jQuery-File-Upload/js/jquery.fileupload-process.js');
 $this->js('/dist/plugins/jQuery-File-Upload/js/jquery.fileupload-image.js');
-
 $this->js('https://blueimp.github.io/JavaScript-Load-Image/js/load-image.all.min.js');
 $this->js('https://blueimp.github.io/JavaScript-Canvas-to-Blob/js/canvas-to-blob.min.js');
 

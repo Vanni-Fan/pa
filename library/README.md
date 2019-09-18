@@ -124,4 +124,48 @@
     [['DbHelper::uniq_number','0.a','1.a','2.a'], '>=', 5] // 使用数据源 0.a+1.a+2.a 在数据库里面做唯一查询出的记录时，是否 >= 5 
     ```
 
+### HTML构造器
+```php
+<?php
 
+use HtmlBuilder\Parser\AdminLte\Parser;
+use HtmlBuilder\Forms;
+
+# ...
+
+class YourController extends AdminBaseController{
+    function YourAction(){
+        # 基本用法
+        $element = Forms::form($this->url('update'),'post')->add(
+            Forms::input('user_name','用户名'),
+            Forms::input('user_pass','密码')->subtype('password'),
+            Forms::button('提交')->subtype('submit')
+        );
+        
+        # 元素可以通过 add 方法嵌套另一个元素
+        $element = \HtmlBuilder\Layouts::columns()->column(
+             Forms::form('update','post')->add(
+                  Forms::input('user','用户'),
+                  Forms::input('passowrd','密码'),
+                  Forms::button('登录')->subtype('submit')
+             ),6
+        )->column(
+             HtmlBuilder\Layouts\Box::create()->body(
+                 Forms::input('query','搜索'),
+             ),6
+        );
+
+        $parser = new Parser(); // 初始化分析器，如果需要 HTML 输出，就用 AdminLte 的分析器，如果是前端，就用VUE的分析器
+        $this->view->content = $parser->parse($element);
+        
+        # AdminLte\Parser分析器输出内容，CSS&JS会本记录在对象中
+        # 将额外的样式和脚本应用到 View 上
+        $this->addStyle($parser->getStyles());
+        $this->addScript($parser->getScripts());
+        foreach($parser->getJs() as $js)   $this->addJs($js);
+        foreach($parser->getCss() as $css) $this->addCss($css);
+
+        # ...
+    }
+}
+```

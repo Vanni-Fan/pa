@@ -21,7 +21,7 @@ class IndexController extends AdminBaseController{
 //                Validate::regex('必须全是8','^8+$'),
 //            )
 //        );
-//        $inputs[] = $parser->parse(Forms::input('a','用户名')->statistics()->subtype('email'));
+        $inputs[] = $parser->parse(Forms::input('a','用户名')->statistics()->subtype('datetime'));
 //        $inputs[] = $parser->parse(Forms::input('a','用户名')->statistics()->subtype('email'));
 //        $inputs[] = $parser->parse(Forms::input('b','个人说明')->required()->placeHolder('填写你的说明')->description('xxxx')->labelWidth(3)->tooltip('hhhh'));
 //        $inputs[] = $parser->parse(Forms::input('c','手机号')->inputBeforeIcon('fa fa-users')->required()->inputMask("'mask':'(999) 999-9999'"));
@@ -80,7 +80,7 @@ class IndexController extends AdminBaseController{
 
         $inputs[] = $parser->parse(
             Forms::form($this->url('update'))->add(
-                Forms::input('aaa','用户'),
+                Forms::input('aaa','用户')->subtype('color'),
                 Forms::input('bbb','秘密')->subtype('password'),
                 Forms::file('xxxx')->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
                 Forms::file('yyyy[]')->subtype('multiple'),//->label('用户头像')->labelWidth(4)->description('头像必须300x234'),

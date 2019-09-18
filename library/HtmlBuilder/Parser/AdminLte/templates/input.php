@@ -1,3 +1,26 @@
+<?php
+if($subtype === 'color'){
+    $this->css('/dist/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css');
+    $this->js('/dist/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js');
+    $this->script("$('#$id-input').colorpicker();");
+} elseif( $subtype === 'time'){
+    $this->css('/dist/plugins/timepicker/bootstrap-timepicker.min.css');
+    $this->js('/dist/plugins/timepicker/bootstrap-timepicker.min.js');
+    $this->script("$('#$id-input').timepicker({showInputs:false});");
+} elseif($subtype === 'date'){
+    $this->css('/dist/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css');
+    $this->js('/dist/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js');
+    $this->script("$('#$id-input').datepicker({autoclose:true});");
+} elseif($subtype === 'daterange' || $subtype === 'datetimerange' || $subtype ==='datetime'){
+    $this->css('/dist/bower_components/bootstrap-daterangepicker/daterangepicker.css');
+    $this->js('/dist/bower_components/bootstrap-daterangepicker/daterangepicker.js');
+    if($subtype === 'datetime'){
+        $this->script("$('#$id-input').daterangepicker({singleDatePicker:true,timePicker:true,timePicker24Hour:true,timePickerSeconds:true,locale:{format:'YYYY-MM-DD HH:mm:ss'}});");
+    }else{
+        $this->script("$('#$id-input').daterangepicker(".($subtype==='datetimerange'?'{timePicker:true}':'').");");
+    }
+}
+?>
 <div id="<?=$id?>" class="form-group htmlbuild-form <?=$attributes['class']??''?>" style="<?=$visible?'':'display:none;'?>">
     <?php include(__DIR__.'/_label.php'); ?>
     <div class="<?=($inputAfterIcon||$inputBeforeIcon)?'input-group':''?> <?=$labelWidth?('col-sm-'.(12-$labelWidth)):''?>" style="<?=($inputAfterIcon||$inputBeforeIcon)?'':'padding:0'?>">

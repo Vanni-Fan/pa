@@ -82,6 +82,10 @@ config = {
     - 时间： 添加额外控件
     - 日期： 添加额外控件
     - 颜色： 添加额外控件
+    - daterange 日期段
+    - datetime 日期+时间
+    - datetimerange 时间段
+
 ```js
 config = {
   type:"text",        //类型 
@@ -173,6 +177,7 @@ config = {
 }
 ```
 - select 下拉列表（~~资源选择器、树选择、图片列表等~~）
+    - tags 标签（tags）
 ```js
 config = {
     type:"select",
@@ -255,10 +260,7 @@ config = {
 ```
 #### 组件
 - multiselect 多级联动下拉列表
-- datetime 日期+时间
-- daterange 日期段
 - timerange 时间段
-- tags 标签（tags）
 - map 地图
 - table 表格
 
