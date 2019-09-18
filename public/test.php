@@ -36,6 +36,7 @@
         .top,.bottom{
             color:white;
             z-index:10000;
+            min-height: 50px;
             height:50px;
             background-color:#000000b0;
             width:100%;
@@ -43,8 +44,10 @@
         }
         .body{
             z-index:10000;
-            opacity: .05;
-            padding:20px;
+            /*opacity: .05;*/
+            /*padding:20px;*/
+            flex-grow: 1;
+            padding: 0 !important;
         }
         .top{
             display: flex;
@@ -54,6 +57,8 @@
         }
         .bottom{
             padding: 15px;
+            /*position: absolute;*/
+            bottom: 0;
         }
         .slider-handle.custom {
             background: transparent none;
@@ -71,20 +76,23 @@
             content: '‖';
             color: #fff;
         }
+        .hand{
+            cursor: pointer;
+        }
     </style>
 </head>
 
 <body>
 <div class="outer">
     <div class="top">
-        <i onclick="doRotate(90)" class="fa fa-rotate-right">Rotate 90</i>
-        <div onclick="doVertical()">
-            <i class="fa fa-exchange" style="transform: rotate(90deg);"></i>Vertical
+        <i onclick="doRotate(-90)" class="fa fa-rotate-left hand">Rotate left</i>
+        <div onclick="doVertical()" class="hand">
+            <i class="fa fa-exchange" style="transform: rotate(90deg);"></i>Flip vertical
         </div>
-        <i onclick="doReset()" class="fa fa-refresh">Reset</i>
-        <i onclick="doHorizontal()" class="fa fa-exchange">Horizontal</i>
-        <i onclick="doCrop()" class="fa fa-crop">Crop</i>
-        <i onclick="doClose()" class="fa fa-close">Close</i>
+        <i onclick="doHorizontal()" class="fa fa-exchange hand">Flip horizontal</i>
+        <i onclick="doReset()" class="fa fa-refresh hand">Reset</i>
+        <i onclick="doCrop()" class="fa fa-crop hand">Crop</i>
+        <i onclick="doClose()" class="fa fa-close hand">Close</i>
     </div>
     
     <div class="body">
@@ -95,38 +103,80 @@
         <input id="mys" type="text" data-slider-handle="custom">
     </div>
 </div>
+
+<img id="final">
+
 <script src="/dist/plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="/dist/plugins/cropperjs/cropper.js"></script>
 <script>
     var myCropper = null;
     var mySlider = null;
+    var sliderStatus = {
+        rotate:0,
+        horizontal:false,
+        vertical:false
+    };
     $(function () {
         mySlider  = $('#mys').slider({step: 1,min: -45,value:0,max: 45,tooltip:'hide'});
         mySlider.on("slide", function(sliderValue) {
-            console.log(sliderValue);
-            doRotate(sliderValue.value);
+            var newValue = sliderValue.value - sliderStatus.rotate;
+            doRotate(newValue);
+            sliderStatus.rotate = sliderValue.value;
         });
+        mySlider.on('slideStart', function () {
+            sliderStatus.rotate = 0;
+        })
         mySlider.on('slideStop', function () {
+            sliderStatus.rotate = 0;
             mySlider.slider('setValue',0);
         });
         //a.slider('setValue', -20);
         myCropper = new Cropper(document.getElementById('myi'), {
             aspectRatio: 16 / 9,
             crop(event) {
-                console.log(event.detail.x);
-                console.log(event.detail.y);
-                console.log(event.detail.width);
-                console.log(event.detail.height);
-                console.log(event.detail.rotate);
-                console.log(event.detail.scaleX);
-                console.log(event.detail.scaleY);
+                // console.log(event.detail.x);
+                // console.log(event.detail.y);
+                // console.log(event.detail.width);
+                // console.log(event.detail.height);
+                // console.log(event.detail.rotate);
+                // console.log(event.detail.scaleX);
+                // console.log(event.detail.scaleY);
             },
         });
     });
-    function doRotate(i){myCropper.rotate(i);}
-    function doHorizontal(){ myCropper.scale(-1, 1);}
-    function doVertical(){myCropper.scale(1,-1); }
-    function doCrop(){myCropper.crop();}
+    function doRotate(i){
+        myCropper.rotate(i);
+    }
+    function doHorizontal(){
+        myCropper.scale(sliderStatus.horizontal ? 1 : -1, sliderStatus.vertical ? -1 :1);
+        sliderStatus.horizontal = !sliderStatus.horizontal;
+    }
+    function doVertical(){
+        myCropper.scale(sliderStatus.horizontal ? -1 : 1, sliderStatus.vertical ? 1 :-1);
+        sliderStatus.vertical = !sliderStatus.vertical;
+    }
+    function doCrop(){
+        // myCropper.crop();
+        myCropper.getCroppedCanvas().toBlob(function(blob){
+            var uuu = URL.createObjectURL(blob);
+            $('#final').attr('src',uuu);
+            console.log(uuu);
+            doClose();
+            return;
+            var formData = new FormData();
+            // Pass the image file name as the third parameter if necessary.
+            formData.append('croppedImage', blob/*, 'example.png' */);
+            // Use `jQuery.ajax` method for example
+            $.ajax('/path/to/upload', {
+                method: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success:function() {console.log('Upload success');},
+                error:function() {console.log('Upload error');},
+            });
+        }/*, 'image/png' */);
+    }
     function doReset() {myCropper.reset();}
     function doClose(){$('.outer').hide()}
 </script>
