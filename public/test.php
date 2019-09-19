@@ -1,6 +1,3 @@
-<?php
-
-?>
 <html>
 <head>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
@@ -11,7 +8,7 @@
     
     <script src="/dist/bower_components/jquery/dist/jquery.min.js"></script>
     <style>
-        .outer{
+        .cropperWarpDiv{
             display: flex;
             position: fixed;
             top:0;
@@ -22,7 +19,7 @@
             align-items: center;
             flex-direction: column;
         }
-        .outer:after{
+        .cropperWarpDiv:after{
             content:'';
             width:100%;
             height:100%;
@@ -33,7 +30,7 @@
             left:0;
             z-index: 9999;
         }
-        .top,.bottom{
+        .cropperWarpDiv>.top,.cropperWarpDiv>.bottom{
             color:white;
             z-index:10000;
             min-height: 50px;
@@ -42,143 +39,106 @@
             width:100%;
             text-align: center;
         }
-        .body{
+        .cropperWarpDiv>.body{
             z-index:10000;
             /*opacity: .05;*/
             /*padding:20px;*/
-            flex-grow: 1;
+            /*flex-grow: 1;*/
             padding: 0 !important;
+            height: calc(100% - 100px);
         }
-        .top{
+        .cropperWarpDiv>.top{
             display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: space-evenly;
         }
-        .bottom{
+        .cropperWarpDiv>.bottom{
             padding: 15px;
             /*position: absolute;*/
             bottom: 0;
         }
-        .slider-handle.custom {
+        .cropperWarpDiv .slider-handle.custom {
             background: transparent none;
         }
-        .slider.slider-horizontal .slider-track-high {
+        .cropperWarpDiv .slider.slider-horizontal .slider-track-high {
             background-color: #cccccc;
         }
-        .slider-selection{
+        .cropperWarpDiv .slider-selection{
             background-color: #cccccc;
             background-image: none;
         }
-        .slider-handle.custom::before {
+        .cropperWarpDiv .slider-handle.custom::before {
             line-height: 20px;
             font-size: 40px;
             content: '‖';
             color: #fff;
         }
-        .hand{
+        .cropperWarpDiv .hand{
             cursor: pointer;
         }
     </style>
 </head>
 
 <body>
-<div class="outer">
+<div style="width:100px;height: 200px;">
+<div class="cropperWarpDiv">
     <div class="top">
-        <i onclick="doRotate(-90)" class="fa fa-rotate-left hand">Rotate left</i>
-        <div onclick="doVertical()" class="hand">
-            <i class="fa fa-exchange" style="transform: rotate(90deg);"></i>Flip vertical
-        </div>
-        <i onclick="doHorizontal()" class="fa fa-exchange hand">Flip horizontal</i>
-        <i onclick="doReset()" class="fa fa-refresh hand">Reset</i>
-        <i onclick="doCrop()" class="fa fa-crop hand">Crop</i>
-        <i onclick="doClose()" class="fa fa-close hand">Close</i>
+        <i onclick="cropperWarp.doRotate(-90)" class="fa fa-rotate-left hand">Rotate left</i>
+        <div onclick="cropperWarp.doVertical()" class="hand"><i class="fa fa-exchange" style="transform: rotate(90deg);"></i>Flip vertical</div>
+        <i onclick="cropperWarp.doHorizontal()" class="fa fa-exchange hand">Flip horizontal</i>
+        <i onclick="cropperWarp.doReset()" class="fa fa-refresh hand">Reset</i>
+        <i onclick="cropperWarp.doCrop(function(){})" class="fa fa-crop hand">Crop</i>
+        <i onclick="cropperWarp.hide()" class="fa fa-close hand">Close</i>
     </div>
     
-    <div class="body">
-        <img id="myi" src="/dist/adminlte/img/photo1.png" width="100%">
-    </div>
-    
-    <div class="bottom">
-        <input id="mys" type="text" data-slider-handle="custom">
-    </div>
+    <div class="body"><img id="htmlBuilder_image_source" src="/dist/adminlte/img/photo1.png" width="100%"></div>
+    <div class="bottom"><input id="htmlBuilder_slider_bar" type="text" data-slider-handle="custom"></div>
 </div>
-
-<img id="final">
-
+</div>
 <script src="/dist/plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="/dist/plugins/cropperjs/cropper.js"></script>
 <script>
-    var myCropper = null;
-    var mySlider = null;
-    var sliderStatus = {
-        rotate:0,
-        horizontal:false,
-        vertical:false
-    };
-    $(function () {
-        mySlider  = $('#mys').slider({step: 1,min: -45,value:0,max: 45,tooltip:'hide'});
-        mySlider.on("slide", function(sliderValue) {
-            var newValue = sliderValue.value - sliderStatus.rotate;
-            doRotate(newValue);
-            sliderStatus.rotate = sliderValue.value;
-        });
-        mySlider.on('slideStart', function () {
-            sliderStatus.rotate = 0;
-        })
-        mySlider.on('slideStop', function () {
-            sliderStatus.rotate = 0;
-            mySlider.slider('setValue',0);
-        });
-        //a.slider('setValue', -20);
-        myCropper = new Cropper(document.getElementById('myi'), {
-            aspectRatio: 16 / 9,
-            crop(event) {
-                // console.log(event.detail.x);
-                // console.log(event.detail.y);
-                // console.log(event.detail.width);
-                // console.log(event.detail.height);
-                // console.log(event.detail.rotate);
-                // console.log(event.detail.scaleX);
-                // console.log(event.detail.scaleY);
-            },
-        });
-    });
-    function doRotate(i){
-        myCropper.rotate(i);
-    }
-    function doHorizontal(){
-        myCropper.scale(sliderStatus.horizontal ? 1 : -1, sliderStatus.vertical ? -1 :1);
-        sliderStatus.horizontal = !sliderStatus.horizontal;
-    }
-    function doVertical(){
-        myCropper.scale(sliderStatus.horizontal ? -1 : 1, sliderStatus.vertical ? 1 :-1);
-        sliderStatus.vertical = !sliderStatus.vertical;
-    }
-    function doCrop(){
-        // myCropper.crop();
-        myCropper.getCroppedCanvas().toBlob(function(blob){
-            var uuu = URL.createObjectURL(blob);
-            $('#final').attr('src',uuu);
-            console.log(uuu);
-            doClose();
-            return;
-            var formData = new FormData();
-            // Pass the image file name as the third parameter if necessary.
-            formData.append('croppedImage', blob/*, 'example.png' */);
-            // Use `jQuery.ajax` method for example
-            $.ajax('/path/to/upload', {
-                method: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                success:function() {console.log('Upload success');},
-                error:function() {console.log('Upload error');},
-            });
+var cropperWarp = {
+    cropper: new Cropper(document.getElementById('htmlBuilder_image_source')),
+    slider: $('#htmlBuilder_slider_bar').slider({step: 1,min: -45,value:0,max: 45,tooltip:'hide'}),
+    sliderStatus: {rotate:0,horizontal:false,vertical:false},
+    blob:null,
+    doRotate:function doRotate(i){ this.cropper.rotate(i) },
+    doHorizontal:function doHorizontal(){
+        this.cropper.scale(this.sliderStatus.horizontal ? 1 : -1, this.sliderStatus.vertical ? -1 :1);
+        this.sliderStatus.horizontal = !this.sliderStatus.horizontal;
+    },
+    doVertical:function doVertical(){
+        this.cropper.scale(this.sliderStatus.horizontal ? -1 : 1, this.sliderStatus.vertical ? 1 :-1);
+        this.sliderStatus.vertical = !this.sliderStatus.vertical;
+    },
+    doCrop:function doCrop(func){
+        var that = this;
+        this.cropper.getCroppedCanvas().toBlob(function(blob){
+            that.blob = blob;
+            func(URL.createObjectURL(blob));
+            that.hide();
         }/*, 'image/png' */);
+    },
+    setImage:function setImage(url){ this.cropper.replace(url) }, // 设置图片
+    setAspectRatio:function setAspectRatio(aspectRatio){ this.cropper.setAspectRatio(aspectRatio) }, // 设置高宽比
+    doReset:function doReset(){ this.cropper.reset() },
+    getBlob:function getBlob(){ return this.blob },
+    show:function show(){ $('.cropperWarpDiv').show() },
+    hide:function hide(){ $('.cropperWarpDiv').hide() },
+    init:function init(){
+        var that = this;
+        this.slider.on("slide", function(sliderValue) {
+            var newValue = sliderValue.value - that.sliderStatus.rotate;
+            that.doRotate(newValue);
+            that.sliderStatus.rotate = sliderValue.value;
+        });
+        this.slider.on('slideStart', function () { that.sliderStatus.rotate = 0 });
+        this.slider.on('slideStop', function () { that.sliderStatus.rotate = 0; that.slider.slider('setValue',0);});
     }
-    function doReset() {myCropper.reset();}
-    function doClose(){$('.outer').hide()}
+};
+cropperWarp.init();
 </script>
 </body>
 </html>
