@@ -6,12 +6,16 @@ $this->js('/dist/plugins/jQuery-File-Upload/js/jquery.fileupload.js');
 $this->style(/** @lang CSS */"
 /** 拖拽 **/
 .htmlbuild-form-file-over{
-    border-color:red;
+    border-color: red !important;
+    border-style: dashed;
+    border-width: 1px
 }
 /** 虚拟边框 **/
-#$id{
+#$id.multiple{
     border-style: dashed;
-    border-width:2px;
+    border-width:1px;
+    border-color:#000;
+    margin-bottom:5px;
 }
 ");
 
@@ -113,7 +117,7 @@ if($canCorp) {
             display: flex;
             flex-direction: row;
             align-items: center;
-            justify-content: space-evenly;
+            justify-content: space-around;
         }
         .cropperWarpDiv>.bottom{
             padding: 15px;
@@ -215,13 +219,14 @@ $(function() {
     $('#$id-file').fileupload(
         { autoUpload:false, replaceFileInput:false, singleFileUploads:'$isSingle'?true:false, dropZone:$('#$id') }
     ).bind('fileuploadadd', function(e, data){
+        $('#$id').removeClass('htmlbuild-form-file-over');
         if('$isSingle'){
             var file = data.files[0];
             $('#$id-text').val(file.name);
             $('#$id-message').text('类型:'+file.type+',大小:'+getFileSize(file));
             if('$canCorp'){
                 var imageBlobUrl = cropperWarp.getBlobUrl(file);
-                $('#$id-icon').parent().css({
+                $('#$id-icon').hide().parent().css({
                     padding: 0,
                     width: '35px',
                     backgroundImage: 'url(' + imageBlobUrl + ')',
@@ -238,6 +243,7 @@ $(function() {
             for(var i in data.files){
                 var file = data.files[i];
                 var tmp = $('#$id-file-template').clone();
+                tmp.removeAttr('id');
                 if('$canCorp'){
                     tmp.find('img').attr('src', cropperWarp.getBlobUrl(file));
                     tmp.find('i').remove();
@@ -265,6 +271,7 @@ $(function() {
         $('#$id').removeClass('htmlbuild-form-file-over');
     });
     
+//    $('#$id').click(function(e){ $('#$id-file').click(); });
     $('#$id-folder-btn,#$id-text,#$id-no-file').click(function(e){ $('#$id-file').click(); });
     
     if('$canCorp') cropperWarp.setAspectRatio($aspectRatio);
@@ -287,13 +294,13 @@ $(function() {
     <?php if($validators || $statistics){ ?><span id="<?=$id?>-message" class="help-block pull-right"></span><?php } ?>
 </div>
 <?php }elseif($subtype === 'multiple'){ ?>
-<div id="<?=$id?>" class="<?=$attributes['class']??''?>" style="display:flex;flex-wrap:wrap;">
+<div id="<?=$id?>" class="multiple <?=$attributes['class']??''?>" style="display:flex;flex-wrap:wrap;">
     <input accept="<?=$accept?>" id="<?=$id?>-file" name="<?=$name?>" multiple="multiple" type="file" style="display: none">
-    <div id="<?=$id?>-no-file" style="border-style: dashed;border-width: 1px;width:100%;display: flex;align-items: center;justify-content: center;transition: all 1s;">
+    <div id="<?=$id?>-no-file" style="width:100%;display: flex;align-items: center;justify-content: center;transition: all 1s;">
         <i class="fa fa-cloud-upload" style="font-size: 50px;padding: 10px;"></i>
         <span><?=$label?:'Drag & Drop a File'?></span>
     </div>
-    <div id="<?=$id?>-files" style="border-style: dashed;border-width: 1px;width:100%;transition: width 1s;display:none;flex-wrap: wrap;">
+    <div id="<?=$id?>-files" style="width:100%;transition: width 1s;display:none;flex-wrap: wrap;">
         <div id="<?=$id?>-file-template" style="padding:10px;display:none;width:100%;">
             <div style="flex-basis:50px">
                 <img src="" style="width:50px; height:50px;float:left;">

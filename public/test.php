@@ -96,6 +96,7 @@
     <div class="bottom"><input id="htmlBuilder_slider_bar" type="text" data-slider-handle="custom"></div>
 </div>
 </div>
+<!--<script src="/dist/bower_components/jquery-ui/jquery-ui.min.js"></script>-->
 <script src="/dist/plugins/bootstrap-slider/bootstrap-slider.js"></script>
 <script src="/dist/plugins/cropperjs/cropper.js"></script>
 <script>

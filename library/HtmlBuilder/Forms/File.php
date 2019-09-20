@@ -7,7 +7,7 @@ use HtmlBuilder\Element;
 class File extends Element
 {
     public $subtype = 'single';
-    public $statistics = 1;//true;
+    public $statistics = false;//true;
     public $accept = '*/*';//image/*';
     public $corpWidth  = null;  // 裁剪最大宽
     public $corpHeight = null;  // 裁剪最大高
