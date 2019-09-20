@@ -20,7 +20,10 @@ class Parser{
      * @var array 分析【parse()】后获得的脚本片段，通过 $this->script(...）添加的
      */
     private $scripts   = [];
-    
+    /**
+     * @var array 缓存输出 HTML 内容，即相同HTML内容去重输出
+     */
+    private $html = [];
     /**
      * 获得所有的样式片段
      * @return string
@@ -113,5 +116,13 @@ class Parser{
      */
     public function js(string $file):void{
         if(!isset($this->js_files[$file])) $this->js_files[$file] = $file;
+    }
+    
+    public function html(string $html):void{
+        $hash = md5($html);
+        if(!isset($this->html[$hash])){
+            $this->html[$hash] = true;
+            echo $html;
+        }
     }
 }

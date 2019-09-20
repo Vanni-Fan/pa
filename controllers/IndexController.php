@@ -82,7 +82,7 @@ class IndexController extends AdminBaseController{
             Forms::form($this->url('update'))->add(
                 Forms::input('aaa','用户')->subtype('color'),
                 Forms::input('bbb','秘密')->subtype('password'),
-                Forms::file('xxxx')->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
+                Forms::file('xxxx')->placeHolder('用户头像')->setCorpSize(200,400),//->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
                 Forms::file('yyyy[]')->subtype('multiple'),//->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
                 Forms::button('重置')->action('reset'),
                 Forms::button('提交')->action('submit'),
