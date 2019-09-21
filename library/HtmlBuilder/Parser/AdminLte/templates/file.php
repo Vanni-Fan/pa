@@ -51,10 +51,9 @@ function getFileSize(file){
 // 初始化文件上载控件
 function initFileUpload(id, isSingle, canCorp, corpOptions){
     var id = '#' + id;
-    
     $(id + '-file').change(function(e){
         var data = e.target;
-        console.log(data.files);
+        if(!data.files.length) return;
         var form_id = $(id).parents('form').attr('id');
         var form_item_name = $(id).data('name');
         if(isSingle){
@@ -80,7 +79,7 @@ function initFileUpload(id, isSingle, canCorp, corpOptions){
             $(id + '-files').css('width','100%').css('display','flex');
             // 清除原来设置
             if(blobFiles[form_id] && blobFiles[form_id][form_item_name]) delete(blobFiles[form_id][form_item_name]);
-            for(var i in data.files){
+            for(var i=0; i<data.files.length; i++){
                 var file = data.files[i];
                 console.log('my file', file);
                 addFiles(file, form_id, form_item_name, i); // 将文件加入到全局对象中
@@ -101,69 +100,6 @@ function initFileUpload(id, isSingle, canCorp, corpOptions){
             }
         }
     });
-        
-    
-    
-    
-    
-    
-    // $(id + '-file').fileupload(
-    //     { autoUpload:false, replaceFileInput:false, singleFileUploads:isSingle?true:false, dropZone:$(id) }
-    // ).bind('fileuploadadd', function(e, data){
-    //     $(id).removeClass('htmlbuild-form-file-over');
-    //     var form_id = $(id).parents('form').attr('id');
-    //     var form_item_name = $(id).data('name');
-    //     if(isSingle){
-    //         var file = data.files[0];
-    //         addFiles(file, form_id, form_item_name, 0); // 将文件加入到全局对象中
-    //         $(id + '-text').val(file.name);
-    //         $(id + '-message').text('类型:'+file.type+',大小:'+getFileSize(file));
-    //         if(canCorp){
-    //             var imageBlobUrl = cropperWarp.getImageUrl(file);
-    //             $(id + '-icon').hide().parent().css({
-    //                 padding: 0,
-    //                 width: '35px',
-    //                 backgroundImage: 'url(' + imageBlobUrl + ')',
-    //                 backgroundSize: 'cover'
-    //             }).click(function(){
-    //                 startCorp($(id+'-icon')[0], 0);
-    //             });
-    //         }else{
-    //             $(id + '-icon').removeClass().addClass(getFileIcon(file));
-    //         }
-    //     }else{
-    //         $(id + '-no-file').css('display','none');
-    //         $(id + '-files').css('width','100%').css('display','flex');
-    //         // 清除原来设置
-    //         if(blobFiles[form_id] && blobFiles[form_id][form_item_name]) delete(blobFiles[form_id][form_item_name]);
-    //         for(var i in data.files){
-    //             var file = data.files[i];
-    //             addFiles(file, form_id, form_item_name, i); // 将文件加入到全局对象中
-    //             var tmp = $('#multiple-file-template').clone();
-    //             tmp.removeAttr('id');
-    //             if(canCorp){
-    //                 tmp.find('img').attr('src', cropperWarp.getImageUrl(file));
-    //                 tmp.find('i').remove();
-    //             }else{
-    //                 tmp.find('.edit-btn').remove();
-    //                 tmp.find('img').remove();
-    //                 tmp.find('i').addClass(getFileIcon(file)).css('font-size','40px');
-    //             }
-    //             tmp.find('.filename').text(file.name);
-    //             tmp.css('display','flex');
-    //             tmp.find('.fileinfo').text('类型:'+file.type+', 大小:' +getFileSize(file));
-    //             $(id + '-files').append(tmp);
-    //         }
-    //     }
-    // }).bind('fileuploaddrop', function(e){
-    //     $(id + '-no-file').css('display','none');
-    //     $(id + '-files').css('width','100%').css('display','flex').html('');
-    // }).bind('fileuploaddragover',function(e){
-    //     $(id).addClass('htmlbuild-form-file-over');
-    // });
-    // $(id).on('dragleave',function(e){
-    //     $(id).removeClass('htmlbuild-form-file-over');
-    // });
     
     // 打击打开文件选择框
     $(id + '-folder-btn,' + id + '-text,' + id + '-no-file').click(function(e){ $(id + '-file').click(); });
@@ -438,7 +374,7 @@ $this->html(/** @lang HTML */'
 ?>
 <div id="<?=$id?>" data-name="<?=$name?>" class="htmlbuild-file multiple-file <?=$attributes['class']??''?>" style="display:flex;flex-wrap:wrap;">
     <input accept="<?=$accept?>" id="<?=$id?>-file" name="<?=$name?>" multiple="multiple" type="file" style="display: none">
-    <div id="<?=$id?>-no-file" style="width:100%;display: flex;align-items: center;justify-content: center;transition: all 1s;">
+    <div id="<?=$id?>-no-file" style="width:100%;display: flex;align-items: center;justify-content: center;transition: all 1s;text-align: center;">
         <i class="fa fa-cloud-upload" style="font-size: 50px;padding: 10px;"></i>
         <span><?=$label?:'点击选择图片'?></span>
     </div>
