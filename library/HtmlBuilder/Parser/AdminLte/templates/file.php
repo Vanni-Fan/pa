@@ -337,6 +337,17 @@ if($canCorp) {
 
 # 初始化JS
 $this->script("initFileUpload('$id', $isSingle, $canCorp, $corpOptions);\n");
+$this->script("
+document.addEventListener('dragover',function(ev){
+    ev.preventDefault()
+});
+$('document').on('drop',function(e){
+    console.log(e);
+    e.preventDefault();
+    return false;
+});
+
+");
 ?>
 
 <?php if($subtype === 'single'){ ?>
