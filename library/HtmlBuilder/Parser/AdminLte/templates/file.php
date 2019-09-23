@@ -337,17 +337,14 @@ if($canCorp) {
 
 # 初始化JS
 $this->script("initFileUpload('$id', $isSingle, $canCorp, $corpOptions);\n");
-$this->script("
-document.addEventListener('dragover',function(ev){
-    ev.preventDefault()
-});
-$('document').on('drop',function(e){
-    console.log(e);
-    e.preventDefault();
-    return false;
-});
-
-");
+$this->script("$(function(){
+    $('#$id').on('dragover', function(ev){ev.preventDefault();});
+    $('#$id').on('drop', function(ev){
+        $('#$id-file')[0].files = ev.originalEvent.dataTransfer.files;
+        $('#$id-file').change();
+        ev.preventDefault();
+    });
+});");
 ?>
 
 <?php if($subtype === 'single'){ ?>
