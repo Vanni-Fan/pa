@@ -6,12 +6,25 @@ $this->style(/** @lang CSS */ '
     border-width:1px;
     border-color:#000;
     margin-bottom:5px;
-}');
+}
+.drop-file-ok{
+    border-style: dashed;
+    border-width:1px;
+    border-color:#00ffff;
+    margin-bottom:5px;
+}
+.drop-file-error{
+    border-style: dashed;
+    border-width:1px;
+    border-color:#ff0008;
+    margin-bottom:5px;
+}
+');
 # 通用函数
 $this->script(/** @lang JavaScript */ <<<'OUT'
 // 全局保存 blob 对象的对象，blobFiles = {"formid":{'file_name_in_the_form':{'file_name':file_obj_1, 'file_name_2':file_obj_2, ...}}}
 var blobFiles = {};
-var hasCorp = false;
+var hasCorp = [];
 // 获得文件类型字符串
 function getFileIcon(file){
     var fa = 'fa ';
@@ -76,7 +89,7 @@ function initFileUpload(id, isSingle, canCorp, corpOptions){
             }
         }else{
             $(id + '-no-file').css('display','none');
-            $(id + '-files').css('width','100%').css('display','flex');
+            $(id + '-files').css('width','100%').css('display','flex').html('');
             // 清除原来设置
             if(blobFiles[form_id] && blobFiles[form_id][form_item_name]) delete(blobFiles[form_id][form_item_name]);
             for(var i=0; i<data.files.length; i++){
@@ -113,9 +126,12 @@ function initFileUpload(id, isSingle, canCorp, corpOptions){
 // 如果有剪裁，修改默认的提交事件，改用Ajax提交
 function handForm(form){
     form.submit(function(){
-        if(hasCorp[form.attr('id')]){
+        var form_id = form.attr('id')
+        if(window.hasCorp[form_id]){
             var data = new FormData(form[0]);
-            data.set('item name in the form', 'replace File', 'the file name');
+            for(var name in blobFiles){
+                data.set(name, blobFiles[name]);
+            }
             console.log(data);
             alert('有裁剪');
             try{
@@ -132,8 +148,7 @@ function handForm(form){
             }
             return false;
         }
-        alert('ok');
-        return false;
+        return true;
     });
 }
 // 添加 blob 到全局的 blobFiles 中，将来用于上传
@@ -147,6 +162,7 @@ function startCorp(element, index){
     var form_id = current_file_ui.parents('form').attr('id'); // 找到所在 form
     var name = current_file_ui.data('name');
     if(typeof(index) === 'undefined') index = findElementIndex(current_file_ui.find('.edit-btn'), element);
+    cropperWarp.currentOption = {form_id:form_id, name:name, index:index};
     cropperWarp.setFile(blobFiles[form_id][name][index]).show();
 }
 function deleteFile(element, index){
@@ -165,6 +181,24 @@ function deleteFile(element, index){
 function findElementIndex(elements, element){
     for(var i=0; i<elements.length; i++) if(elements[i] === element) return i;
     return -i;
+}
+function checkFileTypeForDrop(file_dom, event){
+    var file_obj = file_dom.find('input[type=file]');
+    var accept = new RegExp(file_obj.attr('accept').replace('*','.*'));
+    var user_drop_files = event.originalEvent.dataTransfer.files;
+    var ok = true;
+    console.log(user_drop_files.length);
+    for(var index=0; index<user_drop_files.length; index++){
+        console.log(accept, user_drop_files[index].type);
+        if(!accept.test(user_drop_files[index].type)){
+            ok = false;
+            break;
+        }
+    }
+    return ok;
+}
+function cropImage(blob,options){
+    addFiles(blob, options.form_id, options.name, options.index);
 }
 OUT
 );
@@ -267,6 +301,7 @@ if($canCorp) {
             sliderStatus: {rotate:0,horizontal:false,vertical:false},
             croppedFile:null, // 裁剪器裁剪后的File对象
             currentFile:null, // 当前正在被裁剪的File对象
+            currentObject:{}, // 当前正在被裁剪的选项
             setFile:function setFile(file){
                 this.currentFile = file;
                 this.cropper.replace(this.getImageUrl(file));
@@ -281,12 +316,12 @@ if($canCorp) {
                 this.cropper.scale(this.sliderStatus.horizontal ? -1 : 1, this.sliderStatus.vertical ? 1 :-1);
                 this.sliderStatus.vertical = !this.sliderStatus.vertical;
             },
-            doCrop:function doCrop(func,options){
+            doCrop:function doCrop(func){
                 var that = this;
-                hasCorp = true;
-                this.cropper.getCroppedCanvas(options || {}).toBlob(function(blob){
+                window.hasCorp[this.currentObject.form_id] = true;
+                this.cropper.getCroppedCanvas(this.currentObject).toBlob(function(blob){
                     that.croppedFile = new File([blob], that.currentFile.name, {type:that.currentFile.type})
-                    func(that.croppedFile, options);
+                    func(that.croppedFile, that.currentObject);
                     that.hide();
                 }, this.currentFile.type);
                 return this;
@@ -324,7 +359,7 @@ if($canCorp) {
                 <div onclick="cropperWarp.doVertical()" class="hand"><i class="fa fa-exchange" style="transform: rotate(90deg);"></i>垂直翻转</div>
                 <i onclick="cropperWarp.doHorizontal()" class="fa fa-exchange hand">水平翻转</i>
                 <i onclick="cropperWarp.doReset()" class="fa fa-refresh hand">重置</i>
-                <i onclick="cropperWarp.doCrop(function(b){addFiles(b,$(this).parents("form").attr("id"),"name?")})" class="fa fa-crop hand">裁剪</i>
+                <i onclick="cropperWarp.doCrop(cropImage)" class="fa fa-crop hand">裁剪</i>
                 <i onclick="cropperWarp.hide()" class="fa fa-close hand">取消</i>
             </div>
             <div class="body"><img id="htmlBuilder_image_source" width="100%"></div>
@@ -336,12 +371,22 @@ if($canCorp) {
 }
 
 # 初始化JS
-$this->script("initFileUpload('$id', $isSingle, $canCorp, $corpOptions);\n");
 $this->script("$(function(){
-    $('#$id').on('dragover', function(ev){ev.preventDefault();});
+    initFileUpload('$id', $isSingle, $canCorp, $corpOptions);
+    $('#$id').on('dragover', function(ev){
+        $('#$id').removeClass('drop-file-error').addClass('drop-file-ok');
+        ev.preventDefault();
+    });
+    $('#$id').on('dragleave', function(ev){
+        $('#$id').removeClass(['drop-file-error','drop-file-ok']);
+        ev.preventDefault();
+    });
     $('#$id').on('drop', function(ev){
-        $('#$id-file')[0].files = ev.originalEvent.dataTransfer.files;
-        $('#$id-file').change();
+        $('#$id').removeClass(['drop-file-error','drop-file-ok']);
+        if(checkFileTypeForDrop($('#$id'), ev)){
+            $('#$id-file')[0].files = ev.originalEvent.dataTransfer.files;
+            $('#$id-file').change();
+        }
         ev.preventDefault();
     });
 });");
