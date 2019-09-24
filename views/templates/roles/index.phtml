@@ -273,18 +273,22 @@ $(function(){
     });
     $('.remove').click(function(e){
         var url = $(e.target).data('url');
-        showModal({
+
+        showDialogs({
             title:'是否删除此角色',
             body:'删除后，此角色下面的用户将无法登录，需要单独为这些用户再分配角色',
-            btns:[
-                    {text:'确认',click:function(t){
-                        $.ajax(url,{method:'delete'}).done(function(d){
-                            console.log(d);
-                            window.location.href = '<?=$c->url()?>'
-                        })
-                    }},
-                    {text:'取消',click:function(t){t.close()}}
-                ]
+            ok:{
+                text:'确认',
+                click:function(t){
+                    $.ajax(url,{method:'delete'}).done(function(d){
+                        window.location.href = '<?=$c->url()?>';
+                    });
+                }
+            },
+            close:{
+                text:'取消',
+                click:function(t){t.close()}
+            }
         });
     })
 });
