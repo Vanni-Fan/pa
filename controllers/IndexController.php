@@ -82,8 +82,8 @@ class IndexController extends AdminBaseController{
             Forms::form($this->url('update'))->add(
                 Forms::input('aaa','用户')->subtype('color'),
                 Forms::input('bbb','秘密')->subtype('password'),
-                Forms::file('xxxx')->accept('image/*')->placeHolder('用户头像')->setCorpSize(200,400),//->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
-                Forms::file('yyyy[]')->accept('image/*')->subtype('multiple')->setCorpSize(200,400),//->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
+                Forms::file('xxxx')->accept('image/*')->placeHolder('用户头像'),//->setCorpSize(200,400),//->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
+                Forms::file('yyyy[]')->accept('image/*')->subtype('multiple')->setCorpSize(200,200),//->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
                 Forms::button('重置')->action('reset'),
                 Forms::button('提交')->action('submit'),
             )
@@ -208,5 +208,16 @@ class IndexController extends AdminBaseController{
     public function updateAction(){
         print_r($_POST);
         print_r($_FILES);
+        foreach($_FILES as $file){
+            if(!is_array($file['name'])){
+                foreach($file as $k=>$v){
+                    $file[$k] = [$v];
+                }
+            }
+            $count = count($file['name']);
+            for($i=0; $i<$count; $i++){
+                move_uploaded_file($file['tmp_name'][$i],'d:/tmp/'.$file['name'][$i]);
+            }
+        }
     }
 }

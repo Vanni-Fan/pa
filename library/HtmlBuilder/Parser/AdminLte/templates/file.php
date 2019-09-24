@@ -1,5 +1,5 @@
 <?php
-# 拖拽样式
+# 拖拽样式，缓存
 $this->style(/** @lang CSS */ '
 .multiple-file{
     border-style: dashed;
@@ -20,7 +20,7 @@ $this->style(/** @lang CSS */ '
     margin-bottom:5px;
 }
 ');
-# 通用函数
+# 通用函数，缓存
 $this->script(/** @lang JavaScript */ <<<'OUT'
 // 全局保存 blob 对象的对象，blobFiles = {"formid":{'file_name_in_the_form':{'file_name':file_obj_1, 'file_name_2':file_obj_2, ...}}}
 var blobFiles = {};
@@ -94,7 +94,7 @@ function initFileUpload(id, isSingle, canCorp, corpOptions){
             if(blobFiles[form_id] && blobFiles[form_id][form_item_name]) delete(blobFiles[form_id][form_item_name]);
             for(var i=0; i<data.files.length; i++){
                 var file = data.files[i];
-                console.log('my file', file);
+                //console.log('my file', file);
                 addFiles(file, form_id, form_item_name, i); // 将文件加入到全局对象中
                 var tmp = $('#multiple-file-template').clone();
                 tmp.removeAttr('id');
@@ -129,23 +129,24 @@ function handForm(form){
         var form_id = form.attr('id')
         if(window.hasCorp[form_id]){
             var data = new FormData(form[0]);
-            for(var name in blobFiles){
-                data.set(name, blobFiles[name]);
+            for(var name in blobFiles[form_id]){
+                //console.log(form_id, name);
+                data.delete(name);
+                for(var i in blobFiles[form_id][name]){
+                    //console.log('上传的图片:',blobFiles[form_id][name],'URL:',URL.createObjectURL(blobFiles[form_id][name][0]));
+                    data.append(name, blobFiles[form_id][name][i]);
+                }
             }
-            console.log(data);
-            alert('有裁剪');
-            try{
+            //console.log('使用AJAX提交', data);
             $.ajax({
-                url:form.url,
+                url:form.attr('action'),
                 type:'post',
                 data: data,
-                processData:false
+                processData:false,
+                contentType : false
             }).then(function(d){
-                console.log(d);
+                //console.log(d);
             });
-            }catch(e){
-                console.log(e);
-            }
             return false;
         }
         return true;
@@ -160,9 +161,17 @@ function addFiles(file, form_id, name, index){
 function startCorp(element, index){
     var current_file_ui = $(element).parents('.htmlbuild-file'); // 找到文件元素位置
     var form_id = current_file_ui.parents('form').attr('id'); // 找到所在 form
+    var name_id = current_file_ui.attr('id');
     var name = current_file_ui.data('name');
-    if(typeof(index) === 'undefined') index = findElementIndex(current_file_ui.find('.edit-btn'), element);
-    cropperWarp.currentOption = {form_id:form_id, name:name, index:index};
+    if(typeof(index) === 'undefined'){
+        index = findElementIndex(current_file_ui.find('.edit-btn'), element);
+        var viewer = $(current_file_ui.find('img')[index]);
+        var type = 'multiple';
+    }else{
+        var viewer = current_file_ui.find('.view-icon');
+        var type = 'single';
+    }
+    cropperWarp.currentObject = {form_id:form_id, name_id:name_id, name:name, index:index, viewer:viewer, type:type};
     cropperWarp.setFile(blobFiles[form_id][name][index]).show();
 }
 function deleteFile(element, index){
@@ -187,9 +196,9 @@ function checkFileTypeForDrop(file_dom, event){
     var accept = new RegExp(file_obj.attr('accept').replace('*','.*'));
     var user_drop_files = event.originalEvent.dataTransfer.files;
     var ok = true;
-    console.log(user_drop_files.length);
+    //console.log(user_drop_files.length);
     for(var index=0; index<user_drop_files.length; index++){
-        console.log(accept, user_drop_files[index].type);
+        //console.log(accept, user_drop_files[index].type);
         if(!accept.test(user_drop_files[index].type)){
             ok = false;
             break;
@@ -197,8 +206,18 @@ function checkFileTypeForDrop(file_dom, event){
     }
     return ok;
 }
-function cropImage(blob,options){
-    addFiles(blob, options.form_id, options.name, options.index);
+function cropImage(blob){
+    if(cropperWarp.currentObject.type == 'single'){
+        var img = cropperWarp.currentObject.viewer.css('background-image');
+        img = img.substr(5,img.length-7);
+        URL.revokeObjectURL(img);
+        cropperWarp.currentObject.viewer.css('background-image','url("' + URL.createObjectURL(blob) + '")');
+    }else{
+        URL.revokeObjectURL(cropperWarp.currentObject.viewer.attr('src'));
+        cropperWarp.currentObject.viewer.attr('src', URL.createObjectURL(blob));
+    }
+    $('#'+cropperWarp.currentObject.name_id+'-file').removeAttr('name'); // 去掉name字段，使用ajax 添加
+    addFiles(blob, cropperWarp.currentObject.form_id, cropperWarp.currentObject.name, cropperWarp.currentObject.index);
 }
 OUT
 );
@@ -215,7 +234,7 @@ if($canCorp) {
     $this->js('/dist/plugins/bootstrap-slider/bootstrap-slider.js');
     $this->js('/dist/plugins/cropperjs/cropper.js');
     
-    # 图片裁剪 CSS
+    # 图片裁剪 CSS，缓存
     $this->style(/** @lang CSS */ "
         .cropperWarpDiv{
             display: flex;
@@ -293,7 +312,7 @@ if($canCorp) {
         }"
     );
 
-    # 图片裁剪 JS & Form的Ajax提交
+    # 图片裁剪 JS & Form的Ajax提交，缓存
     $this->script(/** @lang JavaScript */ "
         var cropperWarp = {
             cropper: new Cropper(document.getElementById('htmlBuilder_image_source')),
@@ -321,7 +340,7 @@ if($canCorp) {
                 window.hasCorp[this.currentObject.form_id] = true;
                 this.cropper.getCroppedCanvas(this.currentObject).toBlob(function(blob){
                     that.croppedFile = new File([blob], that.currentFile.name, {type:that.currentFile.type})
-                    func(that.croppedFile, that.currentObject);
+                    func(that.croppedFile);
                     that.hide();
                 }, this.currentFile.type);
                 return this;
@@ -331,7 +350,7 @@ if($canCorp) {
             doReset:function doReset(){ this.cropper.reset(); return this; },
             getImage:function getImage(){ return this.croppedFile },
             getImageUrl:function getImageUrl(blob){
-                console.log('blob对象是:',blob);
+                //console.log('blob对象是:',blob);
                 return URL.createObjectURL(blob || this.croppedFile);
             },
             show:function show(){ $('.cropperWarpDiv').show(); return this; },
@@ -351,7 +370,7 @@ if($canCorp) {
         cropperWarp.init();"
     );
 
-    # 裁剪器
+    # 裁剪器，缓存
     $this->html(/** @lang HTML */'
         <div class="cropperWarpDiv" style="display: none">
             <div class="top">
@@ -370,7 +389,7 @@ if($canCorp) {
     $this->script("handForm($('#$id').parents('form'));\n");
 }
 
-# 初始化JS
+# 初始化JS，不缓存
 $this->script("$(function(){
     initFileUpload('$id', $isSingle, $canCorp, $corpOptions);
     $('#$id').on('dragover', function(ev){
@@ -398,7 +417,7 @@ $this->script("$(function(){
     <?php include(__DIR__.'/_label.php'); ?>
     <input accept="<?=$accept?>" id="<?=$id?>-file" name="<?=$name?>" type="file" style="display: none">
     <div class="input-group <?=$labelWidth?('col-sm-'.(12-$labelWidth)):''?>">
-        <span class="input-group-addon"><i id="<?=$id?>-icon" class="fa fa-file-o"></i></span>
+        <span class="input-group-addon view-icon"><i id="<?=$id?>-icon" class="fa fa-file-o"></i></span>
         <input id="<?=$id?>-text" type="text" class="form-control" placeholder="<?=$placeHolder?>" readonly="true">
         <span class="input-group-addon" id="<?=$id?>-folder-btn"><i class="fa fa-folder-open"></i></span>
     </div>
