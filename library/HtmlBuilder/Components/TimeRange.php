@@ -1,0 +1,16 @@
+<?php
+
+namespace HtmlBuilder\Components;
+
+use HtmlBuilder\Element;
+
+class TimeRange extends Element
+{
+
+    public function __construct(string $label='')
+    {
+        parent::__construct('timerange');
+        $this->label = $label;
+    }
+
+}

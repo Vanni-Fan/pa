@@ -78,17 +78,20 @@ class IndexController extends AdminBaseController{
 //            ->labelWidth(3)->rows(1)
 //        );
 
+//        $inputs[] = $parser->parse(
+//            Forms::form($this->url('update'))->add(
+//                Forms::input('aaa','用户')->subtype('color'),
+//                Forms::input('bbb','秘密')->subtype('password'),
+//                Forms::file('xxxx')->accept('image/*')->placeHolder('用户头像'),//->setCorpSize(200,400),//->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
+//                Forms::file('yyyy[]')->accept('image/*')->subtype('multiple')->setCorpSize(200,200),//->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
+//                Forms::button('重置')->action('reset'),
+//                Forms::button('提交')->action('submit'),
+//            )
+//        );
+
         $inputs[] = $parser->parse(
-            Forms::form($this->url('update'))->add(
-                Forms::input('aaa','用户')->subtype('color'),
-                Forms::input('bbb','秘密')->subtype('password'),
-                Forms::file('xxxx')->accept('image/*')->placeHolder('用户头像'),//->setCorpSize(200,400),//->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
-                Forms::file('yyyy[]')->accept('image/*')->subtype('multiple')->setCorpSize(200,200),//->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
-                Forms::button('重置')->action('reset'),
-                Forms::button('提交')->action('submit'),
-            )
+            Components::timerange()
         );
-        
 
 //            Forms::textarea()->subtype('wysihtml5'),
 //            Forms::textarea()->subtype('simple')->label('xxxxx')->labelWidth(3),

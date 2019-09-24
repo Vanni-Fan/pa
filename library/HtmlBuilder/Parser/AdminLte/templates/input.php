@@ -12,6 +12,7 @@ if($subtype === 'color'){
     $this->js('/dist/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js');
     $this->script("$('#$id-input').datepicker({autoclose:true});");
 } elseif($subtype === 'daterange' || $subtype === 'datetimerange' || $subtype ==='datetime'){
+    $this->js('/dist/bower_components/moment/moment.js');
     $this->css('/dist/bower_components/bootstrap-daterangepicker/daterangepicker.css');
     $this->js('/dist/bower_components/bootstrap-daterangepicker/daterangepicker.js');
     if($subtype === 'datetime'){
