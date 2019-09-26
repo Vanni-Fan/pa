@@ -1,0 +1,4 @@
+site_name: PremissionAdmin
+nav:
+  - PowerLibrary: library/README.md
+  - HtmlBuilder: library/README.md
