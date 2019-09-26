@@ -2,6 +2,7 @@
 namespace HtmlBuilder;
 
 use HtmlBuilder\Components\MultiSelect;
+use HtmlBuilder\Components\Table;
 use HtmlBuilder\Components\TimeRange;
 
 /**
@@ -29,6 +30,6 @@ class Components extends Element
 
     public static function table()
     {
-        return static::create('', '');
+        return new Table();
     }
 }

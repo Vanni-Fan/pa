@@ -91,6 +91,7 @@ class IndexController extends AdminBaseController{
 
         $inputs[] = $parser->parse(
             Forms::form($this->url('update'))->add(
+                Components::table(),
                 Components::timerange('time')->label('时间段')->value(['12:12:12','13:13:13']),
                 Components::multiselect($this->url('index',['action'=>'getItems']))
                   ->addSelect('a[]',null,2,$this->url('index',['action'=>'getItems']).'?type=A')
