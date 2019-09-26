@@ -1,3 +1,11 @@
-site_name: PremissionAdmin
+site_name: Premission Admin
+site_description: 权限管理框架
+site_author: Vanni Fan
 docs_dir: docs
 site_dir: public/docs
+theme:
+  name: 'material'
+  language: 'zh'
+extra:
+  search:
+    language: 'jp'

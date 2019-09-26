@@ -5,4 +5,9 @@
         <span id="<?=$id?>-label"><?=$label?><?php if($required){ ?><i class="require-star">*</i><?php }?></span>
         <?php if($tooltip){ ?><i id="<?=$id?>-tooltip" data-placement="bottom" class="fa fa-question-circle" data-toggle="tooltip" data-original-title="<?=$tooltip?>"></i><?php }?>
     </label>
-<?php } ?>
+<?php }
+
+if($tooltip){
+    $this->script("$(function(){ $('#$id-tooltip').tooltip(); });\n");
+}
+?>

@@ -41,7 +41,6 @@ if($subtype === 'color'){
 $script     = '';
 $required   = (int)$required;
 $statistics = (int)$statistics;
-if($tooltip){ $script .= "$('#$id-tooltip').tooltip();\n"; }
 if($statistics || $required){
     $script .= "$('#$id-input').keyup(function(e){var v = $(e.target).val();\n";
     if($statistics) $script .= "$('#$id-message').text('长度:'+v.length+',词汇:'+v.split(/\b/).filter(function(i){ return i.trim() }).length);\n";
