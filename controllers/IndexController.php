@@ -90,7 +90,17 @@ class IndexController extends AdminBaseController{
 //        );
 
         $inputs[] = $parser->parse(
-            Components::timerange()
+            Forms::form($this->url('update'))->add(
+                Components::timerange('time')->label('时间段')->value(['12:12:12','13:13:13']),
+                Components::multiselect($this->url('index',['action'=>'getItems']))
+                  ->addSelect('a[]',null,2,$this->url('index',['action'=>'getItems']).'?type=A')
+                  ->addSelect('a[]',null,1,$this->url('index',['action'=>'getItems']).'?type=B')
+                  ->addSelect('c',null,1,$this->url('index',['action'=>'getItems']).'?type=C')
+                  ->addSelect('d',null,1,$this->url('index',['action'=>'getItems']).'?type=D')
+                  ->addSelect('e',null,1,$this->url('index',['action'=>'getItems']).'?type=E')
+                  ->addSelect('f',null,1)->label('选择地区'),
+                Forms::button('提交')->action('submit')
+            )
         );
 
 //            Forms::textarea()->subtype('wysihtml5'),
@@ -222,5 +232,19 @@ class IndexController extends AdminBaseController{
                 move_uploaded_file($file['tmp_name'][$i],'d:/tmp/'.$file['name'][$i]);
             }
         }
+    }
+    
+    public function getItemsAction(){
+//        $type = $this->getParam('type');
+        $type = $_REQUEST['type'] ?? 0;
+        $this->jsonOut(
+            [
+                ['text'=>uniqid().'=>'.$type, 'value'=>random_int(100, 200)],
+                ['text'=>uniqid().'=>'.$type, 'value'=>random_int(100, 200)],
+                ['text'=>uniqid().'=>'.$type, 'value'=>random_int(100, 200)],
+                ['text'=>uniqid().'=>'.$type, 'value'=>random_int(100, 200)],
+                ['text'=>uniqid().'=>'.$type, 'value'=>random_int(100, 200)],
+            ]
+        );
     }
 }
