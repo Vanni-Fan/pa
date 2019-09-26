@@ -1,4 +1,6 @@
 site_name: PremissionAdmin
+docs_dir: docs
+site_dir: public/docs
 nav:
-  - PowerLibrary: library/README.md
-  - HtmlBuilder: library/README.md
+  - PowerLibrary: docs/pa.md
+  - HtmlBuilder: docs/htmlbuilder.md
