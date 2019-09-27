@@ -13,12 +13,12 @@ use HtmlBuilder\Components\TimeRange;
 
 class Components extends Element
 {
-    public static function multiselect(string $style='single')
+    public static function multiselect(string $style='single'):MultiSelect
     {
         return new MultiSelect($style);
     }
 
-    public static function timerange(string $name)
+    public static function timerange(string $name):TimeRange
     {
         return new TimeRange($name);
     }
@@ -28,8 +28,8 @@ class Components extends Element
         return static::create('', '');
     }
 
-    public static function table()
+    public static function table($name):Table
     {
-        return new Table();
+        return new Table($name);
     }
 }

@@ -91,15 +91,29 @@ class IndexController extends AdminBaseController{
 
         $inputs[] = $parser->parse(
             Forms::form($this->url('update'))->add(
-                Components::table(),
-                Components::timerange('time')->label('时间段')->value(['12:12:12','13:13:13']),
-                Components::multiselect($this->url('index',['action'=>'getItems']))
-                  ->addSelect('a[]',null,2,$this->url('index',['action'=>'getItems']).'?type=A')
-                  ->addSelect('a[]',null,1,$this->url('index',['action'=>'getItems']).'?type=B')
-                  ->addSelect('c',null,1,$this->url('index',['action'=>'getItems']).'?type=C')
-                  ->addSelect('d',null,1,$this->url('index',['action'=>'getItems']).'?type=D')
-                  ->addSelect('e',null,1,$this->url('index',['action'=>'getItems']).'?type=E')
-                  ->addSelect('f',null,1)->label('选择地区'),
+                Components::table('浏览器分布情况')->queryApi(
+                    $this->url('index',['action'=>'getTableData'])
+                )->fields(
+                    [
+                        ['name'=>'a', 'text'=>'字段A','tooltip'=>'这个是字段A','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
+                        ['name'=>'b', 'text'=>'字段B','tooltip'=>'这个是字段B','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
+                        ['name'=>'c', 'text'=>'字段C','tooltip'=>'这个是字段C','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
+                        ['name'=>'d', 'text'=>'字段D','tooltip'=>'这个是字段D','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
+                        ['name'=>'e', 'text'=>'字段E','tooltip'=>'这个是字段E','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
+                        ['name'=>'f', 'text'=>'字段F','tooltip'=>'这个是字段F','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
+                        ['name'=>'g', 'text'=>'字段G','tooltip'=>'这个是字段G','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
+                        ['name'=>'h', 'text'=>'字段H','tooltip'=>'这个是字段H','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
+                        ['name'=>'i', 'text'=>'字段I','tooltip'=>'这个是字段I','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
+                    ]
+                ),
+//                Components::timerange('time')->label('时间段')->value(['12:12:12','13:13:13']),
+//                Components::multiselect($this->url('index',['action'=>'getItems']))
+//                  ->addSelect('a[]',null,2,$this->url('index',['action'=>'getItems']).'?type=A')
+//                  ->addSelect('a[]',null,1,$this->url('index',['action'=>'getItems']).'?type=B')
+//                  ->addSelect('c',null,1,$this->url('index',['action'=>'getItems']).'?type=C')
+//                  ->addSelect('d',null,1,$this->url('index',['action'=>'getItems']).'?type=D')
+//                  ->addSelect('e',null,1,$this->url('index',['action'=>'getItems']).'?type=E')
+//                  ->addSelect('f',null,1)->label('选择地区'),
                 Forms::button('提交')->action('submit')
             )
         );
@@ -247,5 +261,23 @@ class IndexController extends AdminBaseController{
                 ['text'=>uniqid().'=>'.$type, 'value'=>random_int(100, 200)],
             ]
         );
+    }
+    
+    public function getTableDataAction(){
+        $data = [];
+        for($i=0; $i<10; $i++){
+            $data[] = [
+                'a'=>random_int(100,999),
+                'b'=>random_int(100,999),
+                'c'=>random_int(100,999),
+                'd'=>random_int(100,999),
+                'e'=>random_int(100,999),
+                'f'=>random_int(100,999),
+                'g'=>random_int(100,999),
+                'h'=>random_int(100,999),
+                'i'=>random_int(100,999),
+            ];
+        }
+        $this->jsonOut($data);
     }
 }
