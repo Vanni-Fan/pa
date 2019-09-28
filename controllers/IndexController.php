@@ -12,7 +12,7 @@ class IndexController extends AdminBaseController{
     public function indexAction(){
 //        phpinfo();
 //        exit;
-//        $this->title = 'The PermissionAdmin System.';
+        $this->title = 'HtmlBuilder Test Page';
         $parser = new Parser();
         $inputs = [];
 //        $inputs[] = $parser->parse(
@@ -90,8 +90,24 @@ class IndexController extends AdminBaseController{
 //        );
 
         $inputs[] = $parser->parse(
-            Forms::form($this->url('update'))->add(
-                Components::table('浏览器分布情况')->queryApi(
+//            Forms::form($this->url('update'))->add(
+                Components::table('浏览器分布情况')->query(
+                    [
+                        'filters'=>[
+                            ['name'=>'e','operation'=>'>=','value'=>'11'],
+                            ['name'=>'e','operation'=>'<','value'=>'1001'],
+                            ['name'=>'d','operation'=>'>=','value'=>'11'],
+                        ],
+                        'sort' => [
+                            ['name'=>'a','type'=>'desc'],
+                            ['name'=>'b','type'=>'asc']
+                        ],
+                        'limit'=>[ // start, size
+                            'page'=>10,
+                            'size'=>50
+                        ]
+                    ]
+                )->queryApi(
                     $this->url('index',['action'=>'getTableData'])
                 )->fields(
                     [
@@ -100,10 +116,6 @@ class IndexController extends AdminBaseController{
                         ['name'=>'c', 'text'=>'字段C','tooltip'=>'这个是字段C','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
                         ['name'=>'d', 'text'=>'字段D','tooltip'=>'这个是字段D','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
                         ['name'=>'e', 'text'=>'字段E','tooltip'=>'这个是字段E','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
-                        ['name'=>'f', 'text'=>'字段F','tooltip'=>'这个是字段F','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
-                        ['name'=>'g', 'text'=>'字段G','tooltip'=>'这个是字段G','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
-                        ['name'=>'h', 'text'=>'字段H','tooltip'=>'这个是字段H','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
-                        ['name'=>'i', 'text'=>'字段I','tooltip'=>'这个是字段I','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
                     ]
                 ),
 //                Components::timerange('time')->label('时间段')->value(['12:12:12','13:13:13']),
@@ -114,8 +126,8 @@ class IndexController extends AdminBaseController{
 //                  ->addSelect('d',null,1,$this->url('index',['action'=>'getItems']).'?type=D')
 //                  ->addSelect('e',null,1,$this->url('index',['action'=>'getItems']).'?type=E')
 //                  ->addSelect('f',null,1)->label('选择地区'),
-                Forms::button('提交')->action('submit')
-            )
+//                Forms::button('提交')->action('submit')
+//            )
         );
 
 //            Forms::textarea()->subtype('wysihtml5'),
@@ -272,12 +284,15 @@ class IndexController extends AdminBaseController{
                 'c'=>random_int(100,999),
                 'd'=>random_int(100,999),
                 'e'=>random_int(100,999),
-                'f'=>random_int(100,999),
-                'g'=>random_int(100,999),
-                'h'=>random_int(100,999),
-                'i'=>random_int(100,999),
             ];
         }
-        $this->jsonOut($data);
+        $this->jsonOut(
+            [
+                'list'=>$data,
+                'total'=>1000,
+                'page'=>5,
+                'size'=>50,
+            ]
+        );
     }
 }
