@@ -17,7 +17,7 @@ function showDialogs(params, name){
     var dom_str =
         '<div class="modal fade" id="'+name+'" tabindex="-1" role="dialog">'
         +'    <div class="modal-dialog modal-dialog-centered" role="document">'
-        +'        <div class="modal-content">'
+        +'        <div class="modal-content" style="border-radius:5px;">'
         +'           <div class="modal-header"><h5 class="modal-title">Title</h5></div>'
         +'           <div class="modal-body">Body</div>'
         +'           <div class="modal-footer">'
@@ -38,7 +38,15 @@ function showDialogs(params, name){
 
     // 位置大小
     if(params.width)  obj.find('.modal-dialog').css('width',   params.width);
-    if(params.height) obj.find('.modal-content').css('height', params.height);
+    if(params.height){
+        obj.find('.modal-content').css({
+            height: params.height,
+            display: 'flex',
+            'flex-direction': 'column',
+            'overflow-y':'auto',
+        });
+        obj.find('.modal-body').css('flex-grow',1);
+    }
 
     // 按钮
     if(params.close || params.ok){
@@ -59,24 +67,30 @@ function showDialogs(params, name){
     obj.css({"display":"block"}).addClass("in");
 
     // 居中
-    obj.css('padding-top', '100px');
+    // obj.css('padding-top', '100px');
     obj.css('transition',  'padding-top 0.5s ease-out');
 
     // 监控内容变化，动态调整位置
-    var mo = new MutationObserver(function(){
-        var top = ($(window).height() - obj.find('.modal-dialog').height() - 60)/2; // 60 为内容上下30的Padding
+    console.log(params);
+    if(!params.height) {
+        var mo = new MutationObserver(function () {
+            var top = ($(window).height() - obj.find('.modal-dialog').height() - 60) / 2; // 60 为内容上下30的Padding
+            obj.css('padding-top', top + 'px');
+            var height = obj.find('.modal-body').height();
+            if (height > parseInt(params.height)) obj.find('.modal-content').css('overflow-y', 'scroll');
+            // console.log("MO 输出：",l);
+        });
+        mo.observe(obj[0], {attributes: true, childList: true, subtree: true});
+        setTimeout(function () { // 延迟更新，因为一开始获得不到 obj.find('.modal-dialog').height() 的高度
+            var top = ($(window).height() - obj.find('.modal-dialog').height() - 60) / 2; // 60 为内容上下30的Padding
+            obj.css('padding-top', top + 'px');
+            var height = obj.find('.modal-body').height();
+            if (height > parseInt(params.height)) obj.find('.modal-content').css('overflow-y', 'scroll');
+        }, 10);
+    }else{
+        var top = ($(window).height() - params.height - 60) / 2; // 60 为内容上下30的Padding
         obj.css('padding-top', top + 'px');
-        var height = obj.find('.modal-body').height();
-        if(height > parseInt(params.height)) obj.find('.modal-content').css('overflow-y','scroll');
-        // console.log("MO 输出：",l);
-    });
-    mo.observe(obj[0], {attributes:true,childList:true,subtree: true});
-    setTimeout(function(){ // 延迟更新，因为一开始获得不到 obj.find('.modal-dialog').height() 的高度
-        var top = ($(window).height() - obj.find('.modal-dialog').height() - 60)/2; // 60 为内容上下30的Padding
-        obj.css('padding-top', top + 'px');
-        var height = obj.find('.modal-body').height();
-        if(height > parseInt(params.height)) obj.find('.modal-content').css('overflow-y','scroll');
-    },200);
+    }
 
     // 关闭
     obj.close = function(){

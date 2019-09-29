@@ -108,7 +108,7 @@ class IndexController extends AdminBaseController{
                         ]
                     ]
                 )->queryApi(
-                    $this->url('index',['action'=>'getTableData'])
+                    $this->url('update',['action'=>'getTableData'])
                 )->fields(
                     [
                         ['name'=>'a', 'text'=>'字段A','tooltip'=>'这个是字段A','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
