@@ -29,6 +29,13 @@ $routers = [
             'priority'  => 10,
             'params'     => 3
         ], # 修改动作
+        PA_URL_PATH.'menu/{rule_id:[0-9]+}/item/{item_id:[0-9,]+}/delete/:params' =>[
+            'namespace'  => 'Power\Controllers',
+            'controller' => 'Router',
+            'action'     => 'delete',
+            'priority'   => 20,
+            'params'     => 3
+        ], # 删除的POST形式
     ],
     'GET' => [
         PA_URL_PATH => [
@@ -83,7 +90,7 @@ $routers = [
             'priority'  => 10,
             'params'     => 3
         ], # 显示Item页面
-        PA_URL_PATH.'menu/{rule_id:[0-9]+}/item/{item_id:[0-9]+}/delete/:params' =>[
+        PA_URL_PATH.'menu/{rule_id:[0-9]+}/item/{item_id:[0-9,]+}/delete/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'delete',
@@ -92,7 +99,7 @@ $routers = [
         ], # 删除的Get形式
     ],
     'DELETE' => [
-        PA_URL_PATH.'menu/{rule_id:[0-9]+}/item/{item_id:[0-9]+}/:params' =>[
+        PA_URL_PATH.'menu/{rule_id:[0-9]+}/item/{item_id:[0-9,]+}/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'delete',

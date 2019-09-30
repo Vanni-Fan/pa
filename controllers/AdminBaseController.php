@@ -75,10 +75,10 @@ class AdminBaseController extends Controller{
     
     /**
      * 获得记录的所有者，如果item_id为空，表示首页或者列表页
-     * @param int $item_id
-     * @return int
+     * @param int|array $item_id_or_items null
+     * @return int|array
      */
-    public static function getItemOwner(int $item_id=null):int{
+    public static function getItemOwner($item_id_or_items=null){
         if(!$item_id) return 1;
         return 1;
     }
@@ -147,10 +147,13 @@ class AdminBaseController extends Controller{
         # 扩展属性
         if(!array_key_exists($this->rule_id, $this->rules)) throw new \Exception('Permission Denied(rule not exists).');
         
-        if(!Rules::isAllowed($this->dispatcher->getActionName(), $this->getItemOwner($this->item_id), $this->userinfo["user_id"],$this->rules[$this->rule_id])){
-            throw new \Exception('Permission Denied.');
+        $ower_id = static::getItemOwner($this->item_id);
+        if(!is_array($ower_id)) $ower_id = [$ower_id]; // 删除时可以传入多个ID，用逗号分隔
+        foreach($ower_id as $ower){
+            if(!Rules::isAllowed($this->dispatcher->getActionName(), $ower, $this->userinfo["user_id"],$this->rules[$this->rule_id])){
+                throw new \Exception('Permission Denied.');
+            }
         }
-        
     }
     
     /**

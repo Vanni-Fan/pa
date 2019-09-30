@@ -7,8 +7,12 @@ use HtmlBuilder\Forms;
 use HtmlBuilder\Layouts;
 use HtmlBuilder\Parser\AdminLte\Parser;
 use HtmlBuilder\Validate;
+use http\Client\Response;
 
 class IndexController extends AdminBaseController{
+    public static function getItemOwner($ids=null):int{
+        return 1;
+    }
     public function indexAction(){
 //        phpinfo();
 //        exit;
@@ -117,6 +121,8 @@ class IndexController extends AdminBaseController{
                         ['name'=>'d', 'text'=>'字段D','tooltip'=>'这个是字段D','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
                         ['name'=>'e', 'text'=>'字段E','tooltip'=>'这个是字段E','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
                     ]
+                )->primary('c')->deleteApi(
+                    $this->url('delete',['item_id'=>'{id}'])
                 ),
 //                Components::timerange('time')->label('时间段')->value(['12:12:12','13:13:13']),
 //                Components::multiselect($this->url('index',['action'=>'getItems']))
@@ -274,7 +280,9 @@ class IndexController extends AdminBaseController{
             ]
         );
     }
-    
+    public function deleteAction(){
+        return $this->getTableDataAction();
+    }
     public function getTableDataAction(){
         $data = [];
         for($i=0; $i<10; $i++){

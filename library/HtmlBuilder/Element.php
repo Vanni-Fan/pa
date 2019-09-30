@@ -294,7 +294,8 @@ class Element{
      */
     public function __call(string $name, array $arguments)
     {
-        $this->attributes[$name] = current($arguments);
+//        $this->attributes[$name] = current($arguments);
+        $this->$name = current($arguments);
         return $this;
     }
     
