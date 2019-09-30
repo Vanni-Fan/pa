@@ -79,7 +79,7 @@ class AdminBaseController extends Controller{
      * @return int|array
      */
     public static function getItemOwner($item_id_or_items=null){
-        if(!$item_id) return 1;
+        if(!$item_id_or_items) return 1;
         return 1;
     }
 

@@ -13,7 +13,7 @@ class UsersController extends AdminBaseController {
         $this->render(null, $this->item_id ? true : false);
     }
     
-    public static function getItemOwner(int $item_id = null): int
+    public static function getItemOwner($item_id = null): int
     {
         return $item_id;
     }
