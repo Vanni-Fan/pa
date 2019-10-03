@@ -184,6 +184,7 @@ function HtmlBuilder_table_init(id){
     options.query.sort    = options.query.sort    || [];
     options.query.limit   = options.query.limit   || {};
     options.query.filters = options.query.filters || [];
+    window[id] = options;
 
     var obj = $('#htmlbuilder-table-template').clone();
     obj.removeAttr('id').css('display','block').find('.box-title').html(options.name);
@@ -393,7 +394,7 @@ function HtmlBuilder_table_filterConfirm(obj) {
 
 // 执行AJAX查询
 function HtmlBuilder_table_query(id){
-    $.ajax(window[id].queryApi,{method:'post',data:window[id].query}).done(function(data){
+   $.ajax(window[id].queryApi,{method:'post',data:window[id].query}).done(function(data){
         HtmlBuilder_table_setData(data, id);
     });
 }
@@ -404,7 +405,7 @@ function HtmlBuilder_table_setData(data, id) {
     var html = '';
     var body = obj.find('.htmlbuild-table-body').html('');
     var options = window[id];
-    
+    console.log('书籍列表',data);
     for(var row in data.list){
         var tr_class = row % 2 ? 'odd' : 'even';
         var tr = '<tr class="' + tr_class + '">';

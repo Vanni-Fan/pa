@@ -27,7 +27,9 @@
                         <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'enable'])?>">启用</a> |
                         <?php } ?>
                         <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'delete'])?>">删除</a> |
-                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'upgrade'])?>">更新</a>
+                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'upgrade'])?>">更新</a> |
+                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'install'])?>">安装</a> |
+                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'uninstall'])?>">卸载</a>
                     </div>
                 </td>
                 <td>

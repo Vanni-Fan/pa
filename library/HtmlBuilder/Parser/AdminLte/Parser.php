@@ -2,6 +2,7 @@
 
 namespace HtmlBuilder\Parser\AdminLte;
 use HtmlBuilder\Element;
+use Power\Controllers\AdminBaseController;
 
 class Parser{
     /**
@@ -58,24 +59,35 @@ class Parser{
     
     /**
      * 分析元素，记得样式和脚本到对应的成员变量，并返回分析后的HTML片段
-     * @param Element $element
+     * @param Element ...$elements
      * @return string
      */
-    public function parse(Element $element):string {
-        $template_dir  = POWER_BASE_DIR.'library/HtmlBuilder/Parser/AdminLte/templates/';
-        $template_file = $template_dir . $element->type.'.php';
-        if(!file_exists($template_file)) $template_file = $template_dir . 'default.php';
-
-        if(empty($element->id)) $element->id = 'E-'.uniqid();
-        
-        $parse = function()use($template_file,$element){
-            extract(get_object_vars($element),EXTR_OVERWRITE);
-            require $template_file;
-        };
-        
-        ob_start();
-        $parse(); // $parse->call($this);
-        return ob_get_clean();
+    public function parse(Element ...$elements):string {
+        $out = '';
+        foreach($elements as $element) {
+            $template_dir  = POWER_BASE_DIR . 'library/HtmlBuilder/Parser/AdminLte/templates/';
+            $template_file = $template_dir . $element->type . '.php';
+            if (!file_exists($template_file)) $template_file = $template_dir . 'default.php';
+    
+            if (empty($element->id)) $element->id = 'E-' . uniqid();
+    
+            $parse = function () use ($template_file, $element) {
+                extract(get_object_vars($element), EXTR_OVERWRITE);
+                require $template_file;
+            };
+    
+            ob_start();
+            $parse(); // $parse->call($this);
+            $out .= ob_get_clean();
+        }
+        return $out;
+    }
+    
+    public function setResources(adminBaseController $controller){
+        $controller->addStyle($this->getStyles());
+        $controller->addScript($this->getScripts());
+        foreach($this->getJs() as $js)   $controller->addJs($js);
+        foreach($this->getCss() as $css) $controller->addCss($css);
     }
     
     /**

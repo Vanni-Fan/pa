@@ -14,6 +14,7 @@ class PluginsController extends AdminBaseController {
     public function newAction(){
         $this->render();
     }
+    
     public function setAction(){
         $event  = $this->getParam('event');
         $plugin = Plugins::findFirst($this->item_id);
@@ -33,6 +34,10 @@ class PluginsController extends AdminBaseController {
                 break;
             case 'setting': # 设置页面
             case 'upgrade':
+                break;
+            case 'install':
+            case 'uninstall':
+                break;
             
         }
         if($redirect) $this->response->redirect($this->url(),true);

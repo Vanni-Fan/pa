@@ -3,7 +3,7 @@
 return [
     # 调试开关
     'debug'       => 1,
-    'trace'       => false,
+    'trace'       => 1,
 
     # 应用的基础目录
     'application' => POWER_BASE_DIR,

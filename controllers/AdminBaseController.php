@@ -44,18 +44,18 @@ class AdminBaseController extends Controller{
     
     public function getItemId(){return $this->item_id;}
     public function getRuleId(){return $this->rule_id;}
-    protected function addCss($css_file,$position='after'){
+    public function addCss($css_file,$position='after'){
         $plus = PA::$config['debug'] ? ('?'.random_int(1000000,9999999)) : '';
         $this->css_files[$position][] = '<link rel="stylesheet" href="'.$css_file.$plus.'" type="text/css" />';
     }
-    protected function addStyle($style,$position='after'){
+    public function addStyle($style,$position='after'){
         $this->styles[$position][] = '<style type="text/css">'.$style.'</style>';
     }
-    protected function addJs($js_file,$position='after'){
+    public function addJs($js_file,$position='after'){
         $plus = PA::$config['debug'] ? ('?'.random_int(1000000,9999999)) : '';
         $this->js_files[$position][] = '<script type="text/javascript" src="'.$js_file.$plus.'"></script>';
     }
-    protected function addScript($script,$position='after'){
+    public function addScript($script,$position='after'){
         $this->scripts[$position][] = '<script type="text/javascript">'.$script.'</script>';
     }
     
