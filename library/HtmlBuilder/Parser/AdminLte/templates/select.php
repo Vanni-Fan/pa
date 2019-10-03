@@ -8,7 +8,7 @@ if($subtype === 'select2') {
 ?>
 <div id="<?=$id?>" class="form-group htmlbuild-form <?=$attributes['class']??''?>" style="<?=$visible?'':'display:none;'?>">
     <?php include(__DIR__.'/_label.php'); ?>
-    <div class="<?=$labelWidth?('col-sm-'.(12-$labelWidth)):''?>" id="<?=$id?>">
+    <div class="<?=$labelWidth?('col-sm-'.(12-$labelWidth)):''?>" id="<?=$id?>" style="<?=($labelWidth)?'padding:0':''?>">
         <select
                 id="<?=$id?>-select"
                 name="<?=$name?>"
