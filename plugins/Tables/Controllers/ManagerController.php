@@ -90,22 +90,22 @@ class ManagerController extends AdminBaseController
             Forms::form($this->url('update',array_merge($params,['command'=>'update','source'=>'source'])),'POST')->add(
                 Layouts::columns()->column(
                     Element::create('div')->add(
-                        Forms::input('name','名称')->labelWidth(4)->labelPosition('left-right')->required(),
-                        Forms::input('host','主机')->labelWidth(4)->labelPosition('left-right')->required(),
-                        Forms::input('user','用户')->labelWidth(4)->labelPosition('left-right')->required(),
+                        Forms::input('name','名称')->required(),
+                        Forms::input('host','主机')->required(),
+                        Forms::input('user','用户')->required(),
                     )
                     ,6
                 )->column(
                     Element::create('div')->add(
                         Forms::select('类型','type')
-                            ->labelWidth(4)->labelPosition('left-right')
+//                            ->labelWidth(4)->labelPosition('left-right')
                             ->choices([
                                 ['text'=>'MySQL','value'=>'mysql'],
                                 ['text'=>'SQLite','value'=>'sqlite'],
                                 ['text'=>'PostgreSQL','value'=>'postgresql'],
                         ])->required(),
-                        Forms::input('port','端口')->labelWidth(4)->labelPosition('left-right')->required()->subtype('number'),
-                        Forms::input('password','密码')->labelWidth(4)->labelPosition('left-right')->required()->subtype('password'),
+                        Forms::input('port','端口')->required()->subtype('number'),
+                        Forms::input('password','密码')->required()->subtype('password'),
                     )
                     ,6
                 ),
