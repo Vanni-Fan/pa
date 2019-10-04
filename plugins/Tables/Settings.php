@@ -45,12 +45,12 @@ class Settings {
         $template = file_get_contents(__DIR__ .'/ModelTemplate.php');
         file_put_contents(POWER_DATA . 'TablesPlugins/PluginsTableMenus.php',str_replace(
             ['__MODEL_NAME__','__DB_INFO__'],
-            ['PluginsTableMenus', var_export(PA::$config['pa_db'],1)],
+            ['PluginsTableMenus', var_export(PA::$config['pa_db']->toArray(),1)],
             $template
         ));
         file_put_contents(POWER_DATA . 'TablesPlugins/PluginsTableSources.php',str_replace(
             ['__MODEL_NAME__','__DB_INFO__'],
-            ['PluginsTableSources', var_export(PA::$config['pa_db'],1)],
+            ['PluginsTableSources', var_export(PA::$config['pa_db']->toArray(),1)],
             $template
         ));
 

@@ -84,9 +84,7 @@ $this->html(/** @lang HTML */<<<'OUT'
                     <span class="page-status"></span>
                 </div>
             </div>
-            <div class="col-sm-7 dataTables_paginate">
-                <div class=" paging_simple_numbers"></div>
-            </div>
+            <div class="col-sm-7 dataTables_paginate"></div>
         </div>
     </div>
 </div>
@@ -96,7 +94,7 @@ $this->html(/** @lang HTML */<<<'OUT'
         <ul class="dropdown-menu">
             <li class="disabled"><a>选择一个操作符</a></li>
             <li class="divider"></li>
-            <li value="==" class="active" onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">等于</a></li>
+            <li value="=" class="active" onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">等于</a></li>
             <li value=">"  onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">大于</a></li>
             <li value=">=" onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">大于或等于</a></li>
             <li value="<"  onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">小于</a></li>
@@ -143,6 +141,7 @@ function HtmlBuilder_table_inverse(id) {
 
 // 提交删除选择的项
 function HtmlBuilder_table_delItems(id, items){
+    if(items.length===0) return;
     showDialogs({
         title:'确认删除？',
         body: '这些记录将被删除：<b>' + items + '</b>',
@@ -434,7 +433,9 @@ function HtmlBuilder_table_setData(data, id) {
     options.fixedTop && HtmlBuilder_table_fixedColumnWidth(id);
     
     // 分页设置
-    obj.find('.page-status').text((data.page * data.size) + '-' + (data.size+data.list.length) + ' of ' + data.total);
+    var offset = (data.page - 1 ) * data.size + 1;
+    var end = offset + (data.list.length < data.size ? data.list.length : data.size) - 1;
+    obj.find('.page-status').text(offset + '-' + end + ' of ' + data.total);
     obj.find('.dataTables_paginate').twbsPagination({
         totalPages: Math.ceil(data.total/data.size),
         startPage: data.page,

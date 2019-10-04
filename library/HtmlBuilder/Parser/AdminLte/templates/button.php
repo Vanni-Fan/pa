@@ -35,3 +35,10 @@ if($subtype === 'input') { ?>
     <?php foreach($elements as $element){ echo $this->parse($element); }?>
 </div>
 <?php } ?>
+
+<?php
+$this->script(
+"$(function(){
+    $('#$id button[type=back]').click(function(){ window.history.back(); });
+});"
+); ?>

@@ -84,8 +84,8 @@ class Forms extends Element {
      * @param $subtype
      * @return Select
      */
-    public static function select($label, $name, $value=null,$subtype='select'):Select{
-        return new Select($label, $name, $value,$subtype);
+    public static function select($name, $label, $value=null,$subtype='select'):Select{
+        return new Select($name, $label, $value,$subtype);
     }
     
     /**

@@ -42,7 +42,7 @@ class Select extends Element
      * @param string|array $value 默认值
      * @param string $subtype 子类型
      */
-    public function __construct(string $label, string $name, $value, string $subtype = 'select')
+    public function __construct(string $name, string $label, $value, string $subtype = 'select')
     {
         parent::__construct('select');
         $this->label = $label;

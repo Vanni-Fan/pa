@@ -123,6 +123,29 @@ class Rules extends PMB{
     }
 
     /**
+     * 获得子菜单
+     * @param int $parent_id
+     * @return array
+     */
+    public static function getMenus(int $parent_id=0){
+        $out = [];
+        self::getChildIds($out, $parent_id);
+        return $out;
+    }
+
+    /**
+     * 获得扁平化的菜单
+     * @param int $parent_id
+     * @return array
+     */
+    public static function getFlatMenus(int $parent_id=0){
+        $all_menus = self::getMenus($parent_id);
+        $out_menus = [];
+        Rules::expandMenu($all_menus, $out_menus);
+        return $out_menus;
+    }
+
+    /**
      * 获得指定菜单的所有上级菜单
      */
     public static function getParentIds(int $rule_id, array &$parents){
