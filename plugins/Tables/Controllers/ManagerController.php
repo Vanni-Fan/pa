@@ -18,6 +18,7 @@ class ManagerController extends AdminBaseController
     private $params = [];
     public function initialize()
     {
+        $this->page_size = 10;
         PA::$loader->registerNamespaces([
             'Tables' => POWER_DATA . 'TablesPlugins/'
         ]);
@@ -40,6 +41,7 @@ class ManagerController extends AdminBaseController
         $parser = new Parser();
         $this->view->content = $parser->parse(
             Components::table('数据源列表')
+                ->query(['limit'=>['page'=>1,'size'=>$this->page_size]])
                 ->queryApi($this->getUrl(['command'=>'getList','type'=>'source']))
                 ->createApi($this->getUrl(['command'=>'show','type'=>'source','sub_command'=>'new']))
                 ->updateApi($this->getUrl(['command'=>'show','type'=>'source','sub_command'=>'edit','id'=>'{id}']))
@@ -57,6 +59,7 @@ class ManagerController extends AdminBaseController
                 )->primary('id')
             ,
             Components::table('菜单列表')
+                ->query(['limit'=>['page'=>1,'size'=>$this->page_size]])
                 ->queryApi($this->getUrl(['command'=>'getList','type'=>'menu']))
                 ->createApi($this->getUrl(['command'=>'show','type'=>'menu','sub_command'=>'new']))
                 ->updateApi($this->routerUrl('update',['namespace'=>'Power\\Controllers','controller'=>'rules'],['item_id'=>'{id}']))
@@ -68,7 +71,7 @@ class ManagerController extends AdminBaseController
                         ['name'=>'source_id','text'=>'数据源'],
                         ['name'=>'table_name','text'=>'表名','sort'=>1, 'filter'=>1],
                     ]
-                )->canMin()
+                )
         );
         
         $parser->setResources($this);
@@ -105,7 +108,7 @@ class ManagerController extends AdminBaseController
         $model = $this->params['type'] == 'menu' ? \Tables\PluginsTableMenus::class : \Tables\PluginsTableSources::class;
         $data = call_user_func([$model,'find'], $where);
         if($this->params['type'] == 'menu'){
-            $data = [];
+//            $data = [];
             $data = array_map(function($v){
                 $rule = Rules::findFirstByRuleId($v['rule_id']);
                 $source = PluginsTableSources::findFirstById($v['source_id']);
@@ -115,10 +118,18 @@ class ManagerController extends AdminBaseController
             },$data->toArray());
         }
         $this->jsonOut(
-            ['list'=>$data,'total'=>call_user_func(
-                [$model,'count'],
-                ['conditions'=>$where['conditions'],'bind'=>$where['bind']]
-            ),'page'=>$page,'size'=>$size]
+            [
+                'list'=>$data,'total'=>call_user_func(
+                    [$model,'count'],
+                    ['conditions'=>$where['conditions'],'bind'=>$where['bind']]
+                ),
+                'page'=>$page,
+                'size'=>$size,
+                'query'=>[
+                    'filter'=>$_POST['filters']??[],
+                    'limit'=>$_POST['limit']??['page'=>$page, 'size'=>$size]
+                ]
+            ]
         );
     }
 

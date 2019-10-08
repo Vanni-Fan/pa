@@ -1102,7 +1102,6 @@ throw new Error('AdminLTE requires jQuery')
 
       if (!data) {
         var options = $.extend({}, Default, $this.data(), typeof option == 'object' && option);
-        console.debug(options);
         $this.data(DataKey, new Tree($this, options));
       }
     });

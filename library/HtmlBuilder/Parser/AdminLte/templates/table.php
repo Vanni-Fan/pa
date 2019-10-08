@@ -59,6 +59,12 @@ $this->style(/** @lang CSS */ <<<'OUT'
 .table-edit-btn{
     cursor:pointer;
 }
+.table-striped>tbody>tr:nth-of-type(odd) {
+    background-color: hsla(0, 0%, 92%, 1);
+}
+tr.htmlbuild-table-header{
+    background-color: hsla(0, 0%, 93%, 1);
+}
 OUT
 );
 
@@ -198,7 +204,6 @@ function HtmlBuilder_table_delItems(id, items){
 // 获得当前选择的项目
 function HtmlBuilder_table_getSelected(id){
     var all = $('#' + id + ' .htmlbuild-table-body .htmlbuild-table-selected-row');
-    console.log(all);
     var ids = [];
     for(var index=0; index<all.length; index++){
         ids.push(all[index].getAttribute('data-id'));
@@ -224,6 +229,7 @@ function HtmlBuilder_table_init(id){
     // 初始化表头
     var html = '';
     obj.find('.table-edit-btn>*').attr('data-id', id);
+    obj.find('.box-header a').attr('href', options.createApi);
     
     for(var index in options.fields){
         var field = options.fields[index];
@@ -368,7 +374,6 @@ function HtmlBuilder_table_delFilter(obj) {
         window.current_filters.splice(index,1);
         dom.remove();
     }
-    console.log('删除',dom.data('index'),dom.data('id'),dom.data('field'));
 }
 
 // 添加一个过滤条件
@@ -435,6 +440,7 @@ function HtmlBuilder_table_setData(data, id) {
     var html = '';
     var body = obj.find('.htmlbuild-table-body').html('');
     var options = window[id];
+    options.query.limit = {page:data.page, size:data.size}; // 缓存当前页面参数
     for(var row in data.list){
         var tr_class = row % 2 ? 'odd' : 'even';
         var primary = data.list[row][options.primary || 'id'];
@@ -461,12 +467,15 @@ function HtmlBuilder_table_setData(data, id) {
     
     // 分页设置
     var offset = (data.page - 1 ) * data.size + 1;
-    var end = offset + (data.list.length < data.size ? data.list.length : data.size) - 1;
+    var end = offset + parseInt((data.list.length < data.size ? data.list.length : data.size)) - 1;
     obj.find('.page-status').text(offset + '-' + end + ' of ' + data.total);
     obj.find('.dataTables_paginate').twbsPagination({
         totalPages: Math.ceil(data.total/data.size),
         startPage: data.page,
         onPageClick: function (event, page) {
+            var tmp = Object.assign({}, window[id].query.limit);
+            console.log(tmp);
+            if($.isEmptyObject(tmp) || tmp.page === page) return;
             options.query.limit.page = page;
             window[id] = options;
             HtmlBuilder_table_query(id);
