@@ -56,6 +56,9 @@ $this->style(/** @lang CSS */ <<<'OUT'
     float: right!important;
     margin: auto;
 }
+.table-edit-btn{
+    cursor:pointer;
+}
 OUT
 );
 
@@ -75,7 +78,7 @@ $this->html(/** @lang HTML */<<<'OUT'
           <button type="button" class="btn btn-info"><i class="fa fa-plus"></i> 添加</button>
         </div> -->
         <div class="pull-right table-edit-btn" style="display: inline-block;margin-right:50px;">
-            <span onclick="HtmlBuilder_table_selectAll(this.getAttribute('data-id'),event)" class="text-light-blue"><i class="check-all fa fa-square"></i> 全选 </span>&nbsp;
+            <span onclick="HtmlBuilder_table_selectAll(this.getAttribute('data-id'),event)" class="text-light-blue"><i class="check-all fa fa-square-o"></i> 全选 </span>&nbsp;
             <span onclick="HtmlBuilder_table_inverse(this.getAttribute('data-id'))" class="text-light-blue"><i class="glyphicon glyphicon-transfer"></i> 反选 </span>&nbsp;
             <span onclick="HtmlBuilder_table_delItems(this.getAttribute('data-id'),HtmlBuilder_table_getSelected(this.getAttribute('data-id')))" class="text-red"><i class="fa fa-trash-o"></i> 删除 </span>&nbsp;
             <a class="text-aqua"><i class="fa fa-plus"></i> 添加 </a>
@@ -143,13 +146,13 @@ $this->script(/** @lang JavaScript 1.5 */ <<<'OUT'
 function HtmlBuilder_table_selectAll(id,event){
     var obj = $(event.currentTarget).find('i');
     var status = true;
-    if(obj.hasClass('fa-square')){
+    if(obj.hasClass('fa-square-o')){
         status = true;
-        obj.removeClass('fa-square').addClass('fa-check-square');
+        obj.removeClass('fa-square-o').addClass('fa-check-square-o');
         $('#' + id + ' .htmlbuild-table-body tr').addClass('htmlbuild-table-selected-row');
     }else{
         status = false;
-        obj.removeClass('fa-check-square').addClass('fa-square');
+        obj.removeClass('fa-check-square-o').addClass('fa-square-o');
         $('#' + id + ' .htmlbuild-table-body tr').removeClass('htmlbuild-table-selected-row');
     }
 }
@@ -163,7 +166,13 @@ function HtmlBuilder_table_inverse(id) {
 
 // 提交删除选择的项
 function HtmlBuilder_table_delItems(id, items){
-    if(items.length===0) return;
+    if(items.length===0){
+        showDialogs({
+            body:'当前没有选择的数据！',
+            delay:3000
+        });
+        return;
+    }
     showDialogs({
         title:'确认删除？',
         body: '这些记录将被删除：<b>' + items + '</b>',
@@ -174,7 +183,7 @@ function HtmlBuilder_table_delItems(id, items){
                 var deleteApi = window[id].deleteApi.replace('{id}', items);
                 $.ajax(deleteApi, {data:{query:window[id].query}, method:'POST'}).done(function(data){
                     HtmlBuilder_table_setData(data,id);
-                    $('#'+id+' i.check-all').removeClass('fa-check-square').addClass('fa-square');
+                    $('#'+id+' i.check-all').removeClass('fa-check-square-o').addClass('fa-square-o');
                 });
                 o.close();
             }
