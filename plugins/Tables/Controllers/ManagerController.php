@@ -6,6 +6,7 @@ use HtmlBuilder\Element;
 use HtmlBuilder\Forms;
 use HtmlBuilder\Layouts;
 use HtmlBuilder\Parser\AdminLte\Parser;
+use HtmlBuilder\Validate;
 use PDO;
 use Power\Controllers\AdminBaseController;
 use PA;
@@ -58,7 +59,7 @@ class ManagerController extends AdminBaseController
             Components::table('菜单列表')
                 ->queryApi($this->getUrl(['command'=>'getList','type'=>'menu']))
                 ->createApi($this->getUrl(['command'=>'show','type'=>'menu','sub_command'=>'new']))
-                ->updateApi($this->getUrl(['command'=>'show','type'=>'menu','sub_command'=>'edit','id'=>'{id}']))
+                ->updateApi($this->routerUrl('update',['namespace'=>'Power\\Controllers','controller'=>'rules'],['item_id'=>'{id}']))
                 ->deleteApi($this->getUrl(['command'=>'delete','type'=>'menu','sub_command'=>'show','id'=>'{id}']))
                 ->fields(
                     [
@@ -67,14 +68,15 @@ class ManagerController extends AdminBaseController
                         ['name'=>'source_id','text'=>'数据源'],
                         ['name'=>'table_name','text'=>'表名','sort'=>1, 'filter'=>1],
                     ]
-                )
+                )->canMin()
         );
+        
         $parser->setResources($this);
         $this->render();
     }
 
     public function getList(){
-        $size  = $_POST['limit']['size']??2;
+        $size  = $_POST['limit']['size']??$this->page_size;
         $page  = $_POST['limit']['page']??1;
         $where = [
             'conditions' => '',
@@ -103,6 +105,7 @@ class ManagerController extends AdminBaseController
         $model = $this->params['type'] == 'menu' ? \Tables\PluginsTableMenus::class : \Tables\PluginsTableSources::class;
         $data = call_user_func([$model,'find'], $where);
         if($this->params['type'] == 'menu'){
+            $data = [];
             $data = array_map(function($v){
                 $rule = Rules::findFirstByRuleId($v['rule_id']);
                 $source = PluginsTableSources::findFirstById($v['source_id']);
@@ -126,31 +129,33 @@ class ManagerController extends AdminBaseController
         if($this->params['type'] == 'source') {
             $this->view->content = $parser->parse(
                 Forms::form($this->getUrl(['command' => 'update']))->add(
-                    Layouts::columns()->column(
-                        Element::create('div')->add(
-                            Forms::input('name', '名称',$default->name??'')->required(),
-                            Forms::input('host', '主机', $default->host??'')->required()->inputMask("'alias':'ip'"),
-                            Forms::input('user', '用户', $default->user??'')->required(),
+                    Layouts::box(
+                        Layouts::columns()->column(
+                            Element::create('div')->add(
+                                Forms::input('name', '名称',$default->name??'')->required(),
+                                Forms::input('host', '主机', $default->host??'')->required()->inputMask("'alias':'ip'"),
+                                Forms::input('user', '用户', $default->user??'')->required(),
                             )
-                        , 6
-                    )->column(
-                        Element::create('div')->add(
-                            Forms::select('type','类型', $default->type??'')
-//                            ->labelWidth(4)->labelPosition('left-right')
-                                ->choices([
-                                    ['text' => 'MySQL', 'value' => 'mysql'],
-                                    ['text' => 'SQLite', 'value' => 'sqlite'],
-                                    ['text' => 'PostgreSQL', 'value' => 'postgresql'],
-                                ])->required(),
-                            Forms::input('port', '端口', $default->port??'')->required()->subtype('number'),
-                            Forms::input('password', '密码', $default->password??'')->required()->subtype('password'),
+                            , 6
+                        )->column(
+                            Element::create('div')->add(
+                                Forms::select('type','类型', $default->type??'')
+                                     ->choices([
+                                                   ['text' => 'MySQL', 'value' => 'mysql'],
+                                                   ['text' => 'SQLite', 'value' => 'sqlite'],
+                                                   ['text' => 'PostgreSQL', 'value' => 'postgresql'],
+                                               ])->required(),
+                                Forms::input('port', '端口', $default->port??'')->required()->subtype('number'),
+                                Forms::input('password', '密码', $default->password??'')->required()->subtype('password'),
                             )
-                        , 6
-                    ),
-                    Element::create('div')->add(
-                        Forms::button('返回')->action('back'),
-                        Forms::button('提交')->action('submit')
-                    )->style('text-align: center')
+                            , 6
+                        ),
+                        '编辑数据源',
+                        Element::create('div')->add(
+                            Forms::button('返回')->on('click','window.history.back()')->style('default'),
+                            Forms::button('提交')->action('submit')->class('pull-right')
+                        )
+                    )
                 )
             );
         }else{
@@ -160,11 +165,26 @@ class ManagerController extends AdminBaseController
             $sources = PluginsTableSources::find(['columns'=>'id as value,name as text'])->toArray();
             $this->view->content = $parser->parse(
                 Forms::form($this->getUrl(['command' => 'update']))->add(
-                    Forms::select('rule_id','菜单ID', $default->rule_id??'','select2')->choices($menus)->required(),
-                    Forms::select('source_id','数据源', $default->source_id??'','select2')->choices($sources)->required(),
-                    Forms::input('table_name', '表名', $default->table_name??'')->required(),
-                    Forms::button('返回')->action('back'),
-                    Forms::button('提交')->action('submit')
+                    Layouts::box(
+                        Element::create('div')->add(
+                            Forms::select('rule_id','上级目录', $default->rule_id??'','select2')
+                                 ->choices($menus)
+                                 ->required()
+                                 ->description('如果找不到对应的菜单目录，请在《<a>系统管理->权限管理</a>》中<a>创建菜单</a>。')
+                                 ->tooltip('将此功能放到什么菜单位置下面'),
+                            Forms::select('source_id','数据源', $default->source_id??'','select2')
+                                 ->choices($sources)
+                                 ->required()
+                                 ->description('数据源信息在<a>数据源管理</a>中创建'),
+                            Forms::input('table_name', '表名', $default->table_name??'')->required()->tooltip('表名必须为中文')->placeHolder('表名必须存在')->validate(
+                                new Validate('text','不能为空',['max'=>1,'min'=>2])
+                            ),
+                        ),'编辑',
+                        Element::create('div')->add(
+                            Forms::button('返回')->on('click','window.history.back()')->style('default'),
+                            Forms::button('提交')->action('submit')->class('pull-right')
+                        )
+                    )
                 )
             );
         }
@@ -179,6 +199,14 @@ class ManagerController extends AdminBaseController
             $a->create($_POST);
         }else{
             call_user_func([$model,'findFirst'], $this->params['id'])->update($_POST);
+            if($a instanceof \Tables\PluginsTableMenus){
+                # 修改菜单
+                $rule = Rules::findFirstByRuleId($_POST['rule_id']); // todo
+                $params = [
+                    'source_id'=>1,
+                    'table'=>'abcd',
+                ];
+            }
         }
         $this->response->redirect($this->url('display',['item_id'=>$this->item_id,'action'=>'set','event'=>'setting']));
     }

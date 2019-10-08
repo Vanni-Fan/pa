@@ -79,6 +79,7 @@ class Element{
      * @var string 在输入框后面条件的图标
      */
     public $badgeIcon='';
+    public $events=[];
     /**
      * @var array 子元素
      */
@@ -305,5 +306,10 @@ class Element{
      */
     public function toArray():array{
         return json_decode(json_encode($this),1);
+    }
+    
+    public function on(string $event_name, string $js_code, string $selector=''){
+        $this->events[] = ['event'=>$event_name, 'code'=>$js_code, 'selector'=>$selector];
+        return $this;
     }
 }

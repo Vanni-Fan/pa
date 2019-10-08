@@ -2,7 +2,7 @@
 $this->css('/dist/htmlbuilder.css');
 
 if($subtype === 'input') { ?>
-<div class="input-group margin">
+<div id="<?=$id?>"  class="input-group margin">
     <?php
     if($btnBeforeIcon) {
         if(is_string($btnBeforeIcon)){
@@ -22,7 +22,7 @@ if($subtype === 'input') { ?>
     } ?>
 </div>
 <?php } elseif($subtype === 'default') { ?>
-    <button type="<?=$action?>" class="btn <?=($btnAfterIcon||$btnBeforeIcon)?'btn-social':''?> <?=$flat?'btn-flat':''?> <?=$enabled?'':'disabled'?> <?=$block?'btn-block':''?> btn-<?=$style?> <?=$attributes['class']??''?>">
+    <button id="<?=$id?>" type="<?=$action?>" class="btn <?=($btnAfterIcon||$btnBeforeIcon)?'btn-social':''?> <?=$flat?'btn-flat':''?> <?=$enabled?'':'disabled'?> <?=$block?'btn-block':''?> btn-<?=$style?> <?=$class??''?>">
         <?php if($btnBeforeIcon) { ?><i class="<?=$btnBeforeIcon?>"></i><?php } ?>
         <?=$label?>
         <?php if($btnAfterIcon) { ?><i class="<?=$btnAfterIcon?>"></i><?php } ?>
@@ -31,14 +31,7 @@ if($subtype === 'input') { ?>
         <?php } ?>
     </button>
 <?php }elseif($subtype === 'group') { ?>
-<div class="btn-group<?=$vertical?'-vertical':''?> <?=$flat?'btn-flat':''?> <?=$enabled?'':'disabled'?> <?=$block?'btn-block':''?> <?=$attributes['class']??''?>">
+<div id="<?=$id?>"  class="btn-group<?=$vertical?'-vertical':''?> <?=$flat?'btn-flat':''?> <?=$enabled?'':'disabled'?> <?=$block?'btn-block':''?> <?=$class??''?>">
     <?php foreach($elements as $element){ echo $this->parse($element); }?>
 </div>
 <?php } ?>
-
-<?php
-$this->script(
-"$(function(){
-    $('#$id button[type=back]').click(function(){ window.history.back(); });
-});"
-); ?>

@@ -11,6 +11,13 @@ $this->style(/** @lang CSS */ <<<'OUT'
     color:green !important;
     cursor: pointer;
 }
+.htmlbuild-table-selected-row{
+    background-color: #00c0ef !important;
+    color: white;
+}
+.htmlbuild-table-selected-row a{
+    color: white;
+}
 .htmlbuild-table-header .sort-badge{
     background-color: #31708f;
     color: white;
@@ -57,6 +64,22 @@ $this->html(/** @lang HTML */<<<'OUT'
 <div class="box box-primary" id="htmlbuilder-table-template" style="display:none;">
     <div class="box-header with-border">
         <h3 class="box-title"><?=$name?></h3>
+        <div class="box-tools pull-right">
+            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+            <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
+        </div><!--
+        <div class="btn-group" style="position: absolute;top:3px;right:70px;">
+          <button type="button" class="btn btn-info"><i class="check-all fa fa-square"></i> 全选</button>
+          <button type="button" class="btn btn-info"><i class="glyphicon glyphicon-transfer"></i> 反选</button>
+          <button type="button" class="btn btn-info"><i class="fa fa-trash-o"></i> 删除</button>
+          <button type="button" class="btn btn-info"><i class="fa fa-plus"></i> 添加</button>
+        </div> -->
+        <div class="pull-right table-edit-btn" style="display: inline-block;margin-right:50px;">
+            <span onclick="HtmlBuilder_table_selectAll(this.getAttribute('data-id'),event)" class="text-light-blue"><i class="check-all fa fa-square"></i> 全选 </span>&nbsp;
+            <span onclick="HtmlBuilder_table_inverse(this.getAttribute('data-id'))" class="text-light-blue"><i class="glyphicon glyphicon-transfer"></i> 反选 </span>&nbsp;
+            <span onclick="HtmlBuilder_table_delItems(this.getAttribute('data-id'),HtmlBuilder_table_getSelected(this.getAttribute('data-id')))" class="text-red"><i class="fa fa-trash-o"></i> 删除 </span>&nbsp;
+            <a class="text-aqua"><i class="fa fa-plus"></i> 添加 </a>
+        </div>
     </div>
     <div class="box-body">
         <div class="dataTables_wrapper form-inline dt-bootstrap">
@@ -123,19 +146,18 @@ function HtmlBuilder_table_selectAll(id,event){
     if(obj.hasClass('fa-square')){
         status = true;
         obj.removeClass('fa-square').addClass('fa-check-square');
+        $('#' + id + ' .htmlbuild-table-body tr').addClass('htmlbuild-table-selected-row');
     }else{
         status = false;
         obj.removeClass('fa-check-square').addClass('fa-square');
+        $('#' + id + ' .htmlbuild-table-body tr').removeClass('htmlbuild-table-selected-row');
     }
-    $('#' + id + ' .htmlbuild-table-body input[type="checkbox"]').each(function(index,dom){
-        dom.checked = status;
-    });
 }
 
 // 反选
 function HtmlBuilder_table_inverse(id) {
-    $('#' + id + ' .htmlbuild-table-body input[type="checkbox"]').each(function(index,dom){
-        dom.checked = !dom.checked;
+    $('#' + id + ' .htmlbuild-table-body tr').each(function(index,dom){
+        $(dom).toggleClass('htmlbuild-table-selected-row');
     });
 }
 
@@ -166,10 +188,11 @@ function HtmlBuilder_table_delItems(id, items){
 
 // 获得当前选择的项目
 function HtmlBuilder_table_getSelected(id){
-    var all = $('#' + id + ' .htmlbuild-table-body input[type="checkbox"]');
+    var all = $('#' + id + ' .htmlbuild-table-body .htmlbuild-table-selected-row');
+    console.log(all);
     var ids = [];
     for(var index=0; index<all.length; index++){
-        if(all[index].checked) ids.push(all[index].value);
+        ids.push(all[index].getAttribute('data-id'));
     }
     return ids;
 }
@@ -191,15 +214,7 @@ function HtmlBuilder_table_init(id){
     
     // 初始化表头
     var html = '';
-    if(options.selectMode){    // fa-check-square:全选，   fa-square:全不选，   fa-minus-square:反选
-        var first_col_width = options.canEdit ? 100 : 80;
-        html += '<th style="padding:0;text-align:center;vertical-align:middle;min-width:' + first_col_width + 'px;" width="' + first_col_width + 'px">' +
-        '<div class="btn-group">'+
-              '<button onclick="HtmlBuilder_table_selectAll(\'' + id + '\',event)" type="button" class="btn btn-primary btn-xs"><i class="check-all fa fa-square"></i></button>'+
-              '<button onclick="HtmlBuilder_table_inverse(\'' + id + '\',event)" type="button" class="btn btn-primary btn-xs"><i class="glyphicon glyphicon-transfer"></i></button>'+
-              (options.canEdit ? '<button onclick="HtmlBuilder_table_delItems(\'' + id + '\', HtmlBuilder_table_getSelected(\'' + id + '\'))" type="button" class="btn btn-primary btn-xs"><i class="fa fa-trash-o"></i></button>' : '') +
-        '</div></th>';
-    }
+    obj.find('.table-edit-btn>*').attr('data-id', id);
     
     for(var index in options.fields){
         var field = options.fields[index];
@@ -226,7 +241,7 @@ function HtmlBuilder_table_init(id){
         html += th;
     }
     if(options.canEdit){
-        html += '<th class="text-center" width="90px" style="min-width:90ox">编辑 <a href="' + options.createApi + '" class="btn btn-primary fa fa-plus" style="width:22px;height:22px;line-height: 18px;padding: 1px;margin-top: -2px;"></a></th>';
+        html += '<th class="text-center" width="90px" style="min-width:90ox">编辑</th>';
     }
     header.append(html);
     // header.render();
@@ -398,20 +413,23 @@ function HtmlBuilder_table_query(id){
     });
 }
 
+function HtmlBuilder_table_selectRow(obj){
+    if(obj.hasClass('htmlbuild-table-selected-row')){
+        obj.removeClass('htmlbuild-table-selected-row');
+    }else{
+        obj.addClass('htmlbuild-table-selected-row');
+    }
+}
 // AJAX请求后的数据设置
 function HtmlBuilder_table_setData(data, id) {
     var obj  = $('#'+id);
     var html = '';
     var body = obj.find('.htmlbuild-table-body').html('');
     var options = window[id];
-    console.log('书籍列表',data);
     for(var row in data.list){
         var tr_class = row % 2 ? 'odd' : 'even';
-        var tr = '<tr class="' + tr_class + '">';
         var primary = data.list[row][options.primary || 'id'];
-        if(options.selectMode){
-            tr += '<td class="text-center"><input value="' + primary + '" type="checkbox"></td>';
-        }
+        var tr = '<tr data-id="' + primary + '" onclick="HtmlBuilder_table_selectRow($(this))" class="' + tr_class + '">';
         for(var field in data.list[row]){
             var field_index = options.fields.findIndex(function(_v){ return _v.name === field });
             // if(field_index === -1) continue; // 其实一定是会有的

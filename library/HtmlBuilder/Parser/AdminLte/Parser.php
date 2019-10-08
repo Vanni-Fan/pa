@@ -69,8 +69,15 @@ class Parser{
             $template_file = $template_dir . $element->type . '.php';
             if (!file_exists($template_file)) $template_file = $template_dir . 'default.php';
     
-            if (empty($element->id)) $element->id = 'E-' . uniqid();
+            if (empty($element->id)) $element->id = 'HB_' . uniqid();
     
+            //        $this->events[] = ['event'=>$event_name, 'code'=>$js_code, 'selector'=>$selector];
+            // $('# $id $selector').on('event', function(event){  $code;  });
+            foreach($element->events as $event){
+                $this->script(
+                    '$("#' . $element->id.$event['selector'] .'").on("'.$event['event'].'", function(event){ '.$event['code'].'; });'
+                );
+            }
             $parse = function () use ($template_file, $element) {
                 extract(get_object_vars($element), EXTR_OVERWRITE);
                 require $template_file;
