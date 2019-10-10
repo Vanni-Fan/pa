@@ -12,7 +12,7 @@ $this->style(/** @lang CSS */ <<<'OUT'
     cursor: pointer;
 }
 .htmlbuild-table-selected-row{
-    background-color: #00c0ef !important;
+    background-color: #64a7ce !important;
     color: white;
 }
 .htmlbuild-table-selected-row a{
@@ -60,10 +60,11 @@ $this->style(/** @lang CSS */ <<<'OUT'
     cursor:pointer;
 }
 .table-striped>tbody>tr:nth-of-type(odd) {
-    background-color: hsla(0, 0%, 92%, 1);
+    background-color: #d9e9f2;
 }
 tr.htmlbuild-table-header{
-    background-color: hsla(0, 0%, 93%, 1);
+    background-color: #3c8dbc;
+    color:white;
 }
 OUT
 );
