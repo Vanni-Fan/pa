@@ -10,6 +10,7 @@ use HtmlBuilder\Validate;
 use PDO;
 use Power\Controllers\AdminBaseController;
 use PA;
+use Power\Models\Roles;
 use Power\Models\Rules;
 use Tables\PluginsTableSources;
 
@@ -178,18 +179,27 @@ class ManagerController extends AdminBaseController
                 Forms::form($this->getUrl(['command' => 'update']))->add(
                     Layouts::box(
                         Element::create('div')->add(
-                            Forms::select('rule_id','上级目录', $default->rule_id??'','select2')
+                            Forms::select('rule_id','上级目录菜单', $default->rule_id??'','select2')
                                  ->choices($menus)
                                  ->required()
-                                 ->description('如果找不到对应的菜单目录，请在《<a>系统管理->权限管理</a>》中<a>创建菜单</a>。')
+                                 ->description(
+                                     '如果找不到对应的菜单目录，请在《<a href="'
+                                     .$this->routerUrl('index',['namespace'=>'Power\\Controllers','controller'=>'rules'])
+                                     .'">系统管理->权限管理</a>》中<a href="'
+                                     .$this->routerUrl('new',['namespace'=>'Power\\Controllers','controller'=>'rules'])
+                                     .'">创建菜单</a>。'
+                                 )
                                  ->tooltip('将此功能放到什么菜单位置下面'),
-                            Forms::select('source_id','数据源', $default->source_id??'','select2')
+                            Forms::input('name', '菜单名称', $default->table_name??'')->required()->tooltip('表名必须为中文'),
+                            Forms::select('source_id','选择数据源', $default->source_id??'','select2')
                                  ->choices($sources)
                                  ->required()
-                                 ->description('数据源信息在<a>数据源管理</a>中创建'),
-                            Forms::input('table_name', '表名', $default->table_name??'')->required()->tooltip('表名必须为中文')->placeHolder('表名必须存在')->validate(
-                                new Validate('text','不能为空',['max'=>1,'min'=>2])
-                            ),
+                                 ->description(
+                                     '数据源信息在<a href="'
+                                     .$this->getUrl(['sub_command'=>'new','type'=>'source'])
+                                     .'">数据源管理</a>中创建'
+                                 ),
+                            Forms::input('table_name', '表名', $default->table_name??'')->required()->tooltip('表名必须为中文')
                         ),'编辑',
                         Element::create('div')->add(
                             Forms::button('返回')->on('click','window.history.back()')->style('default'),
@@ -208,6 +218,29 @@ class ManagerController extends AdminBaseController
         $a = new $model();
         if($this->params['sub_command']=='new'){
             $a->create($_POST);
+            # 插入一个菜单
+            $rule = new Rules;
+            $id = $rule->create([
+                'name'      => $_POST['name'],
+                'router'    => '{"controller":"tables","action":"index","namespace":"plugins\\\\Tables\\\\Controllers","priority":10}',
+                'params'    => '{"source_id":' . $_POST['source_id'] . ',"table":"' . $_POST['table_name'] . '"}',
+                'parent_id' => $_POST['rule_id'],
+                'index'     => 0,
+                'enabled'   => 1,
+                'icon'      => 'fa fa-table',
+                'data_source'  => 'tables',
+                'created_time' => time(),
+                'created_user' => $this->getUserId(),
+            ]);
+            # 更新管理员权限
+            $role = Roles::findFirstByRoleId(1);
+            $role_rules = json_decode($role->rules,1);
+            $role_rules[$rule->rule_id] = 255;
+            $role->rules = json_encode($role_rules,JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            $role->save();
+            # 跳转回去
+//            $this->response->redirect($this->url('index',['action'=>'set','event'=>'setting']),true);
+
         }else{
             call_user_func([$model,'findFirst'], $this->params['id'])->update($_POST);
             if($a instanceof \Tables\PluginsTableMenus){

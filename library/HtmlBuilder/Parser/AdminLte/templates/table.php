@@ -19,14 +19,17 @@ $this->style(/** @lang CSS */ <<<'OUT'
     color: white;
 }
 .htmlbuild-table-header .sort-badge{
-    background-color: #31708f;
-    color: white;
+    background-color: white;
+    color: #3c8dbc;
     border-radius: 15px;
     height: 15px;
     width: 15px;
     display: inline-block;
     line-height: 15px;
     position: relative;
+}
+.htmlbuild-table-header th .text-info{
+    color:white;
 }
 .filter-field, .filter-operation, .filter-value{
     margin:10px;
