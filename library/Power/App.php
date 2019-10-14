@@ -49,16 +49,22 @@ class App{
         # 设置基础环境
         define('BASE_DIR', isset(PA::$config['application']) ? PA::$config['application'] : POWER_BASE_DIR);
         define('PA_URL_PATH', PA::$config['pa_url_path']);
+        
+        # 加载依赖库
+        $vendors = array_unique(array_filter([
+            realpath(POWER_BASE_DIR.'library/vendor/autoload.php'),
+            realpath(BASE_DIR.'library/vendor/autoload.php')
+        ]));
+        foreach($vendors as $vendor) require $vendor;
+        
         # 设置库和插件的加载目录
         PA::$loader->registerDirs(
-            array_unique(
-                [
-                    rtrim(POWER_BASE_DIR,'/\\'),
-                    POWER_BASE_DIR.'library',
-                    rtrim(BASE_DIR,'/\\'),
-                    BASE_DIR.'library',
-                ]
-            )
+            array_unique(array_filter([
+                realpath(POWER_BASE_DIR),
+                realpath(POWER_BASE_DIR.'library'),
+                realpath(BASE_DIR),
+                realpath(BASE_DIR.'library'),
+            ]))
         );
         PA::$loader->registerNamespaces(
             [
@@ -77,17 +83,23 @@ class App{
         }else{
             if($exception_handler = PA::$config->path('error.exception')) set_exception_handler($exception_handler);
         }
+        # 创建数据库连接
+        PA::$db = DB::load(PA::$config['pa_db']);
         
-        # 加载路由
+        # 加载配置路由
         $routers = include POWER_BASE_DIR.'data/routers.php'; // 加载路由
         if(PA::$config['routers']){
             foreach(PA::$config['routers'] as $_method => $_routers){
                 foreach($_routers as $_match=>$_router) $routers[$_method][$_match] = $_router->toArray();
             }
         }
+        # 加载数据库路由
+        $db_router = \Power\Models\Rules::find(['url_suffix is not null','columns'=>'url_suffix,router']);
+        foreach($db_router as $_router){
+            $routers['*'][$_router->url_suffix] = json_decode($_router->router,1);
+        }
         
         # 合并数据库配置
-        PA::$db = DB::load(PA::$config['pa_db']);
         $db_config = array_column(PA::$db->fetchAll('SELECT name,value FROM '.PA::$config->path('pa_db.prefix').'configs'),'value','name');
         PA::$config->merge(new \Phalcon\Config($db_config));// 数据配置
         
@@ -167,7 +179,11 @@ class App{
             #echo "\n要添加的 $method 有",print_r($rule);
             foreach($rule as $url => $param){
                 unset($param['priority']);
-                PA::$router->{'add'.$method}($url, $param);
+                if($method === '*' ) {
+                    PA::$router->add($url, $param);
+                }else{
+                    PA::$router->{'add' . $method}($url, $param);
+                }
             }
         }
         PA::$config['routers'] = $routers;

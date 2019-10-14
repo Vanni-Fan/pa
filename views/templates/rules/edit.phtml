@@ -162,12 +162,34 @@
             </div>
         
             <!-- 扩展参数 -->
-            <div class="form-group">
-                <label class="col-sm-2" for="params" style="padding-left: 30px;padding-right: 10px;">扩展参数</label>
-                <div class="col-sm-10" style="padding-left: 20px;padding-right: 30px;">
-                    <textarea name="params" id="params" class="form-control" rows="3" placeholder="Enter ..."><?=$rule['params']??''?></textarea>
+<!--            <div class="form-group">-->
+<!--                <label class="col-sm-2" for="params" style="padding-left: 30px;padding-right: 10px;">扩展参数</label>-->
+<!--                <div class="col-sm-10" style="padding-left: 20px;padding-right: 30px;">-->
+<!--                    <textarea name="params" id="params" class="form-control" rows="3" placeholder="Enter ...">--><?//=$rule['params']??''?><!--</textarea>-->
+<!--                </div>-->
+<!--            </div>-->
+
+            <!-- 权重 -->
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="url_suffix" class="col-sm-4 control-label">URL后缀</label>
+                    <div class="col-sm-8">
+                        <input name="url_suffix" value="<?=$rule['url_suffix']??''?>" type="text" class="form-control" id="url_suffix" placeholder="默认空，如果指定，那么浏览器中将显示指定的URL">
+                    </div>
                 </div>
             </div>
+
+            <!-- 权重 -->
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="params" class="col-sm-4 control-label">扩展参数</label>
+                    <div class="col-sm-8">
+                        <input name="params" value="<?=$rule['params']??''?>" type="text" class="form-control" id="params" placeholder="JSON格式的扩展参数，默认空">
+                    </div>
+                </div>
+            </div>
+            
+            
         </div>
     </div>
 </div>

@@ -26,7 +26,7 @@ class AdminHelper{
             }
             #echo "\n<!-- $active -->\n";
 //            echo '<li class="', ($has_sub ? 'treeview' : ''), $active, '"><a href="', ($i['url'].'?rule_id='.$i['rule_id']), '">', "\n";
-            $url = PA_URL_PATH.'menu/'.$i['rule_id'].'/index';
+            $url = $i['url_suffix'] ?: (PA_URL_PATH.'menu/'.$i['rule_id'].'/index');
             echo '<li class="', ($has_sub ? 'treeview' : ''), $active, '"><a href="', $url , '">', "\n";
             if ($i['icon']) echo '<i class="', $i['icon'], '"></i>', "\n";
             echo '<span>', $i['name'], '</span>', "\n";

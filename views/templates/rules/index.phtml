@@ -19,6 +19,7 @@
         <table class="table table-bordered table-striped">
             <tbody><tr>
                 <th>名称</th>
+                <th width="200px">指定URL</th>
                 <th width="35%">路由信息</th>
                 <th width="35%">参数信息</th>
                 <th width="100" style="text-align: center">操作</th>
@@ -29,6 +30,7 @@
                     <?=$rule['icon']?('<i class="'.$rule['icon'].'"></i>'):''?>
                     <?=$rule['name']?>
                 </td>
+                <td><?=$rule['url_suffix']?></td>
                 <td><div class="json-code"><?=json_encode($rule['router'])?></div></td>
                 <td><div class="json-code"><?=json_encode($rule['params'])?></div></td>
                 <td style="text-align: center">

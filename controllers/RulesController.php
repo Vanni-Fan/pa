@@ -32,7 +32,8 @@ class RulesController extends AdminBaseController {
             'parent_id' => $this->request->getPost('parent_id','int') ?: 0,
             'index' => $this->request->getPost('index','int') ?: 0,
             'params' => json_encode($params, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
-            'router' => $is_dir ? null : json_encode($router,JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            'router' => $is_dir ? null : json_encode($router,JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            'url_suffix'=>$_POST['url_suffix'] ?: null,
         ];
         if($this->item_id){
             $obj = Rules::findFirst($this->item_id);

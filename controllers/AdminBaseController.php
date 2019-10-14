@@ -138,7 +138,15 @@ class AdminBaseController extends Controller{
         # 设置基本信息
         $this->rules   = $this->userinfo['rules'];
         $this->layout  = POWER_VIEW_DIR . 'layouts/index';
-        $this->rule_id = $this->getParam('rule_id','int',array_key_first($this->rules));
+        $rule_id = $this->getParam('rule_id','int');
+        if(!$rule_id){
+            $defined_url_suffix = Rules::findFirstByUrlSuffix($_SERVER['REQUEST_URI']);
+            if($defined_url_suffix) $rule_id = $defined_url_suffix->rule_id;
+        }
+        if(!$rule_id){
+            $rule_id = array_key_first($this->rules);
+        }
+        $this->rule_id = $rule_id;
         $this->item_id = $this->getParam('item_id','int',0);
         $this->current_page = $this->getParam('page','int',1);
         

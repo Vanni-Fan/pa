@@ -1,0 +1,11 @@
+{
+  "require": {
+    "webonyx/graphql-php":"^0.13.8"
+  },
+  "repositories": {
+    "packagist": {
+      "type": "composer",
+      "url": "https://packagist.phpcomposer.com"
+    }
+  }
+}
