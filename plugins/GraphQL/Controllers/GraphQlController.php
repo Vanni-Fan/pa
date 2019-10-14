@@ -7,8 +7,35 @@ use GraphQL\Type\Schema;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\EnumType;
 
 //use GraphQL\Type\Definition\InterfaceType;
+class MyType{
+    static $condition = null;
+    static public function cond(){
+        return self::$condition ?: (self::$condition = new MyCondition());
+    }
+}
+
+class MyCondition extends InputObjectType{
+    public function __construct()
+    {
+        parent::__construct(
+            [
+                'name'=>'Filter',
+                'fields'=>function(){
+                    return [
+                        'key' => Type::string(),
+                        'op'  => Type::string(),
+                        'val' => Type::string(),
+                        'sub' => Type::listOf(MyType::cond())
+                    ];
+                }
+            ]
+        );
+    }
+}
+
 
 class GraphQlController extends ApiController
 {
@@ -16,10 +43,26 @@ class GraphQlController extends ApiController
     public function initialize()
     {
         parent::initialize();
+
+        $muilt_filter = '
+        {
+          op:"or",
+          sub:[
+            {
+              op:"and",
+              sub:[
+                {key:"A",op:">",val:"11"},
+                {key:"B",op:"<",val:"11"}
+              ],
+          },{key:"B",op:"=",val:"11"}]
+        }';
         $this->query = '
         query{
             #logs(id:12, name:"ABC", name_lt:123){
-            logs(filter:{}){
+            #logs(filter:{where:{key:"abc",op:"=",val:"sdf"}}){
+            logs(filter:{where:'.$muilt_filter.'}){
+            #logs(filter:{where:OTHER}){
+            #logs(filter:{where:["AA",">","BB"]}){
             #logs{
                 id(eq:1,lt:2)
                 name
@@ -29,7 +72,8 @@ class GraphQlController extends ApiController
             }
             desc
             #abc
-        }';
+        }
+        ';
     }
     public function getLog($value, $args, $context, $info){
         print_r($args);
@@ -47,22 +91,18 @@ class GraphQlController extends ApiController
     }
 
     public function indexAction(){
+
+        //Input types (or argument types) are: Scalar, Enum, InputObject, NonNull and List
         $filters = new InputObjectType(
             [
-               'name' => 'StoryFiltersInput',
+               'name' => 'Filters',
                'fields' => [
-                   'author' => [
-                       'type' => Type::id(),
-                       'description' => 'Only show stories with this author id'
-                   ],
-                   'popular' => [
-                       'type' => Type::boolean(),
-                       'description' => 'Only show popular stories (liked by several people)'
-                   ],
-                   'tags' => [
-                       'type' => Type::listOf(Type::string()),
-                       'description' => 'Only show stories which contain all of those tags'
-                   ]
+                   'where' => MyType::cond(), // 复杂查询
+                   'sort'  => Type::listOf(Type::string()), // sort:["abc desc"]
+                   'key'   => Type::string(), // 简单查询 key:abc, val:123 =>  abc = 123
+                   'val'   => Type::string(),
+                   'op'    => Type::string(), // 简单查询 key:abc, val:123, op:>  => abc > 123
+                   'limit' => Type::listOf(Type::int()), // limit:[1,2]
                ]
         ]);
 
