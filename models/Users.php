@@ -53,6 +53,12 @@ class Users extends PMB{
             'role_id',
             ["alias" => "roles"]
         );
+        $this->hasMany(
+            'user_id',
+            Logs::class,
+            'user_id',
+            ["alias" => "Logs"]
+        );
     }
     
     public function afterSave(){
