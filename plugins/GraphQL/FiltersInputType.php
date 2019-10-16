@@ -20,7 +20,7 @@ class FiltersInputType extends InputObjectType{
                     ],
                     'limit' => [
                         'type'=>Type::listOf(Type::int()), // limit:[1,2]
-                        'defaultValue'=>[1,10],
+                        'defaultValue'=>[0,10],
                     ]
                 ]
             ]

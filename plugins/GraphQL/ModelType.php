@@ -55,14 +55,14 @@ class ModelType extends ObjectType{
                             if($relate[$field]['type']==='many'){
                                 $fields[$relate[$field]['name']] = [
                                     'type' => Type::listOf(Types::table($relate[$field]['table'])),
-                                    'description' => '有多个', // todo
+//                                    'description' => '有多个', // todo
                                     'args' => $args
                                 ];
                             } else {
                                 $fields[$relate[$field]['name']] = [
                                     'type' => Types::table($relate[$field]['table']),
-                                    'description' => '有一个，关联ID为：#Users.user_id = Logs.user_id#',  // todo
-                                    'args' => $args
+//                                    'description' => '有一个，关联ID为：#Users.user_id = Logs.user_id#',  // todo
+//                                    'args' => $args
                                 ];
                             }
                         }
@@ -106,7 +106,7 @@ class ModelType extends ObjectType{
                     }
                     return $fields;
                 },
-                'resolveField'=>[FatchData::class, 'columns']
+                'resolveField'=>[FetchData::class, 'columns']
             ]
         );
         $this->model = $name;

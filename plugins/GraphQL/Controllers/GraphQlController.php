@@ -1,6 +1,6 @@
 <?php
 namespace plugins\GraphQL\Controllers;
-use plugins\GraphQL\FatchData;
+use plugins\GraphQL\FetchData;
 use Power\Controllers\ApiController;
 use GraphQL\GraphQL;
 use GraphQL\Type\Schema;
@@ -32,11 +32,11 @@ class GraphQlController extends ApiController
             {
               op:AND,
               sub:[
-                {key:"user_id",op:ELT,val:"11"},
-                {key:"user_id",val:"11"}
+                {key:"user_id",op:ELT,val:"1"},
+                {key:"user_id",val:"1"}
               ],
             },
-            {key:"name",op:AND,val:"11"}
+            {key:"name",op:AND,val:"admin"}
           ]
         }';
         $this->query = '
@@ -46,7 +46,8 @@ class GraphQlController extends ApiController
                 nickname
                 password
                 name
-                Logs(filter:{where:{key:"log_id",val:"123"}}){
+                #Logs(filter:{where:{key:"log_id",val:"716",op:GT}}){
+                Logs(filter:{where:{sub:[{key:"log_id",val:"7168"},{key:"log_id",val:"716"}],op:OR}}){
                     log_id
                     name
                 }
@@ -86,6 +87,7 @@ class GraphQlController extends ApiController
     }
 
     public function indexAction(){
+
 //        $params = ['conditions'=>'(a=?0)','bind'=>[100]];
 //        $params = [];
 //        $where = [
@@ -145,7 +147,7 @@ class GraphQlController extends ApiController
                             'args' => ['filter'=>['type' => Types::filter(),'defaultValue' => ['op'=>'=']]]
                         ],
                     ],
-                    'resolveField'=>[FatchData::class, 'rows']
+                    'resolveField'=>[FetchData::class, 'rows']
                 ]
             )]
         );
