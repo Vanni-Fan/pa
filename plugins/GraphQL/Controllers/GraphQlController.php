@@ -149,8 +149,8 @@ class GraphQlController extends ApiController
                 ]
             )]
         );
-        exit(\GraphQL\Utils\SchemaPrinter::doPrint($schema));
-//        $rs = GraphQL::executeQuery($schema, $this->query);
+//        exit(\GraphQL\Utils\SchemaPrinter::doPrint($schema));
+        $rs = GraphQL::executeQuery($schema, $this->query);
         $this->view->data  = $rs->data;
         $this->view->error = $rs->errors;
     }

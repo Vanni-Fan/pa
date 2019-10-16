@@ -28,7 +28,7 @@ class FatchData{
         echo "\n++++++【 $field 】+++++\n";
         echo "到这里来的都是子查询，比如 Users.Logs \n";
         echo '参数：',print_r($args,1);
-        echo '来源：',print_r($source,1);
+        echo '来源：',print_r($source->toArray(),1),get_class($source),"\n";
         echo '期望返回：', $info->returnType, "\n";
         echo "+++++++++++\n\n\n";
     
@@ -67,7 +67,7 @@ class FatchData{
         
         $class = '\\Power\\Models\\'.ucfirst($info->fieldName);
         $model = call_user_func([$class,'find'],['limit'=>10]);
-        return $model->toArray();
+        return $model;//->toArray();
     }
     
     public static function parseWhere(PowerModelBase $model, array $conditions, array &$params, $op='AND'){
