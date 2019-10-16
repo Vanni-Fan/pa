@@ -23,6 +23,7 @@ class GraphQlController extends ApiController
     {
         parent::initialize();
 
+        # 无限子查询表达式
         $filter = '
         {
           op:OR,
@@ -33,7 +34,9 @@ class GraphQlController extends ApiController
                 {key:"A",op:ELT,val:"11"},
                 {key:"B",val:"11"}
               ],
-          },{key:"B",op:AND,val:"11"}]
+            },
+            {key:"B",op:AND,val:"11"}
+          ]
         }';
         $this->query = '
         query{
@@ -46,11 +49,15 @@ class GraphQlController extends ApiController
                     log_id
                     name
                 }
+                roles{
+                    role_id
+                    name
+                }
             }
-            rules{
-                rule_id
+            roles{
+                role_id
                 name
-                router
+               # router
             }
             logs(filter:{key:"AA",val:"234"}){
                 log_id
@@ -58,6 +65,16 @@ class GraphQlController extends ApiController
             }
         }
         ';
+        
+//        $this->query = '
+//        query{
+//          __schema{
+//             users{
+//                 user_id
+//             }
+//          }
+//        }
+//        ';
     }
 
     public function indexAction(){
@@ -99,6 +116,7 @@ class GraphQlController extends ApiController
                 ]
             )]
         );
+//        exit(\GraphQL\Utils\SchemaPrinter::doPrint($schema));
         $rs = GraphQL::executeQuery($schema, $this->query);
         $this->view->data  = $rs->data;
         $this->view->error = $rs->errors;

@@ -1,6 +1,7 @@
 <?php
 namespace plugins\GraphQL;
 use GraphQL\Executor\Executor;
+use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\InputObjectType;
 use Power\Models\Logs;
@@ -11,14 +12,20 @@ class FatchData{
         $rs = Executor::defaultFieldResolver($source, $args, $context, $info);
         if(!is_null($rs)) return $rs;
         
-//        $id = random_int(1,20);
-//        $name = ['AA','BB','CC'][random_int(0,2)];
-//        print_r("\n\n\n++++++【{$info->fieldName}】+++++\n");
-//        var_dump('参数：',$args);
-//        var_dump('上下文：',$context);
-//        var_dump('来源：',$source);
-//        echo "随机ID：$id, 随机名称：$name \n";
-//        print_r("+++++++++++\n\n\n");
+        echo "\n++++++【{$info->fieldName}】+++++\n";
+        echo '参数：',print_r($args,1);
+        echo '来源：',print_r($source,1);
+        echo '期望返回：', $info->returnType, "\n";
+        echo "+++++++++++\n\n\n";
+        
+        $type = $info->returnType;
+        # 不属于List并且不需要ModelType
+        if(!($type instanceof ListOfType) && !($type instanceof ModelType)){
+            throw new \Exception('未实现此类型');
+        }
+        $model = $info->returnType instanceof ListOfType ? $info->returnType->ofType : ($info->returnType instanceof ModelType ? $info->returnType->model : '\Exception');
+        
+        
         switch($info->fieldName){
             case 'Logs':
                 return Logs::find(['user_id=?0','bind'=>[$source['user_id']],'limit'=>10]);

@@ -2,7 +2,6 @@
 namespace plugins\GraphQL;
 
 use GraphQL\Type\Definition\EnumType;
-use GraphQL\Type\Definition\ObjectType;
 
 class Types{
     static private $op = null;
@@ -35,7 +34,7 @@ class Types{
     public static function filter():FiltersInputType{
         return self::$filter ?: (self::$filter = new FiltersInputType());
     }
-    public static function table($name):ObjectType{
+    public static function table($name):ModelType{
         return self::$tables[$name] ?? (self::$tables[$name] = new ModelType($name));
     }
 }

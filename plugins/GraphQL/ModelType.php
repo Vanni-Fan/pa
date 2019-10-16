@@ -6,6 +6,7 @@ use Phalcon\Db\Column;
 use Phalcon\Mvc\Model\Relation;
 
 class ModelType extends ObjectType{
+    public $model;
     public function __construct($name)
     {
         parent::__construct(
@@ -106,5 +107,11 @@ class ModelType extends ObjectType{
                 'resolveField'=>[FatchData::class, 'columns']
             ]
         );
+        $this->model = $name;
+    }
+    
+    public function toString()
+    {
+        return $this->model;
     }
 }

@@ -18,7 +18,10 @@ class FiltersInputType extends InputObjectType{
                         'type'=>Types::op(), // 简单查询 key:abc, val:123, op:>  => abc > 123
                         'defaultValue'=>'EQ'
                     ],
-                    'limit' => Type::listOf(Type::int()), // limit:[1,2]
+                    'limit' => [
+                        'type'=>Type::listOf(Type::int()), // limit:[1,2]
+                        'defaultValue'=>[1,10],
+                    ]
                 ]
             ]
         );
