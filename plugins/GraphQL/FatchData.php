@@ -1,35 +1,54 @@
 <?php
 namespace plugins\GraphQL;
+use ArrayAccess;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\InputObjectType;
 use Power\Models\Logs;
+use PowerModelBase;
 
 class FatchData{
     private static $data;
     public static function columns($source, $args, $context, \GraphQL\Type\Definition\ResolveInfo $info){ # context 用不上
-        $rs = Executor::defaultFieldResolver($source, $args, $context, $info);
-        if(!is_null($rs)) return $rs;
-        
-        echo "\n++++++【{$info->fieldName}】+++++\n";
+        $field = $info->fieldName;
+        $type  = $info->returnType;
+        if(is_array($source) || $source instanceof ArrayAccess){
+            if(array_key_exists($field, $source)){
+                return $source[$field]??null;
+            }
+        }
+        if(is_object($source)){
+            $tmp = get_object_vars($source);
+            if(array_key_exists($field, $tmp)){
+                return $source->$field ?? null;
+            }
+        }
+    
+        echo "\n++++++【 $field 】+++++\n";
+        echo "到这里来的都是子查询，比如 Users.Logs \n";
         echo '参数：',print_r($args,1);
         echo '来源：',print_r($source,1);
         echo '期望返回：', $info->returnType, "\n";
         echo "+++++++++++\n\n\n";
-        
-        $type = $info->returnType;
-        # 不属于List并且不需要ModelType
-        if(!($type instanceof ListOfType) && !($type instanceof ModelType)){
-            throw new \Exception('未实现此类型');
+    
+        $params = [];
+        if($type instanceof ListOfType){
+            if(!($type->ofType instanceof ModelType)) throw new \Exception('未实现此类型');
+            $model = call_user_func([$type->ofType->model,'getInstance']);
+            $func = 'find';
+            $params['offset'] = $args['filter']['limit'][0];
+            $params['limit']  = $args['filter']['limit'][1];
+        }else{
+            if(!($type instanceof ModelType)) throw new \Exception('未实现此类型');
+            $model = call_user_func([$type->model,'getInstance']);
+            $func = 'findFirst';
         }
-        $model = $info->returnType instanceof ListOfType ? $info->returnType->ofType : ($info->returnType instanceof ModelType ? $info->returnType->model : '\Exception');
+
+        self::parseWhere(call_user_func([$model,'getInstance']), $args['filter'], $params);
+//        echo "查询条件：",print_r($params,1);
         
-        
-        switch($info->fieldName){
-            case 'Logs':
-                return Logs::find(['user_id=?0','bind'=>[$source['user_id']],'limit'=>10]);
-        }
+        return call_user_func([$model, $func], $params);
     }
     
     /**
@@ -49,32 +68,50 @@ class FatchData{
         $class = '\\Power\\Models\\'.ucfirst($info->fieldName);
         $model = call_user_func([$class,'find'],['limit'=>10]);
         return $model->toArray();
+    }
+    
+    public static function parseWhere(PowerModelBase $model, array $conditions, array &$params, $op='AND'){
+        if(!isset($conditions['where']) && !isset($conditions['key'], $conditions['val'])) return;
+        if(isset($params['conditions'])){
+            $where_str = &$params['conditions'];
+        }else{
+            $params[0] = $params[0]??'';
+            $where_str = &$params[0];
+        }
         
-        
-//        $id = random_int(1,20);
-//        $name = ['AA','BB','CC'][random_int(0,2)];
-//        print_r("\n\n\n--------【{$info->fieldName}】------\n");
-//        var_dump('参数：',$args);
-//        var_dump('上下文：',$context);
-//        var_dump('来源：',$source);
-//        echo "随机ID：$id, 随机名称：$name \n";
-//        print_r("--------------\n\n\n");
-//        switch($info->fieldName){
-//            case 'logs':
-//                return [[
-//                    'log_id'=>$id,
-//                    'log_name'=>$name
-//                ]];
-//            case 'users':
-//                return [[
-//                    'user_id'=>$id,
-//                    'user_name'=>$name,
-//                    'email'=>'test@a.com',
-//                    'logs'=>''
-//                ]];
-//                break;
-//            default:
-//                return '其他字段内容';
-//        }
+        if(isset($conditions['key'], $conditions['val'])){
+            $sub_where = ['key'=>$conditions['key'], 'op'=>$conditions['op']??'=', 'val'=>$conditions['val']];
+            if(!empty($conditions['where']) && is_array($conditions['where'])){
+                $conditions['where'] = ['op'=>$op, 'sub'=>[$sub_where,$conditions['where']]];
+            }else{
+                $conditions['where'] = $sub_where;
+            }
+        }
+        if($conditions['where']) $params['bind'] = $params['bind'] ?? [];
+//        print_r($conditions['where']);
+//        return;
+        $sub_where_str = self::getParseWhereSql($model, $conditions['where'],$params);
+        $where_str = $where_str ? "$where_str $op $sub_where_str" : $sub_where_str;
+    }
+    
+    private static function getParseWhereSql(PowerModelBase $model, array $conditions, array &$params): string
+    {
+        $fields = $model->fields();
+        if(!empty($conditions['sub']) && is_array($conditions['sub'])){
+            return '('.implode(' '.$conditions['op'].' ', array_map(function($v) use($model, &$params, &$fields){
+                if(!empty($v['sub']) && is_array($v['sub'])) return self::getParseWhereSql($model, $v, $params);
+                return self::setParamsAndReturnWhere($v, $params, $fields);
+            },$conditions['sub'])).')';
+        }
+        return self::setParamsAndReturnWhere($conditions, $params, $fields);
+    }
+    
+    private static function setParamsAndReturnWhere(array $conditions, array &$params, array &$fields): string
+    {
+        if(!array_key_exists($conditions['key'], $fields)) throw new \Exception('Field:['.$conditions['key'].'] not exists!');
+        $bind_index = count($params['bind']);
+        $params['bind'][$bind_index] = $conditions['val'];
+        $params['bindTypes'][$bind_index] = $fields[$conditions['key']];
+        return $conditions['key'] . ' ' . ($conditions['op']??'=') . ' ?'.$bind_index;
     }
 }

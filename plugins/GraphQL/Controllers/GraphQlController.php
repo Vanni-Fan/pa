@@ -14,6 +14,7 @@ use Power\Models\Plugins;
 use Power\Models\Roles;
 use Power\Models\Rules;
 use Power\Models\Users;
+use PowerModelBase;
 
 
 class GraphQlController extends ApiController
@@ -31,11 +32,11 @@ class GraphQlController extends ApiController
             {
               op:AND,
               sub:[
-                {key:"A",op:ELT,val:"11"},
-                {key:"B",val:"11"}
+                {key:"user_id",op:ELT,val:"11"},
+                {key:"user_id",val:"11"}
               ],
             },
-            {key:"B",op:AND,val:"11"}
+            {key:"name",op:AND,val:"11"}
           ]
         }';
         $this->query = '
@@ -45,7 +46,7 @@ class GraphQlController extends ApiController
                 nickname
                 password
                 name
-                Logs(filter:{where:{key:"A",val:"123",op:IN}}){
+                Logs(filter:{where:{key:"log_id",val:"123"}}){
                     log_id
                     name
                 }
@@ -59,9 +60,16 @@ class GraphQlController extends ApiController
                 name
                # router
             }
-            logs(filter:{key:"AA",val:"234"}){
+            logs(filter:{key:"log_id",val:"234"}){
                 log_id
                 name
+            }
+            configs{
+                config_id
+                user_id
+                rule_id
+                name
+                value
             }
         }
         ';
@@ -78,6 +86,31 @@ class GraphQlController extends ApiController
     }
 
     public function indexAction(){
+//        $params = ['conditions'=>'(a=?0)','bind'=>[100]];
+//        $params = [];
+//        $where = [
+//            'key'=>'user_id','op' => 'XOR','val'=>11, // 简短条件
+//            'where'=>[
+//                'op'=>'andx',
+//                'sub'=>[
+//                    ['key'=>'name','val'=>22],
+//                    ['key'=>'user_id','val'=>33,'op'=>'>'],
+//                    [
+//                        'op'=>'AND',
+//                        'sub'=>[
+//                            ['key'=>'user_id','val'=>44],
+//                            ['key'=>'user_id','val'=>55,'op'=>'>=']
+//                        ]
+//                    ],
+//                    ['key'=>'user_id','val'=>66]
+//                ]
+//            ]
+//        ];
+//        FatchData::parseWhere(Users::getInstance(), $where, $params);
+//        print_r($params);
+//        exit;
+        
+        
         $schema = new Schema(
             ['query'=>new ObjectType(
                 [
@@ -116,8 +149,8 @@ class GraphQlController extends ApiController
                 ]
             )]
         );
-//        exit(\GraphQL\Utils\SchemaPrinter::doPrint($schema));
-        $rs = GraphQL::executeQuery($schema, $this->query);
+        exit(\GraphQL\Utils\SchemaPrinter::doPrint($schema));
+//        $rs = GraphQL::executeQuery($schema, $this->query);
         $this->view->data  = $rs->data;
         $this->view->error = $rs->errors;
     }

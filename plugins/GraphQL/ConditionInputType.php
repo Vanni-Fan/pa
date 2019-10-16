@@ -14,7 +14,7 @@ class ConditionInputType extends InputObjectType{
                         'key' => Type::string(),
                         'op'  => [
                             'type' => Types::op(),
-                            'defaultValue' => 'EQ',
+                            'defaultValue' => '=',
                         ],
                         'val' => Type::string(),
                         'sub' => Type::listOf(Types::condition())
