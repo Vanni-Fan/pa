@@ -25,6 +25,8 @@ class Settings {
           "port" TEXT,
           "user" TEXT,
           "password" TEXT,
+          "path" TEXT,
+          "status" INTEGER,
           PRIMARY KEY ("id")
         );';
         $sql2 = 'CREATE TABLE IF NOT EXISTS "plugins_table_menus" (
@@ -40,6 +42,21 @@ class Settings {
             'VALUES ("Tables", NULL, 1, NULL, NULL, "对MySQL表进行增删改查的简易操作", NULL, "http://pa.com", "Vanni Fan", "http://vanni.fan", "1.0", "^1.0", "BSD", ?1, ?1, ?1, NULL, NULL, NULL, NULL, NULL)'
         ,[$now]);
         PA::$db->execute($sql1);
+        # 系统的数据源默认插入，但是不可编辑
+        $sys_ds = [
+            'name'     => "SYSTEM:".PA::$config['pa_db']['dbname'],
+            'type'     => PA::$config['pa_db']['adapter'],
+            'host'     => PA::$config['pa_db']['host']??'',
+            'port'     => PA::$config['pa_db']['port'],
+            'user'     => PA::$config['pa_db']['username']??'',
+            'password' => PA::$config['ps_db']['password']??'',
+            'path'     => POWER_BASE_DIR . 'models/'
+        ];
+        PA::$db->execute(
+            'INSERT INTO "plugins_table_sources"("name","type","host","port","user","password","path","status")
+              VALUES(:name,:type,:host,:port,:user,:password,:path,0)',
+            $sys_ds
+        );
         PA::$db->execute($sql2);
         // 2、 创建 model
         $template = file_get_contents(__DIR__ .'/ModelTemplate.php');

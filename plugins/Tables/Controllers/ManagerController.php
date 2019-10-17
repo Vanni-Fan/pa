@@ -56,6 +56,8 @@ class ManagerController extends AdminBaseController
                           ['name'=>'port','text'=>'端口','sort'=>1,'filter'=>1],
                           ['name'=>'user','text'=>'用户','sort'=>1,'filter'=>1],
                           ['name'=>'password','text'=>'密码','sort'=>1,'filter'=>1],
+                          ['name'=>'path','text'=>'模型文件位置','sort'=>1,'filter'=>1],
+                          ['name'=>'status','text'=>'状态','sort'=>1,'show'=>0],
                     ]
                 )->primary('id')
             ,
@@ -117,6 +119,15 @@ class ManagerController extends AdminBaseController
                 $v['source_id'] = $source ? $source->name : $v['source_id'];
                 return $v;
             },$data->toArray());
+        }else{
+            $data = array_map(function($v){
+                if(!$v['status']){
+                    $v['canEdit'] = 0;
+                    $v['canDelete'] = 0;
+                }
+                unset($v['status']);
+                return $v;
+            },$data->toArray());
         }
         $this->jsonOut(
             [
@@ -147,12 +158,12 @@ class ManagerController extends AdminBaseController
                                 Forms::input('name', '名称',$default->name??'')->required(),
                                 Forms::input('host', '主机', $default->host??'')->required()->inputMask("'alias':'ip'"),
                                 Forms::input('user', '用户', $default->user??'')->required(),
+                                Forms::input('path','模型保存目录',$default->path??'')->required()->tooltip('Model类文件保存的目录')
                             )
                             , 6
                         )->column(
                             Element::create('div')->add(
-                                Forms::select('type','类型', $default->type??'')
-                                     ->choices([
+                                Forms::select('type','类型', $default->type??'')->choices([
                                                    ['text' => 'MySQL', 'value' => 'mysql'],
                                                    ['text' => 'SQLite', 'value' => 'sqlite'],
                                                    ['text' => 'PostgreSQL', 'value' => 'postgresql'],
@@ -214,44 +225,44 @@ class ManagerController extends AdminBaseController
     }
 
     public function update(){
-        $model = $this->params['type'] == 'menu' ? \Tables\PluginsTableMenus::class : \Tables\PluginsTableSources::class;
-        $a = new $model();
-        if($this->params['sub_command']=='new'){
-            $a->create($_POST);
-            # 插入一个菜单
-            $rule = new Rules;
-            $id = $rule->create([
-                'name'      => $_POST['name'],
-                'router'    => '{"controller":"tables","action":"index","namespace":"plugins\\\\Tables\\\\Controllers","priority":10}',
-                'params'    => '{"source_id":' . $_POST['source_id'] . ',"table":"' . $_POST['table_name'] . '"}',
-                'parent_id' => $_POST['rule_id'],
-                'index'     => 0,
-                'enabled'   => 1,
-                'icon'      => 'fa fa-table',
-                'data_source'  => 'tables',
-                'created_time' => time(),
-                'created_user' => $this->getUserId(),
-            ]);
-            # 更新管理员权限
-            $role = Roles::findFirstByRoleId(1);
-            $role_rules = json_decode($role->rules,1);
-            $role_rules[$rule->rule_id] = 255;
-            $role->rules = json_encode($role_rules,JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-            $role->save();
-            # 跳转回去
-//            $this->response->redirect($this->url('index',['action'=>'set','event'=>'setting']),true);
-
-        }else{
-            call_user_func([$model,'findFirst'], $this->params['id'])->update($_POST);
-            if($a instanceof \Tables\PluginsTableMenus){
-                # 修改菜单
-                $rule = Rules::findFirstByRuleId($_POST['rule_id']); // todo
-                $params = [
-                    'source_id'=>1,
-                    'table'=>'abcd',
-                ];
+        if($this->params['type'] == 'menu'){
+            if($this->params['sub_command']=='new'){
+                $model = new PluginsTableMenus();
+                $model->create($_POST);
+                # 插入一个菜单
+                $rule = new Rules;
+                $id = $rule->create([
+                    'name'      => $_POST['name'],
+                    'router'    => '{"controller":"tables","action":"index","namespace":"plugins\\\\Tables\\\\Controllers","priority":10}',
+                    'params'    => '{"source_id":' . $_POST['source_id'] . ',"table":"' . $_POST['table_name'] . '"}',
+                    'parent_id' => $_POST['rule_id'],
+                    'index'     => 0,
+                    'enabled'   => 1,
+                    'icon'      => 'fa fa-table',
+                    'data_source'  => 'tables',
+                    'created_time' => time(),
+                    'created_user' => $this->getUserId(),
+                ]);
+                # 更新管理员权限
+                $role = Roles::findFirstByRoleId(1);
+                $role_rules = json_decode($role->rules,1);
+                $role_rules[$rule->rule_id] = 255;
+                $role->rules = json_encode($role_rules,JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                $role->save();
+                # 跳转回去
+//                $this->response->redirect($this->url('index',['action'=>'set','event'=>'setting']),true);
+            }
+        }else {
+            if($this->params['sub_command']=='new'){
+                $model = new PluginsTableSources();
+                $_POST['status'] = 1;
+                $model->create($_POST);
+            }else{
+                $data = PluginsTableSources::find($this->getParam('id'));
+                $data->update($_POST);
             }
         }
+
         $this->response->redirect($this->url('display',['item_id'=>$this->item_id,'action'=>'set','event'=>'setting']));
     }
 

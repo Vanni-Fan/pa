@@ -237,6 +237,8 @@ function HtmlBuilder_table_init(id){
     
     for(var index in options.fields){
         var field = options.fields[index];
+        field.show = field.hasOwnProperty('show') ? field.show : 1;
+        if(!field.show) continue;
         var sortStatus = '';
         var filterStatus = '';
         if(field.filter) {
@@ -450,6 +452,7 @@ function HtmlBuilder_table_setData(data, id) {
         var primary = data.list[row][options.primary || 'id'];
         var tr = '<tr data-id="' + primary + '" onclick="HtmlBuilder_table_selectRow($(this))" class="' + tr_class + '">';
         for(var field in data.list[row]){
+            if(['canEdit','canDelete'].indexOf(field)>-1) continue;
             var field_index = options.fields.findIndex(function(_v){ return _v.name === field });
             // if(field_index === -1) continue; // 其实一定是会有的
             var def = options.fields[field_index];

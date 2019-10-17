@@ -24,17 +24,7 @@ class TablesController extends AdminBaseController
         $model_class= '\\Tables\\'.$table;
         $db_var = var_export($params['db'],1);
         if(!is_dir($model_dir)) mkdir($model_dir);
-        $file_body = '<?php
-/** The file is generated automatically by TablePlugin */
-namespace Tables;
-use Phalcon\Db\Adapter\Pdo\Factory;
-class ' . $table . ' extends \Phalcon\Mvc\Model{
-    public function initialize(){
-        $this->setDi(\PA::$di);
-        \PA::$di->set("plugin_table_db", Factory::load(' . $db_var . '));
-        $this->setConnectionService("plugin_table_db");
-    }
-}';
+        $file_body = '';
         if(!file_exists($model_file) || filesize($model_file) != strlen($file_body)) file_put_contents($model_file, $file_body);
         require $model_file;
         $this->model = new $model_class();

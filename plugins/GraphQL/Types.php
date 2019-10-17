@@ -22,8 +22,7 @@ class Types{
                     'IN'   => 'in',
                     'AND'  => 'and',
                     'OR'   => 'or',
-                    'LIKE' => 'like %?%', // 包含
-                    'PL'   => 'like ?%'   // 前缀包含
+                    'LIKE' => 'like'
                 ]
             ]
         ));

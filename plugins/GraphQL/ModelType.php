@@ -11,7 +11,8 @@ class ModelType extends ObjectType{
     {
         parent::__construct(
             [
-                'name'=>ucfirst(basename($name)),
+//                'name'=>ucfirst(basename($name)),
+                'name'=>$name,
                 'fields'=> static function() use ($name) {
                     $model = new $name();
                     # 查找关系

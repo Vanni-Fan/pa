@@ -56,7 +56,7 @@ class GraphQlController extends ApiController
                     name
                 }
             }
-            roles{
+            roles(filter:{where:{sub:[{key:"name",val:"%管理员%",op:LIKE},{key:"role_id",val:"2"}],op:OR}}){
                 role_id
                 name
                # router
@@ -151,8 +151,8 @@ class GraphQlController extends ApiController
                 ]
             )]
         );
-//        exit(\GraphQL\Utils\SchemaPrinter::doPrint($schema));
-        $rs = GraphQL::executeQuery($schema, $this->query);
+        exit(\GraphQL\Utils\SchemaPrinter::doPrint($schema));
+//        $rs = GraphQL::executeQuery($schema, $this->query);
         $this->view->data  = $rs->data;
         $this->view->error = $rs->errors;
     }
