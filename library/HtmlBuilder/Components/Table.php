@@ -9,23 +9,45 @@ class Table extends Element
     public $fixedTop       = false;
     public $height         = false; // 最大高度如果定义，那么则固定头部 fixedTop = 1
     
-    public $fixedLeft      = true;
-    public $fixedRight     = true;
+    public $fixedLeft      = true; // todo
+    public $fixedRight     = true; // todo
     
-    public $canEdit        = true;   // 是否可以编辑，1 表示永远可用，字符串表示数据行的字段为真，比如 canEdit = 'canEdit' ,那么数据行存在 canEdit 字段，并且字段为true时则显示编辑，否则不显示
-    public $canDelete      = false;   // 是否可以删除，1 表示永远可用，字符串表示数据行的字段为真
+//    public $canAdd         = '_canEdit';   // 数据行存在 _canEdit 字段，并且字段为true时则显示编辑，否则不显示
+    public $canDelete      = '_canDelete'; // 数据行存在 _canDelete 字段，并且字段为true是则显示删除，否则不显示
     public $selectMode     = 'single'; // 选择模式, null:不可选择，single:单选，multi:多选
     public $query          = null; // 当前查询条件，filter[ [field,operation,value],... ], sort[ [field,asc|desc],... ], limit[start, end]
-    public $fields         = [];// 字段定义[ [name:字段名, text:显示名, tooltip:提示符, sort:1(是否可排序), filter:1(是否可以添加过滤条件), edit:1(是否可编辑), width:null, show:1, type:编辑器类型, params:[编辑器的参数，必须、验证器等], icon:图标, class:额外的样式] ]
+
+    // 字段定义[ [name:字段名, text:显示名, tooltip:提示符, sort:1(是否可排序), filter:1(是否可以添加过滤条件), edit:1(是否可编辑), width:null, show:1, type:编辑器类型, params:[编辑器的参数，必须、验证器等], icon:图标, class:额外的样式] ]
+    /**
+     * 定义表的每一列的显示情况，每一列可以包含下面字段：
+     * [
+     *  name:字段名, 必须
+     *  text:显示名, 必须
+     *  tooltip:提示符, 可选，默认无
+     *  sort:是否可排序, 可选，默认0
+     *  filter:是否可以添加过滤条件, 可选，默认0
+     *  edit:是否可编辑，支持JS回调函数，如果不存在，则使用 canEdit 值，默认0
+     *  delete:是否可删除，支持JS回调函数，如果不存在，则使用 canDelete，默认0
+     *  width:列宽，可选，默认无
+     *  show:是否显示, 可选，默认1
+     *  render:JS的渲染器回调函数，可选，默认无
+     *  type:编辑器类型, 可选，默认text
+     *  params:编辑时附加的参数，比如[编辑器的参数，必须、验证器等], 可选，默认无
+     *  icon:表头图标, 可选，默认无
+     *  class:单元格上的自定义，可选，默认无
+     * ]
+     * @var array
+     */
+    public $fields         = [];
 
     public $createApi      = ''; // 创建数据的API
     public $queryApi       = ''; // 获得数据的API
     public $updateApi      = ''; // 编辑数据的API 其中 {id} 会被替换成真实 ID
     public $deleteApi      = ''; // 删除数据的API 其中 {id} 会被替换成真实 ID
 
-    public $verticalLine   = ''; // 垂直线
-    public $horizontalLine = ''; // 水平线
-    public $primary = 'id'; // 主键
+    public $verticalLine   = ''; // 垂直线 todo
+    public $horizontalLine = ''; // 水平线 todo
+    public $primary        = 'id'; // 主键，用于编辑和删除的替换ID
     
     public function __construct(string $name)
     {
