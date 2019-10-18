@@ -77,21 +77,16 @@ $this->html(/** @lang HTML */<<<'OUT'
 <div class="box box-primary" id="htmlbuilder-table-template" style="display:none;">
     <div class="box-header with-border">
         <h3 class="box-title"><?=$name?></h3>
+        <i class="text-gray table-description">数据源可以添加描述字段，这里是描述信息</i>
         <div class="box-tools pull-right">
             <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
             <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
-        </div><!--
-        <div class="btn-group" style="position: absolute;top:3px;right:70px;">
-          <button type="button" class="btn btn-info"><i class="check-all fa fa-square"></i> 全选</button>
-          <button type="button" class="btn btn-info"><i class="glyphicon glyphicon-transfer"></i> 反选</button>
-          <button type="button" class="btn btn-info"><i class="fa fa-trash-o"></i> 删除</button>
-          <button type="button" class="btn btn-info"><i class="fa fa-plus"></i> 添加</button>
-        </div> -->
+        </div>
         <div class="pull-right table-edit-btn" style="display: inline-block;margin-right:50px;">
-            <span onclick="HtmlBuilder_table_selectAll(this.getAttribute('data-id'),event)" class="text-light-blue"><i class="check-all fa fa-square-o"></i> 全选 </span>&nbsp;
-            <span onclick="HtmlBuilder_table_inverse(this.getAttribute('data-id'))" class="text-light-blue"><i class="glyphicon glyphicon-transfer"></i> 反选 </span>&nbsp;
-            <span onclick="HtmlBuilder_table_delItems(this.getAttribute('data-id'),HtmlBuilder_table_getSelected(this.getAttribute('data-id')))" class="text-red"><i class="fa fa-trash-o"></i> 删除 </span>&nbsp;
-            <a class="text-aqua"><i class="fa fa-plus"></i> 添加 </a>
+            <span onclick="HtmlBuilder_table_selectAll(this.getAttribute('data-id'),event)" class="text-light-blue select-el"><i class="check-all fa fa-square-o"></i> 全选 </span>&nbsp;
+            <span onclick="HtmlBuilder_table_inverse(this.getAttribute('data-id'))" class="text-light-blue select-el"><i class="glyphicon glyphicon-transfer"></i> 反选 </span>&nbsp;
+            <span onclick="HtmlBuilder_table_delItems(this.getAttribute('data-id'),HtmlBuilder_table_getSelected(this.getAttribute('data-id')))" class="text-red del-el"><i class="fa fa-trash-o"></i> 删除 </span>&nbsp;
+            <span class="text-aqua add-el"><a href=""><i class="fa fa-plus"></i> 添加 </a></span>
         </div>
     </div>
     <div class="box-body">
@@ -232,8 +227,20 @@ function HtmlBuilder_table_init(id){
     
     // 初始化表头
     var html = '';
-    obj.find('.table-edit-btn>*').attr('data-id', id);
-    obj.find('.box-header a').attr('href', options.createApi);
+    if(options.canEdit){
+        obj.find('.table-edit-btn>*').attr('data-id', id);
+        obj.find('.add-el a').attr('href', options.createApi);
+    }else{
+        obj.find('.del-el,.add-el').remove();
+    }
+    if(!options.selectMode){
+        obj.find('.select-el').remove();
+    }
+    if(options.description){
+        obj.find('.table-description').text(options.description);
+    }else{
+        obj.find('.table-description').remove();
+    }
     
     for(var index in options.fields){
         var field = options.fields[index];
@@ -450,13 +457,15 @@ function HtmlBuilder_table_setData(data, id) {
     for(var row in data.list){
         var tr_class = row % 2 ? 'odd' : 'even';
         var primary = data.list[row][options.primary || 'id'];
-        var tr = '<tr data-id="' + primary + '" onclick="HtmlBuilder_table_selectRow($(this))" class="' + tr_class + '">';
+        var canSelect = options.selectMode ? 'onclick="HtmlBuilder_table_selectRow($(this))"' : '';
+        var tr = '<tr data-id="' + primary + '" ' + canSelect + ' class="' + tr_class + '">';
         for(var field in data.list[row]){
             if(['canEdit','canDelete'].indexOf(field)>-1) continue;
             var field_index = options.fields.findIndex(function(_v){ return _v.name === field });
             // if(field_index === -1) continue; // 其实一定是会有的
             var def = options.fields[field_index];
-            var cls = (def.class ? (' class="' + def.class + '"') : '');
+            if(def.hasOwnProperty('show') && def.show === 0) continue;
+            var cls = def.hasOwnProperty('class') ? (' class="' + def.class + '"') : '';
             tr += '<td' + cls + '>' + data.list[row][field] + '</td>';
         }
         if(options.canEdit){
@@ -477,7 +486,7 @@ function HtmlBuilder_table_setData(data, id) {
     var end = offset + parseInt((data.list.length < data.size ? data.list.length : data.size)) - 1;
     obj.find('.page-status').text(offset + '-' + end + ' of ' + data.total);
     obj.find('.dataTables_paginate').twbsPagination({
-        totalPages: Math.ceil(data.total/data.size),
+        totalPages: Math.ceil(data.total/data.size)||1,
         startPage: data.page,
         onPageClick: function (event, page) {
             var tmp = Object.assign({}, window[id].query.limit);

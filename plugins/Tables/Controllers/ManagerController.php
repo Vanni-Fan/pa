@@ -8,11 +8,15 @@ use HtmlBuilder\Layouts;
 use HtmlBuilder\Parser\AdminLte\Parser;
 use HtmlBuilder\Validate;
 use PDO;
+use Phalcon\Db\ColumnInterface;
 use Power\Controllers\AdminBaseController;
 use PA;
 use Power\Models\Roles;
 use Power\Models\Rules;
+use Power\Models\Users;
 use Tables\PluginsTableSources;
+
+
 
 class ManagerController extends AdminBaseController
 {
@@ -41,7 +45,7 @@ class ManagerController extends AdminBaseController
         
         $parser = new Parser();
         $this->view->content = $parser->parse(
-            Components::table('数据源列表')
+            Components::table('数据源集合')
                 ->query(['limit'=>['page'=>1,'size'=>$this->page_size]])
                 ->queryApi($this->getUrl(['command'=>'getList','type'=>'source']))
                 ->createApi($this->getUrl(['command'=>'show','type'=>'source','sub_command'=>'new']))
@@ -49,19 +53,19 @@ class ManagerController extends AdminBaseController
                 ->deleteApi($this->getUrl(['command'=>'delete','type'=>'source','sub_command'=>'show','id'=>'{id}']))
                 ->fields(
                     [
-                          ['name'=>'id','text'=>'#'],
+                          ['name'=>'id','text'=>'id','sort'=>1, 'filter'=>1],
                           ['name'=>'name','text'=>'名称','sort'=>1,'filter'=>1],
                           ['name'=>'type','text'=>'类型','sort'=>1,'filter'=>1],
                           ['name'=>'host','text'=>'主机','sort'=>1,'filter'=>1],
                           ['name'=>'port','text'=>'端口','sort'=>1,'filter'=>1],
                           ['name'=>'user','text'=>'用户','sort'=>1,'filter'=>1],
                           ['name'=>'password','text'=>'密码','sort'=>1,'filter'=>1],
-                          ['name'=>'path','text'=>'模型文件位置','sort'=>1,'filter'=>1],
+                          ['name'=>'path','text'=>'模型文件的目录','sort'=>1,'filter'=>1],
                           ['name'=>'status','text'=>'状态','sort'=>1,'show'=>0],
                     ]
                 )->primary('id')
             ,
-            Components::table('菜单列表')
+            Components::table('数据表集合')
                 ->query(['limit'=>['page'=>1,'size'=>$this->page_size]])
                 ->queryApi($this->getUrl(['command'=>'getList','type'=>'menu']))
                 ->createApi($this->getUrl(['command'=>'show','type'=>'menu','sub_command'=>'new']))
@@ -69,12 +73,19 @@ class ManagerController extends AdminBaseController
                 ->deleteApi($this->getUrl(['command'=>'delete','type'=>'menu','sub_command'=>'show','id'=>'{id}']))
                 ->fields(
                     [
-                        ['name'=>'id','text'=>'#','sort'=>1, 'filter'=>1],
-                        ['name'=>'rule_id','text'=>'菜单ID'],
-                        ['name'=>'source_id','text'=>'数据源'],
+                        ['name'=>'id','text'=>'id','sort'=>1, 'filter'=>1],
+                        ['name'=>'source_id','text'=>'所属数据源','show'=>0],
+                        ['name'=>'source_name','text'=>'所属数据源'],
+                        ['name'=>'rule_id','text'=>'菜单名称','show'=>0],
+                        ['name'=>'rule_name','text'=>'菜单名称'],
                         ['name'=>'table_name','text'=>'表名','sort'=>1, 'filter'=>1],
+                        ['name'=>'model_file','text'=>'模型文件','filter'=>1],
+                        ['name'=>'action','text'=>'操作','class'=>'text-center']
                     ]
-                )
+                )->canEdit(false)
+                 ->canDelete(false)
+                 ->selectMode('')
+                 ->description('在【操作】栏目中【启动编辑】，将生成新的权限菜单页面，在里面可以对表进行增删改查。默认菜单只分配给管理员！')
         );
         
         $parser->setResources($this);
@@ -112,19 +123,29 @@ class ManagerController extends AdminBaseController
         $data = call_user_func([$model,'find'], $where);
         if($this->params['type'] == 'menu'){
 //            $data = [];
-            $data = array_map(function($v){
-                $rule = Rules::findFirstByRuleId($v['rule_id']);
-                $source = PluginsTableSources::findFirstById($v['source_id']);
-                $v['rule_id'] = $rule ? $rule->name : $v['rule_id'];
-                $v['source_id'] = $source ? $source->name : $v['source_id'];
-                return $v;
-            },$data->toArray());
+            $data = [
+                ['id'=>1,'source_id'=>'','source_name'=>'系统源','rule_id'=>1,'rule_name'=>'<a href="/admin/menu/4/index">Roles表数据</a>','table_name'=>'roles','model_file'=>'Roles.php','action'=>'<a href="">禁用</a>'],
+                ['id'=>2,'source_id'=>'','source_name'=>'系统源','rule_id'=>1,'rule_name'=>'','table_name'=>'rules','model_file'=>'Rules.php','action'=>'<a href="">开启</a>'],
+                ['id'=>2,'source_id'=>'','source_name'=>'系统源','rule_id'=>1,'rule_name'=>'<a href="/admin/menu/7/index">系统配置</a>','table_name'=>'configs','model_file'=>'Configs.php','action'=>'<a href="">启用</a>'],
+                ['id'=>3,'source_id'=>'','source_name'=>'AAA','rule_id'=>1,'rule_name'=>'','table_name'=>'aaa','model_file'=>'<a href="">生成模型</a>','action'=>''],
+                ['id'=>4,'source_id'=>'','source_name'=>'AAA','rule_id'=>1,'rule_name'=>'','table_name'=>'aaa','model_file'=>'<a href="">生成模型</a>','action'=>''],
+                ['id'=>4,'source_id'=>'','source_name'=>'AAA','rule_id'=>1,'rule_name'=>'','table_name'=>'aaa','model_file'=>'aaa.php','action'=>'<a href="">启用</a>'],
+                ['id'=>4,'source_id'=>'','source_name'=>'AAA','rule_id'=>1,'rule_name'=>'','table_name'=>'aaa','model_file'=>'','action'=>''],
+            ];
+//            $data = array_map(function($v){
+//                $rule = Rules::findFirstByRuleId($v['rule_id']);
+//                $source = PluginsTableSources::findFirstById($v['source_id']);
+//                $v['rule_id'] = $rule ? $rule->name : $v['rule_id'];
+//                $v['source_id'] = $source ? $source->name : $v['source_id'];
+//                return $v;
+//            },$data->toArray());
         }else{
             $data = array_map(function($v){
                 if(!$v['status']){
                     $v['canEdit'] = 0;
                     $v['canDelete'] = 0;
                 }
+                $v['password'] = '*******';
                 unset($v['status']);
                 return $v;
             },$data->toArray());
