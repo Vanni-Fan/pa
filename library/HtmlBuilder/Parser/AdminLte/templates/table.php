@@ -69,6 +69,33 @@ tr.htmlbuild-table-header{
     background-color: #3c8dbc;
     color:white;
 }
+.filter-set{
+    margin-left:20px;
+    margin-top: 5px;
+    border-left-style: dashed;
+    border-left-width:1px;
+    border-left-color: #cccccc;
+    padding-left: 5px;
+    margin-bottom: 10px;
+}
+.filter-set-before{
+    width: 20px;background-color: white;margin-left: -15px;font-size: 20px;display: block;position: absolute;color:#cccccc;
+}
+.filter-set-condition{
+    margin-left:10px;
+}
+.filter-set-after{
+    font-size: 20px;background-color: white;position: relative;margin-left: -15px;height: 10px;color:#cccccc;
+}
+.dropdown-toggle .fa-caret-down{
+    line-height: 20px;
+}
+.add-filter-template{
+    margin-left: 10px;
+}
+.filters{
+    min-height: 10px;
+}
 OUT
 );
 
@@ -86,6 +113,7 @@ $this->html(/** @lang HTML */<<<'OUT'
             <span onclick="HtmlBuilder_table_selectAll(this.getAttribute('data-id'),event)" class="text-light-blue select-el"><i class="check-all fa fa-square-o"></i> 全选 </span>&nbsp;
             <span onclick="HtmlBuilder_table_inverse(this.getAttribute('data-id'))" class="text-light-blue select-el"><i class="glyphicon glyphicon-transfer"></i> 反选 </span>&nbsp;
             <span onclick="HtmlBuilder_table_delItems(this.getAttribute('data-id'),HtmlBuilder_table_getSelected(this.getAttribute('data-id')))" class="text-red del-el"><i class="fa fa-trash-o"></i> 删除 </span>&nbsp;
+            <span onclick="HtmlBuilder_table_delItems(this.getAttribute('data-id'),HtmlBuilder_table_getSelected(this.getAttribute('data-id')))" class="text-light-blue filter-el"><i class="fa fa-filter"></i> 筛选 </span>
             <span class="text-aqua add-el"><a href=""><i class="fa fa-plus"></i> 添加 </a></span>
         </div>
     </div>
@@ -119,31 +147,87 @@ $this->html(/** @lang HTML */<<<'OUT'
         </div>
     </div>
 </div>
-<div id="htmlbuilder-table-filter-template" class="input-group margin" style="display:none;">
-    <div class="input-group-btn">
-        <span type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" style="width:110px;"><span class="current-operation">操作符</span><span class="fa fa-caret-down pull-right"></span></span>
-        <ul class="dropdown-menu">
-            <li class="disabled"><a>选择一个操作符</a></li>
-            <li class="divider"></li>
-            <li value="=" class="active" onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">等于</a></li>
-            <li value=">"  onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">大于</a></li>
-            <li value=">=" onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">大于或等于</a></li>
-            <li value="<"  onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">小于</a></li>
-            <li value="<=" onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">小于或等于</a></li>
-            <li value="!=" onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">不等于</a></li>
-            <li value="%"  onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">包含</a></li>
-        </ul>
+<div id="htmlbuilder-table-filter-template" style="display:none;">
+    <div about="条件集合" class="filter-set filter-set-template">
+        <div about="前括号">
+            <span class="filter-set-before">︹</span>
+            <div class="btn-group filter-set-condition">
+              <button type="button" class="btn btn-info" onclick="HtmlBuilder_table_changeFilterSetType($(this))">条件集合（全部匹配）</button>
+              <button type="button" class="btn btn-info" onclick="HtmlBuilder_table_delFilter($(this),'set')"><i class="fa fa-close"></i></button>
+            </div>
+        </div>
+        
+        <div about="所有子条件的集合（直接添加：基本条件样式）" class="filters"></div>
+        
+        <div about="添加子条件的按钮（直接复制：添加子条件的按钮）" class="add-filter" ></div>
+        
+        <div about="后括号" class="filter-set-after">︺</div>
     </div>
-    <input type="text" class="form-control">
-    <span class="input-group-btn">
-        <span class="badge bg-yellow filter-close" onclick="HtmlBuilder_table_delFilter($(this));"><span class="fa fa-close"></span></span>
-        <span type="button" class="btn btn-info" onclick="HtmlBuilder_table_addFilter($(this));" style="width:45px;"><span class="fa fa-check filter-edit-icon"></span></span>
-    </span>
+
+    <div about="基本条件样式" class="base-filter-template">
+        <div class="input-group margin">
+            <div class="input-group-btn">
+                <span type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" style="width:150px;border-right:none;">
+                    <span class="current-operation">字段</span><span class="fa fa-caret-down pull-right"></span>
+                </span>
+                <ul class="dropdown-menu">
+                    <li class="disabled"><a>选择一个字段</a></li>
+                    <li class="divider"></li>
+                    <li value="=" class="active" onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">名称</a></li>
+                    <li value=">"  onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">类型</a></li>
+                    <li value=">=" onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">主机</a></li>
+                    <li value="<"  onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">端口</a></li>
+                    <li value="<=" onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">用户</a></li>
+                </ul>
+            </div>
+            <div class="input-group-btn">
+                <span type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" style="width:110px;border-radius:0;border-width:1px 0 1px 1px;"><span class="current-operation">操作符</span><span class="fa fa-caret-down pull-right"></span></span>
+                <ul class="dropdown-menu">
+                    <li class="disabled"><a>选择一个操作符</a></li>
+                    <li class="divider"></li>
+                    <li value="=" class="active" onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">等于</a></li>
+                    <li value=">"  onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">大于</a></li>
+                    <li value=">=" onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">大于或等于</a></li>
+                    <li value="<"  onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">小于</a></li>
+                    <li value="<=" onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">小于或等于</a></li>
+                    <li value="!=" onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">不等于</a></li>
+                    <li value="%"  onclick="HtmlBuilder_table_opetationClick($(this));"><a href="#">包含</a></li>
+                </ul>
+            </div>
+            <input type="text" class="form-control" style="border-color:#00acd6;" placeholder="查询值" oninput="HtmlBuilder_table_filterValueChange(this)">
+            <span class="input-group-btn">
+              <button type="button" class="btn btn-info" onclick="HtmlBuilder_table_delFilter($(this),'base')"><i class="fa fa-close"></i></button>
+            </span>
+        </div>
+    </div>
+
+    <div about="添加子条件的按钮" class="add-filter-template">
+        <div class="btn-group">
+            <div class="btn-group">
+            <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-plus"></i> 添加条件</span><span class="fa fa-caret-down pull-right">
+            </button>
+            <ul class="dropdown-menu">
+                <li value="BASE" onclick="HtmlBuilder_table_addFilter($(this),'BASE')"><a href="#">标准条件</a></li>
+                <li class="divider"></li>
+                <li value="AND"  onclick="HtmlBuilder_table_addFilter($(this),'AND')"><a href="#">条件集合（全部匹配）</a></li>
+                <li value="OR"   onclick="HtmlBuilder_table_addFilter($(this),'OR')"><a href="#">条件集合（部分匹配）</a></li>
+            </ul>
+            </div>
+        </div>
+    </div>
 </div>
 OUT
 );
 
 echo '<div id="', $id , '"></div>';
+
+$this->html('
+<div id="VANNI">
+<condition-add-btn @add="aaa"></condition-add-btn>
+<condition :value="s_cond" :fields="s_fields" @del="bbb"></condition>
+</div>
+');
 
 // Table 使用的脚本，缓存
 $this->script(/** @lang JavaScript 1.5 */ <<<'OUT'
@@ -323,8 +407,37 @@ function HtmlBuilder_table_sort(id, field){
     HtmlBuilder_table_query(id);
 }
 
-// 打开设置过滤条件的弹窗
+
+// 打开设置过滤条件的弹窗2
 function HtmlBuilder_table_setFilter(id, field) {
+    // 固定的添加项目，用于新增
+    var add = $('#htmlbuilder-table-filter-template .add-filter-template').clone();
+    
+    showDialogs({
+        title:'编辑筛选条件！',
+        body: $('<div><div class="filters"></div></div>').append(add),
+        ok:{
+            text:'确定',
+            click:HtmlBuilder_table_filterConfirm
+        },
+        close:{
+            text:'取消',
+            click:function(o){o.close()}
+        }
+    });
+}
+
+// 切换关系，AND <=> OR
+function HtmlBuilder_table_changeFilterSetType(obj){
+    if(obj.text()==='条件集合（全部匹配）'){
+        obj.text('条件集合（部分匹配）');
+    }else{
+        obj.text('条件集合（全部匹配）');
+    }
+}
+
+// 打开设置过滤条件的弹窗
+function HtmlBuilder_table_setFilter__OLD(id, field) {
     var filters = window[id].query.filters.filter(function(_v){
         return _v.name === field;
     });
@@ -335,7 +448,7 @@ function HtmlBuilder_table_setFilter(id, field) {
         HtmlBuilder_table_addFilterItem(body, id, field, index, filters[index].operation, filters[index].value);
     }
     // 固定的添加项目，用于新增
-    var add = $('#htmlbuilder-table-filter-template').clone().css('display','table').removeAttr('id')
+    var add = $('#htmlbuilder-table-filter-template').clone().css('display','block').removeAttr('id')
         .attr('data-id',id)
         .attr('data-field',field)
         .attr('data-index',parseInt(index)+1).addClass('new-filter');
@@ -360,7 +473,7 @@ function HtmlBuilder_table_setFilter(id, field) {
 
 // 添加一个条件到过滤器中
 function HtmlBuilder_table_addFilterItem(obj, id, field, index, operation, value){
-    var item = $('#htmlbuilder-table-filter-template').clone().css('display','table').removeAttr('id')
+    var item = $('#htmlbuilder-table-filter-template').clone().css('display','block').removeAttr('id')
         .attr('data-id',id)
         .attr('data-field',field)
         .attr('data-index',index);
@@ -379,7 +492,14 @@ function HtmlBuilder_table_opetationClick(obj){
 }
 
 // 删除一个过滤条件
-function HtmlBuilder_table_delFilter(obj) {
+function HtmlBuilder_table_delFilter(obj,type) {
+    if(type==='set'){
+        obj.parent().parent().parent().remove();
+    }else{
+        obj.parent().parent().remove();
+    }
+    return;
+    
     var dom = obj.parent().parent();
     var field = dom.data('field');
     var index = window.current_filters.findIndex(function(_v){ return _v.name === field;});
@@ -390,7 +510,41 @@ function HtmlBuilder_table_delFilter(obj) {
 }
 
 // 添加一个过滤条件
-function HtmlBuilder_table_addFilter(obj) {
+function HtmlBuilder_table_addFilter(obj,type) {
+    var container = obj.parent().parent().parent().parent().parent();
+    if(type === 'BASE'){
+        var add = $('#htmlbuilder-table-filter-template .base-filter-template').clone();
+    }else{
+        var add = $('#htmlbuilder-table-filter-template .filter-set-template').clone();
+        add.find('.add-filter').replaceWith(
+            $('#htmlbuilder-table-filter-template .add-filter-template').clone()
+        );
+    }
+    container = container.find('>.filters');
+    container.append(add);
+    
+    console.log(type);
+    return;
+    
+    if(new_dom.find('.filter-close').length){ // 编辑
+        var filters = new_dom.parent().find('>div');
+        for(var index=0; index<filters.length; index++){
+            if(filters[index] == new_dom[0]) break;
+        }
+        window.current_filters[index] = {name:field,operation:operation,value:value};
+        // console.log(index,window.current_filters);
+    }else{ // 新加
+        var old_dom = new_dom.parent().find('.old-filters');
+        // 添加到当前过滤器中
+        window.current_filters.push({name:field,operation:operation,value:value});
+        // 添加到Dom中
+        HtmlBuilder_table_addFilterItem(old_dom,id,field,old_dom.find('>div').length,operation,value);
+        // 恢复初始值
+        new_dom.find('input').val('');
+        new_dom.find('.current-operation').text('操作符');
+    }
+}
+function HtmlBuilder_table_addFilter__OLD(obj) {
     var new_dom = obj.parent().parent();
     var id = new_dom.data('id');
     var field = new_dom.data('field');
@@ -524,6 +678,43 @@ function HtmlBuilder_table_fixedColumnWidth(id){
 
 OUT
 );
+
+
+// Filter VUE版本，缓存
+$this->js('/dist/plugins/vue/vue.js');
+$this->js('/dist/vue.component.js');
+$this->script(/** @lang JavaScript 1.5 */ <<<'OUT'
+
+var v_filter = new Vue({
+    data:function(){
+        return {
+            s_cond:{
+                op:'>=',
+                key:'bb',
+                val:'哈哈'
+            },
+            s_fields:{
+                aa:'字段1',
+                bb:'字段2',
+                cc:'字段3',
+                dd:'字段4'
+            }
+        };
+    },
+    el:'#VANNI',
+    methods:{
+        aaa:function(val){
+            console.log("上层已经捕获到时间",val)
+        },
+        bbb:function(type) {
+            console.log('删除了',type);
+        }
+    }
+});
+
+OUT
+);
+
 
 // 初始化脚本，不缓存
 $this->script(/** @lang JS */"

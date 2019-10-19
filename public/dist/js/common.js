@@ -71,7 +71,6 @@ function showDialogs(params, name){
     obj.css('transition',  'padding-top 0.5s ease-out');
 
     // 监控内容变化，动态调整位置
-    console.log(params);
     if(!params.height) {
         var mo = new MutationObserver(function () {
             var top = ($(window).height() - obj.find('.modal-dialog').height() - 60) / 2; // 60 为内容上下30的Padding
