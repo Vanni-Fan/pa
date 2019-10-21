@@ -20,6 +20,7 @@ class Settings {
         $sql1 = 'CREATE TABLE IF NOT EXISTS "plugins_table_sources" (
           "id" INTEGER NOT NULL,
           "name" TEXT,
+          "dbname" TEXT,
           "type" TEXT,
           "host" TEXT,
           "port" TEXT,
@@ -33,6 +34,7 @@ class Settings {
           "id" INTEGER NOT NULL,
           "rule_id" INTEGER,
           "source_id" integer,
+          "model_file" TEXT,
           "table_name" TEXT,
           PRIMARY KEY ("id")
         );';
@@ -44,7 +46,7 @@ class Settings {
         PA::$db->execute($sql1);
         # 系统的数据源默认插入，但是不可编辑
         $sys_ds = [
-            'name'     => "SYSTEM:".PA::$config['pa_db']['dbname'],
+            'name'     => PA::$config['pa_db']['dbname'],
             'type'     => PA::$config['pa_db']['adapter'],
             'host'     => PA::$config['pa_db']['host']??'',
             'port'     => PA::$config['pa_db']['port'],
@@ -53,8 +55,8 @@ class Settings {
             'path'     => POWER_BASE_DIR . 'models/'
         ];
         PA::$db->execute(
-            'INSERT INTO "plugins_table_sources"("name","type","host","port","user","password","path","status")
-              VALUES(:name,:type,:host,:port,:user,:password,:path,0)',
+            'INSERT INTO "plugins_table_sources"("name","dbname","type","host","port","user","password","path","status")
+              VALUES("系统",:name,:type,:host,:port,:user,:password,:path,0)',
             $sys_ds
         );
         PA::$db->execute($sql2);

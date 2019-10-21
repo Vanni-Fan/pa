@@ -32,7 +32,21 @@ class ManagerController extends AdminBaseController
         unset($this->params['Rule']);
         return parent::initialize();
     }
-    
+
+    /**
+     * 生成模型文件
+     */
+    public function make_model(){
+
+    }
+
+    /**
+     * 生成菜单
+     */
+    public function generate_rule(){
+
+    }
+
     /**
      * 从数据源同步表到Menus表中
      */
@@ -41,7 +55,7 @@ class ManagerController extends AdminBaseController
         $source_info = PluginsTableSources::findFirst($source_id);
         $arr = [
             'host'     => $source_info->host,
-            'dbname'   => $source_info->name,
+            'dbname'   => $source_info->dbname,
             'port'     => $source_info->port,
             'username' => $source_info->user,
             'password' => $source_info->password,
@@ -68,10 +82,22 @@ class ManagerController extends AdminBaseController
         $this->response->redirect($this->url('display',['item_id'=>$this->item_id,'action'=>'set','event'=>'setting']));
     }
 
+    /**
+     * 获得子事件的URL
+     * @param array $param
+     * @param string $method
+     * @return string
+     * @throws \Exception
+     */
     private function getUrl(array $param, $method='GET'){
         return $this->url($method=='GET'?'display':'update', array_merge($this->params, $param));
     }
 
+    /**
+     * 设置主页面
+     * @return mixed
+     * @throws \Exception
+     */
     public function settingsAction(){
         $this->title = 'Tables插件设置';
         if($this->getParam('command')){
@@ -91,6 +117,7 @@ class ManagerController extends AdminBaseController
                     [
                           ['name'=>'id','text'=>'id','sort'=>1, 'filter'=>1],
                           ['name'=>'name','text'=>'名称','sort'=>1,'filter'=>1],
+                          ['name'=>'dbname','text'=>'数据库名','sort'=>1,'filter'=>1],
                           ['name'=>'type','text'=>'类型','sort'=>1,'filter'=>1],
                           ['name'=>'host','text'=>'主机','sort'=>1,'filter'=>1],
                           ['name'=>'port','text'=>'端口','sort'=>1,'filter'=>1],
@@ -135,6 +162,9 @@ OUT
         $this->render();
     }
 
+    /**
+     * 获得列表数据 Ajax
+     */
     public function getList(){
         $size  = $_POST['limit']['size']??$this->page_size;
         $page  = $_POST['limit']['page']??1;
@@ -169,17 +199,17 @@ OUT
                 $v['rule_name']   = $rule ? $rule->name : '';
                 $v['source_name'] = $source ? $source->name : '';
                 if(!$v['model_file']){
-                    $v['model_file'] = '<a href="">生成模型</a>';
+                    $url1 = $this->getUrl(['command'=>'make_model']);
+                    $v['model_file'] = '<a href="'.$url1.'">生成模型</a>';
                 }
-                $v['action'] = '<a href="">启用</a>';
+                $url2 = $this->getUrl(['command'=>'generate_rule']);
+                $v['action'] = '<a href="'.$url2.'">启用</a>';
                 return $v;
             },$data->toArray());
 
         }else{
             $data = array_map(function($v){
                 if(!$v['status']){
-                    $v['canEdit'] = 0;
-                    $v['canDelete'] = 0;
                 }
                 $v['password'] = '*******';
                 unset($v['status']);
@@ -202,6 +232,10 @@ OUT
         );
     }
 
+    /**
+     * 显示列表
+     * @throws \Exception
+     */
     public function show(){
         $model = $this->params['type'] == 'menu' ? \Tables\PluginsTableMenus::class : \Tables\PluginsTableSources::class;
         $default = $this->params['sub_command'] == 'edit' ? call_user_func([$model,'findFirst'], $this->params['id']) : new \stdClass();
@@ -281,6 +315,10 @@ OUT
         $this->render('manager/source-edit');
     }
 
+    /**
+     * 更新
+     * @throws \Exception
+     */
     public function update(){
         if($this->params['type'] == 'menu'){
             if($this->params['sub_command']=='new'){
@@ -323,6 +361,9 @@ OUT
         $this->response->redirect($this->url('display',['item_id'=>$this->item_id,'action'=>'set','event'=>'setting']));
     }
 
+    /**
+     * 删除
+     */
     public function delete(){
         $model = $this->params['type'] == 'menu' ? \Tables\PluginsTableMenus::class : \Tables\PluginsTableSources::class;
         if(strpos($this->params['id'],',')){

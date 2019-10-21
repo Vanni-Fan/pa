@@ -473,15 +473,14 @@ function HtmlBuilder_table_setData(data, id) {
         var primary = data.list[row][options.primary || 'id'];
         var canSelect = options.selectMode ? 'onclick="HtmlBuilder_table_selectRow($(this))"' : '';
         var tr = '<tr data-id="' + primary + '" ' + canSelect + ' class="' + tr_class + '">';
-        for(var field in data.list[row]){
-            var field_index = options.fields.findIndex(function(_v){ return _v.name === field });
-            // if(field_index === -1) continue; // 其实一定是会有的
-            var def = options.fields[field_index];
+        
+        for(var i in options.fields){
+            var def = options.fields[i]; // defined
+            var val = data.list[row][def.name] || ''; // 当前字段值，不存在则为空
+            val = def.render ? eval(def.render)(val) : val; // 使用 render 函数处理内容
             var cls = def.hasOwnProperty('class') ? def.class : '';
             cls += (def.hasOwnProperty('show') && def.show == 0) ? ' hidden' : '';
-            
-            var val = def.render ? eval(def.render)(data.list[row][field]) : data.list[row][field]; // 使用 render 函数处理内容
-            tr += '<td data-field="' + field + '" class="' + cls + '">' + val + '</td>';
+            tr += '<td data-field="' + def.name + '" class="' + cls + '">' + val + '</td>';
         }
         if(options.canEdit){
             var updateApi = options.updateApi.replace('{id}', primary);
