@@ -38,7 +38,7 @@ class FetchData{
             $params['limit']  = $args['filter']['limit'][1];
 
             self::setRelateCondition($model, $source, $params);
-            self::parseWhere(call_user_func([$model,'getInstance']), $args['filter'], $params);
+            $model->parseWhere($args['filter'], $params);
 //            echo "查询条件：",var_export($params,1);
         }else{
 //            echo "查一条\n";
@@ -73,8 +73,8 @@ class FetchData{
         $model = call_user_func([$info->returnType->ofType->model,'getInstance']);
         $params['offset'] = $args['filter']['limit'][0] ?? 0;
         $params['limit']  = $args['filter']['limit'][1] ?? 10;
-
-        self::parseWhere($model, $args['filter'], $params);
+        
+        $model->parseWhere($args['filter'], $params);
         return call_user_func([$model,'find'],$params);
     }
 
@@ -118,73 +118,5 @@ class FetchData{
 //        echo "查询".get_class($model).'的外键定义'.print_r($return,1)."\n\n\n";
         return $return;
     }
-
-    /**
-     * 根据对象模型，设置查询差数，并返回预编译的SQL部分
-     * @param PowerModelBase $model 对象模型
-     * @param array $conditions 嵌套的查询条件
-     * @param array &$params 分析的填充参数用的查询数组
-     * @param string $op 首层的条件关系
-     * @throws \Exception
-     */
-    public static function parseWhere(PowerModelBase $model, array $conditions, array &$params, $op='AND'){
-        if(!isset($conditions['where']) && !isset($conditions['key'], $conditions['val'])) return;
-        if(isset($params['conditions'])){
-            $where_str = &$params['conditions'];
-        }else{
-            $params[0] = $params[0]??'';
-            $where_str = &$params[0];
-        }
-        
-        if(isset($conditions['key'], $conditions['val'])){
-            $sub_where = ['key'=>$conditions['key'], 'op'=>$conditions['op']??'=', 'val'=>$conditions['val']];
-            if(!empty($conditions['where']) && is_array($conditions['where'])){
-                $conditions['where'] = ['op'=>$op, 'sub'=>[$sub_where,$conditions['where']]];
-            }else{
-                $conditions['where'] = $sub_where;
-            }
-        }
-        if($conditions['where']) $params['bind'] = $params['bind'] ?? [];
-//        print_r($conditions['where']);
-//        return;
-        $sub_where_str = self::getParseWhereSql($model, $conditions['where'],$params);
-        $where_str = $where_str ? "$where_str $op $sub_where_str" : $sub_where_str;
-    }
-
-    /**
-     * 根据对象模型，设置查询差数，并返回预编译的SQL部分
-     * @param PowerModelBase $model
-     * @param array $conditions
-     * @param array $params
-     * @return string
-     * @throws \Exception
-     */
-    private static function getParseWhereSql(PowerModelBase $model, array $conditions, array &$params): string
-    {
-        $fields = $model->fields();
-        if(!empty($conditions['sub']) && is_array($conditions['sub'])){
-            return '('.implode(' '.$conditions['op'].' ', array_map(function($v) use($model, &$params, &$fields){
-                if(!empty($v['sub']) && is_array($v['sub'])) return self::getParseWhereSql($model, $v, $params);
-                return self::setParamsAndReturnWhere($v, $params, $fields);
-            },$conditions['sub'])).')';
-        }
-        return self::setParamsAndReturnWhere($conditions, $params, $fields);
-    }
-
-    /**
-     * 设置单个参数，并返回预编译的SQL部分
-     * @param array $conditions
-     * @param array $params
-     * @param array $fields
-     * @return string
-     * @throws \Exception
-     */
-    private static function setParamsAndReturnWhere(array $conditions, array &$params, array &$fields): string
-    {
-        if(!array_key_exists($conditions['key'], $fields)) throw new \Exception('Field:['.$conditions['key'].'] not exists!');
-        $bind_index = count($params['bind']);
-        $params['bind'][$bind_index] = $conditions['val'];
-//        $params['bindTypes'][$bind_index] = $fields[$conditions['key']];
-        return $conditions['key'] . ' ' . ($conditions['op']??'=') . ' ?'.$bind_index;
-    }
+    
 }

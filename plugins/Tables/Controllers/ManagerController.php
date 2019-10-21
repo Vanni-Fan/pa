@@ -103,13 +103,12 @@ class ManagerController extends AdminBaseController
         ];
 
         # 条件
+        $model = $this->params['type'] == 'menu' ? \Tables\PluginsTableMenus::class : \Tables\PluginsTableSources::class;
         if(isset($_POST['filters'])){
-            foreach($_POST['filters']??[] as $filter){
-                $where['conditions'] .= $filter['name'] . $filter['operation'] . ' :'.$filter['name'].':';
-                $where['bind'][$filter['name']] = $filter['value'];
-            }
+            call_user_func_array([$model,'parseWhere'],[['where'=>&$_POST['filters']], &$where]);
+//            $model->parseWhere($_POST['filters'], $where);
         }
-
+//        print_r($where);
         # 排序
         if(isset($_POST['sort'])){
             $where['order'] = '';
@@ -118,8 +117,7 @@ class ManagerController extends AdminBaseController
             }
             $where['order'] = substr($where['order'],0,-1);
         }
-
-        $model = $this->params['type'] == 'menu' ? \Tables\PluginsTableMenus::class : \Tables\PluginsTableSources::class;
+        
         $data = call_user_func([$model,'find'], $where);
         if($this->params['type'] == 'menu'){
 //            $data = [];

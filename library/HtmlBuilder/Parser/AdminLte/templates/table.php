@@ -262,10 +262,6 @@ function HtmlBuilder_table_init(id){
         if(!field.show) continue;
         var sortStatus = '';
         var filterStatus = '';
-        if(field.filter) {
-            var filter_index = options.query.filters.findIndex(function(_v){ return _v.name === field.name; });
-            filterStatus = '<i onclick="HtmlBuilder_table_setFilter(\'' + id + '\',\'' + field.name + '\')" class="fa fa-filter text-' + (filter_index === -1 ? 'gray' : 'info') + '"></i>';
-        }
         if(field.sort){
             var sort_index = options.query.sort.findIndex(function(_v){ return _v.name === field.name; });
             if(sort_index === -1){
@@ -348,13 +344,22 @@ function HtmlBuilder_table_setFilter(id, field) {
             text:'确定',
             click:function(o){ //HtmlBuilder_table_filterConfirm
                 var f = window['FILTERS_'+id].getFilters();
-                window[id].query.filters = {
-                    op:'AND',
-                    sub:f
-                };
-                HtmlBuilder_table_query(id);
+                if(!window['FILTERS_'+id].checkFilters(f)){
+                    showDialogs({
+                        body:'有些条件不完整，请修复',
+                        width:'200px',
+                        delay:2000
+                    },'sub');
+                    return;
+                }
+                if(f.length>0){
+                    window[id].query.filters = {
+                        op:'AND',
+                        sub:f
+                    };
+                    HtmlBuilder_table_query(id);
+                }
                 o.close();
-                console.log('当前条件是',f)
             }
         },
         close:{
@@ -367,7 +372,8 @@ function HtmlBuilder_table_setFilter(id, field) {
     for(var i=0;i<window[id].fields.length;i++){
         fields[window[id].fields[i].name] = window[id].fields[i].text;
     }
-    var filters = [];
+    var filters = $.isEmptyObject(window[id].query.filters) ? [] : window[id].query.filters.sub;
+    console.log('当前的过滤条件', window[id].query.filters, filters);
     // 固定的添加项目，用于新增
     // 找到 当前的 filters
     window['FILTERS_'+id] = new Vue({
@@ -381,7 +387,21 @@ function HtmlBuilder_table_setFilter(id, field) {
         methods:{
             getFilters:function(){
                 return this.filters;
-                return JSON.stringify(this.filters,null,4);
+            },
+            checkFilters:function(fs){
+                var rs = true;
+                for(var i=0; i<fs.length; i++){
+                    if(fs[i].sub){
+                        rs = this.checkFilters(fs[i].sub);
+                        if(!rs) break;
+                    } else {
+                        if(!fs[i].key || !fs[i].val){
+                            rs = false;
+                            break;
+                        }
+                    }
+                }
+                return rs;
             }
         }
     });

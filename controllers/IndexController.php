@@ -98,9 +98,12 @@ class IndexController extends AdminBaseController{
                 Components::table('浏览器分布情况')->query(
                     [
                         'filters'=>[
-                            ['name'=>'e','operation'=>'>=','value'=>'11'],
-                            ['name'=>'e','operation'=>'<','value'=>'1001'],
-                            ['name'=>'d','operation'=>'>=','value'=>'11'],
+                            'op'=>'AND',
+                            'sub'=>[
+                                ['key'=>'e','op'=>'>=','val'=>'11'],
+                                ['key'=>'e','op'=>'<','val'=>'1001'],
+                                ['key'=>'d','op'=>'>=','val'=>'11'],
+                            ]
                         ],
                         'sort' => [
                             ['name'=>'a','type'=>'desc'],
@@ -123,7 +126,7 @@ class IndexController extends AdminBaseController{
                     ]
                 )->primary('c')->deleteApi(
                     $this->url('delete',['item_id'=>'{id}'])
-                ),
+                )->description('测试表格组件'),
 //                Components::timerange('time')->label('时间段')->value(['12:12:12','13:13:13']),
 //                Components::multiselect($this->url('index',['action'=>'getItems']))
 //                  ->addSelect('a[]',null,2,$this->url('index',['action'=>'getItems']).'?type=A')
