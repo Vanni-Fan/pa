@@ -12,8 +12,11 @@ class Table extends Element
     public $fixedLeft      = true; // todo
     public $fixedRight     = true; // todo
     
-//    public $canAdd         = '_canEdit';   // 数据行存在 _canEdit 字段，并且字段为true时则显示编辑，否则不显示
-    public $canDelete      = '_canDelete'; // 数据行存在 _canDelete 字段，并且字段为true是则显示删除，否则不显示
+    public $canEdit        = false; // 编辑栏的标题，如果有表示可以编辑
+    public $editColWidth   = 90;    // 编辑栏宽
+    public $editCallback   = '';    // 编辑的回调函数
+    
+    public $canDelete      = false; // 数据是否可删除
     public $selectMode     = 'single'; // 选择模式, null:不可选择，single:单选，multi:多选
     public $query          = null; // 当前查询条件，filter[ [field,operation,value],... ], sort[ [field,asc|desc],... ], limit[start, end]
 
@@ -26,8 +29,6 @@ class Table extends Element
      *  tooltip:提示符, 可选，默认无
      *  sort:是否可排序, 可选，默认0
      *  filter:是否可以添加过滤条件, 可选，默认0
-     *  edit:是否可编辑，支持JS回调函数，如果不存在，则使用 canEdit 值，默认0
-     *  delete:是否可删除，支持JS回调函数，如果不存在，则使用 canDelete，默认0
      *  width:列宽，可选，默认无
      *  show:是否显示, 可选，默认1
      *  render:JS的渲染器回调函数，可选，默认无

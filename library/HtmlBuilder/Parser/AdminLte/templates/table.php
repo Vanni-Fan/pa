@@ -1,5 +1,7 @@
 <?php
 $this->js('/dist/plugins/twbs-pagination/jquery.twbsPagination.min.js');
+$this->js('/dist/plugins/vue/vue.js');
+$this->js('/dist/vue.component.js');
 
 // 样式，缓存
 $this->style(/** @lang CSS */ <<<'OUT'
@@ -117,8 +119,9 @@ $this->html(/** @lang HTML */<<<'OUT'
             <span onclick="HtmlBuilder_table_selectAll(this.getAttribute('data-id'),event)" class="text-light-blue select-el"><i class="check-all fa fa-square-o"></i> 全选 </span>&nbsp;
             <span onclick="HtmlBuilder_table_inverse(this.getAttribute('data-id'))" class="text-light-blue select-el"><i class="glyphicon glyphicon-transfer"></i> 反选 </span>&nbsp;
             <span onclick="HtmlBuilder_table_delItems(this.getAttribute('data-id'),HtmlBuilder_table_getSelected(this.getAttribute('data-id')))" class="text-red del-el"><i class="fa fa-trash-o"></i> 删除 </span>&nbsp;
-            <span onclick="HtmlBuilder_table_setFilter(this.getAttribute('data-id'))" class="text-light-blue filter-el"><i class="fa fa-filter"></i> 筛选 </span>
-            <span class="text-aqua add-el"><a href=""><i class="fa fa-plus"></i> 添加 </a></span>
+            <span onclick="HtmlBuilder_table_setFilter(this.getAttribute('data-id'))" class="text-light-blue filter-el"><i class="fa fa-filter"></i> 筛选 </span>&nbsp;
+            <span onclick="HtmlBuilder_table_selectFields(this.getAttribute('data-id'))" class="text-light-blue filter-el"><i class="fa fa-tasks"></i> 字段 </span>&nbsp;
+            <span class="text-aqua add-el"><a><i class="fa fa-plus"></i> 添加 </a></span>
         </div>
     </div>
     <div class="box-body">
@@ -161,6 +164,41 @@ echo '<div id="', $id , '"></div>';
 
 // Table 使用的脚本，缓存
 $this->script(/** @lang JavaScript 1.5 */ <<<'OUT'
+
+// 打开或关闭字段显示
+function HtmlBuilder_table_openCloseField(obj){
+    var dom = $(obj);
+    var id = dom.data('id');
+    var field = dom.data('field');
+    if(obj.checked){
+        $('#'+id+' th[data-field='+field+'],#'+id+' td[data-field='+field+']').removeClass('hidden');
+    }else{
+        $('#'+id+' th[data-field='+field+'],#'+id+' td[data-field='+field+']').addClass('hidden');
+    }
+    var index = window[id].fields.findIndex(function(v){ return v.name == field });
+    window[id].fields[index].show = obj.checked;
+}
+
+
+// 选择字段
+function HtmlBuilder_table_selectFields(id) {
+    var dom = '<div style="display:table;">';
+    for(var i=0; i<window[id].fields.length; i++){
+        var field = window[id].fields[i];
+        var checked = field.show ? ' checked ' : '';
+        dom+='<label class="col-sm-4"><input data-id="'+id+'" data-field="'+field.name+'" onchange="HtmlBuilder_table_openCloseField(this)"' + checked + ' type="checkbox">' + field.text + '</label>';
+    }
+    
+    showDialogs({
+        title:'选择需要展示的列！',
+        body: dom+'</div>',
+        close:{
+            text:'取消',
+            click:function(o){o.close()}
+        }
+    });
+}
+
 // 选择所有
 function HtmlBuilder_table_selectAll(id,event){
     var obj = $(event.currentTarget).find('i');
@@ -259,7 +297,7 @@ function HtmlBuilder_table_init(id){
     for(var index in options.fields){
         var field = options.fields[index];
         field.show = field.hasOwnProperty('show') ? field.show : 1;
-        if(!field.show) continue;
+        // if(!field.show) continue;
         var sortStatus = '';
         var filterStatus = '';
         if(field.sort){
@@ -270,8 +308,9 @@ function HtmlBuilder_table_init(id){
                 sortStatus = '<i onclick="HtmlBuilder_table_sort(\'' + id + '\', \'' + field.name + '\')" class="sort-status fa fa-sort-amount-' + options.query.sort[sort_index].type + ' text-info"></i><span class="sort-badge">'+ (parseInt(sort_index)+1) + '</span>';
             }
         }
+        var _class = 'text-center ' + (field.show ? '' : ' hidden') + (field.class ? field.class : '');
         var th =
-        '<th data-field="' + field.name + '"' +  (field.hasOwnProperty('width') ? ('width="' + field.width + 'px" style="min-width:' + field.width + 'px;"') : '') + ' class="text-center ' + (field.class ? field.class : '') + '">' + (field.icon ? ('<span class="'+field.icon+'"></span> ') : '') +
+        '<th data-field="' + field.name + '"' +  (field.hasOwnProperty('width') ? ('width="' + field.width + 'px" style="min-width:' + field.width + 'px;"') : '') + ' class="' + _class + '">' + (field.icon ? ('<span class="'+field.icon+'"></span> ') : '') +
             field.text +
             sortStatus +
             filterStatus +
@@ -279,7 +318,8 @@ function HtmlBuilder_table_init(id){
         html += th;
     }
     if(options.canEdit){
-        html += '<th class="text-center" width="90px" style="min-width:90ox">编辑</th>';
+        var cw = options.editColWidth;
+        html += '<th class="text-center" width="' + cw + 'px" style="min-width:' + cw + 'px">' + (typeof(options.canEdit) != 'boolean' ? options.canEdit : '编辑') + '</th>';
     }
     header.append(html);
     // header.render();
@@ -344,6 +384,7 @@ function HtmlBuilder_table_setFilter(id, field) {
             text:'确定',
             click:function(o){ //HtmlBuilder_table_filterConfirm
                 var f = window['FILTERS_'+id].getFilters();
+                console.log(id,f);
                 if(!window['FILTERS_'+id].checkFilters(f)){
                     showDialogs({
                         body:'有些条件不完整，请修复',
@@ -352,13 +393,9 @@ function HtmlBuilder_table_setFilter(id, field) {
                     },'sub');
                     return;
                 }
-                if(f.length>0){
-                    window[id].query.filters = {
-                        op:'AND',
-                        sub:f
-                    };
-                    HtmlBuilder_table_query(id);
-                }
+                window[id].query.filters = f.length>0 ? {op:'AND',sub:f} : [];
+                // console.log('当前条件',window[id].query.filters);
+                HtmlBuilder_table_query(id);
                 o.close();
             }
         },
@@ -373,7 +410,7 @@ function HtmlBuilder_table_setFilter(id, field) {
         fields[window[id].fields[i].name] = window[id].fields[i].text;
     }
     var filters = $.isEmptyObject(window[id].query.filters) ? [] : window[id].query.filters.sub;
-    console.log('当前的过滤条件', window[id].query.filters, filters);
+    // console.log('当前的过滤条件', window[id].query.filters, filters);
     // 固定的添加项目，用于新增
     // 找到 当前的 filters
     window['FILTERS_'+id] = new Vue({
@@ -423,6 +460,7 @@ function HtmlBuilder_table_selectRow(obj){
         obj.addClass('htmlbuild-table-selected-row');
     }
 }
+
 // AJAX请求后的数据设置
 function HtmlBuilder_table_setData(data, id) {
     var obj  = $('#'+id);
@@ -436,21 +474,23 @@ function HtmlBuilder_table_setData(data, id) {
         var canSelect = options.selectMode ? 'onclick="HtmlBuilder_table_selectRow($(this))"' : '';
         var tr = '<tr data-id="' + primary + '" ' + canSelect + ' class="' + tr_class + '">';
         for(var field in data.list[row]){
-            if(['canEdit','canDelete'].indexOf(field)>-1) continue;
             var field_index = options.fields.findIndex(function(_v){ return _v.name === field });
             // if(field_index === -1) continue; // 其实一定是会有的
             var def = options.fields[field_index];
-            if(def.hasOwnProperty('show') && def.show === 0) continue;
-            var cls = def.hasOwnProperty('class') ? (' class="' + def.class + '"') : '';
-            tr += '<td' + cls + '>' + data.list[row][field] + '</td>';
+            var cls = def.hasOwnProperty('class') ? def.class : '';
+            cls += (def.hasOwnProperty('show') && def.show == 0) ? ' hidden' : '';
+            
+            var val = def.render ? eval(def.render)(data.list[row][field]) : data.list[row][field]; // 使用 render 函数处理内容
+            tr += '<td data-field="' + field + '" class="' + cls + '">' + val + '</td>';
         }
         if(options.canEdit){
             var updateApi = options.updateApi.replace('{id}', primary);
-            tr +=
-            '<td class="text-center">' +
-                (data.list[row].hasOwnProperty('canEdit') ? (data.list[row].canEdit ? 'Edit ' : '') : '<a href="' + updateApi + '"><i class="fa fa-edit" style="font-size:18px"></i></a> ') +
-                (data.list[row].hasOwnProperty('canDelete') ? (data.list[row].canDelete ? ' Remove' : '') : '&nbsp; <a href="#" onclick="HtmlBuilder_table_delItems(\'' + id + '\',\'' + primary + '\');return false;"><i class="fa fa-trash-o" style="font-size:18px"></i></a>') +
-            '</td>';
+            var edit_str = '<a title="编辑" href="' + updateApi + '"><i class="fa fa-edit" style="font-size:18px"></i></a>&nbsp; '+
+                           '<a title="删除" href="#" onclick="HtmlBuilder_table_delItems(\'' + id + '\',\'' + primary + '\');return false;"><i class="fa fa-trash-o" style="font-size:18px"></i></a>';
+            if(options.editCallback){
+                edit_str = eval(options.editCallback)(data.list[row], edit_str);
+            }
+            tr += '<td class="text-center">' + edit_str + '</td>';
         }
         html += tr + '</tr>';
     }
@@ -502,62 +542,7 @@ OUT
 );
 
 
-// Filter VUE版本，缓存
-$this->js('/dist/plugins/vue/vue.js');
-$this->js('/dist/vue.component.js');
-$this->script(/** @lang JavaScript 1.5 */ <<<'OUT'
-/*
-var v_filter = new Vue({
-    data:function(){
-        return {
-            s_cond:{
-                op:'>=',
-                key:'bb',
-                val:'哈哈'
-            },
-            s_fields:{
-                aa:'字段1',
-                bb:'字段2',
-                cc:'字段3',
-                dd:'字段4'
-            },
-            filters:[
-                // {key:"bb",op:"<",val:11111},
-                // {
-                //     op:"AND",
-                //     sub:[
-                //         // {key:"bb",op:"<",val:"22222"},
-                //         // {
-                //         //     op:"AND",
-                //         //     sub:[
-                //         //         {key:"bb",val:"333333"},
-                //         //         {key:"bb",op:"<",val:"444444"},
-                //         //     ]
-                //         // },
-                //         // {key:"bb",op:"<",val:55555},
-                //     ]
-                // },
-                // {key:"bb",op:"<",val:66666}
-            ]
-        };
-    },
-    el:'#VANNI',
-    methods:{
-        aaa:function(val){
-            console.log("上层已经捕获到时间",val)
-        },
-        bbb:function(type) {
-            console.log('删除了',type);
-        },
-        getFilters:function(){
-            return JSON.stringify(this.filters,null,4);
-        }
-    }
-});
-*/
 
-OUT
-);
 
 
 // 初始化脚本，不缓存

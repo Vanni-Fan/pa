@@ -8,12 +8,12 @@ use HtmlBuilder\Layouts;
 use HtmlBuilder\Parser\AdminLte\Parser;
 use HtmlBuilder\Validate;
 use PDO;
-use Phalcon\Db\ColumnInterface;
+use Phalcon\Db\Adapter\Pdo\Factory;
 use Power\Controllers\AdminBaseController;
 use PA;
 use Power\Models\Roles;
 use Power\Models\Rules;
-use Power\Models\Users;
+use Tables\PluginsTableMenus;
 use Tables\PluginsTableSources;
 
 
@@ -32,6 +32,41 @@ class ManagerController extends AdminBaseController
         unset($this->params['Rule']);
         return parent::initialize();
     }
+    
+    /**
+     * 从数据源同步表到Menus表中
+     */
+    public function sync_table(){
+        $source_id   = $this->getParam('source_id');
+        $source_info = PluginsTableSources::findFirst($source_id);
+        $arr = [
+            'host'     => $source_info->host,
+            'dbname'   => $source_info->name,
+            'port'     => $source_info->port,
+            'username' => $source_info->user,
+            'password' => $source_info->password,
+            'adapter'  => $source_info->type,
+        ];
+        $db = Factory::load($arr);
+        # 查出所有的表
+        $tables = [];
+        switch($source_info->type){ # todo 加入其它支持的数据库
+            case 'mysql':
+                $tables = $db->query('show tables')->fetchAll(PDO::FETCH_COLUMN);
+                break;
+            case 'sqlite':
+                $tables = $db->query('select name from sqlite_master where type="table" order by name')->fetchAll(PDO::FETCH_COLUMN);
+                break;
+        }
+        # 插入到指定位置
+        foreach($tables as $table) {
+            $menu_table = PluginsTableMenus::findFirst(['source_id=?0 and table_name=?1', 'bind' => [$source_id, $table]]);
+            if(!$menu_table){
+                (new PluginsTableMenus)->create(['rule_id'=>null,'source_id'=>$source_id,'table_name'=>$table,'model_file'=>null]);
+            }
+        }
+        $this->response->redirect($this->url('display',['item_id'=>$this->item_id,'action'=>'set','event'=>'setting']));
+    }
 
     private function getUrl(array $param, $method='GET'){
         return $this->url($method=='GET'?'display':'update', array_merge($this->params, $param));
@@ -43,6 +78,7 @@ class ManagerController extends AdminBaseController
              return $this->{$this->getParam('command')}();
         }
         
+        $sync_table_url = $this->getUrl(['command'=>'sync_table']);
         $parser = new Parser();
         $this->view->content = $parser->parse(
             Components::table('数据源集合')
@@ -63,7 +99,14 @@ class ManagerController extends AdminBaseController
                           ['name'=>'path','text'=>'模型文件的目录','sort'=>1,'filter'=>1],
                           ['name'=>'status','text'=>'状态','sort'=>1,'show'=>0],
                     ]
-                )->primary('id')
+                )->primary('id')->canEdit('操作')->editCallback(/** @lang JavaScript */
+                    <<<OUT
+                    (i,j) => {
+                        console.log('编辑回调', i);
+                        return '<a title="同步数据表" href="$sync_table_url/source_id/' + i.id + '"><i class="fa fa-random"></i> &nbsp;</a>' + j;
+                    }
+OUT
+                )
             ,
             Components::table('数据表集合')
                 ->query(['limit'=>['page'=>1,'size'=>$this->page_size]])
@@ -74,9 +117,9 @@ class ManagerController extends AdminBaseController
                 ->fields(
                     [
                         ['name'=>'id','text'=>'id','sort'=>1, 'filter'=>1],
-                        ['name'=>'source_id','text'=>'所属数据源','show'=>0],
-                        ['name'=>'source_name','text'=>'所属数据源'],
-                        ['name'=>'rule_id','text'=>'菜单名称','show'=>0],
+                        ['name'=>'source_id','text'=>'所属数据源ID','show'=>0],
+                        ['name'=>'source_name','text'=>'所属数据源','render'=>'i=>"["+i+"]"'],
+                        ['name'=>'rule_id','text'=>'菜单ID','show'=>0],
                         ['name'=>'rule_name','text'=>'菜单名称'],
                         ['name'=>'table_name','text'=>'表名','sort'=>1, 'filter'=>1],
                         ['name'=>'model_file','text'=>'模型文件','filter'=>1],
@@ -120,23 +163,18 @@ class ManagerController extends AdminBaseController
         
         $data = call_user_func([$model,'find'], $where);
         if($this->params['type'] == 'menu'){
-//            $data = [];
-            $data = [
-                ['id'=>1,'source_id'=>'','source_name'=>'系统源','rule_id'=>1,'rule_name'=>'<a href="/admin/menu/4/index">Roles表数据</a>','table_name'=>'roles','model_file'=>'Roles.php','action'=>'<a href="">禁用</a>'],
-                ['id'=>2,'source_id'=>'','source_name'=>'系统源','rule_id'=>1,'rule_name'=>'','table_name'=>'rules','model_file'=>'Rules.php','action'=>'<a href="">开启</a>'],
-                ['id'=>2,'source_id'=>'','source_name'=>'系统源','rule_id'=>1,'rule_name'=>'<a href="/admin/menu/7/index">系统配置</a>','table_name'=>'configs','model_file'=>'Configs.php','action'=>'<a href="">启用</a>'],
-                ['id'=>3,'source_id'=>'','source_name'=>'AAA','rule_id'=>1,'rule_name'=>'','table_name'=>'aaa','model_file'=>'<a href="">生成模型</a>','action'=>''],
-                ['id'=>4,'source_id'=>'','source_name'=>'AAA','rule_id'=>1,'rule_name'=>'','table_name'=>'aaa','model_file'=>'<a href="">生成模型</a>','action'=>''],
-                ['id'=>4,'source_id'=>'','source_name'=>'AAA','rule_id'=>1,'rule_name'=>'','table_name'=>'aaa','model_file'=>'aaa.php','action'=>'<a href="">启用</a>'],
-                ['id'=>4,'source_id'=>'','source_name'=>'AAA','rule_id'=>1,'rule_name'=>'','table_name'=>'aaa','model_file'=>'','action'=>''],
-            ];
-//            $data = array_map(function($v){
-//                $rule = Rules::findFirstByRuleId($v['rule_id']);
-//                $source = PluginsTableSources::findFirstById($v['source_id']);
-//                $v['rule_id'] = $rule ? $rule->name : $v['rule_id'];
-//                $v['source_id'] = $source ? $source->name : $v['source_id'];
-//                return $v;
-//            },$data->toArray());
+            $data = array_map(function($v){
+                $rule = Rules::findFirstByRuleId($v['rule_id']);
+                $source = PluginsTableSources::findFirstById($v['source_id']);
+                $v['rule_name']   = $rule ? $rule->name : '';
+                $v['source_name'] = $source ? $source->name : '';
+                if(!$v['model_file']){
+                    $v['model_file'] = '<a href="">生成模型</a>';
+                }
+                $v['action'] = '<a href="">启用</a>';
+                return $v;
+            },$data->toArray());
+
         }else{
             $data = array_map(function($v){
                 if(!$v['status']){

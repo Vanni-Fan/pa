@@ -1,9 +1,8 @@
 <?php
 /** The file is generated automatically by TablePlugin */
 namespace Tables;
-use Phalcon\Db\Adapter;
 
-class PluginsTableSources extends \Phalcon\Mvc\Model{
+class PluginsTableSources extends \PowerModelBase{
     public function initialize(){
         $this->setDi(\PA::$di);
         \PA::$di->set("plugin_table_db", \Phalcon\Db\Adapter\Pdo\Factory::load(array (
