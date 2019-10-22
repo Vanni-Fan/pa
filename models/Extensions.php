@@ -6,13 +6,13 @@ use PowerModelBase as PMB;
  * @author vanni.fan
  */
 class Extensions extends PMB{
-    public function initialize(){
+    public function initialize():void{
         parent::initialize();
         $this->hasOne(
             'rule_id',
             Rules::class,
             'rule_id',
-            ["alias" => "rule"]
+            ["alias" => "Rule"]
         );
     }
     

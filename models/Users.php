@@ -45,13 +45,13 @@ class Users extends PMB{
         return $return;
     }
     
-    public function initialize(){
+    public function initialize():void{
         parent::initialize();
         $this->hasOne(
             'role_id',
             Roles::class,
             'role_id',
-            ["alias" => "roles"]
+            ["alias" => "Role"]
         );
         $this->hasMany(
             'user_id',

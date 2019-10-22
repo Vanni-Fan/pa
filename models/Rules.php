@@ -152,9 +152,33 @@ class Rules extends PMB{
      * 删除指定的权限
      */
     public static function deleteRule(int $rule_id){
+        $where = ['rule_id=?0','bind'=>[$rule_id]];
         # 删除自己
-        self::findFirst($rule_id)->delete();
+        self::findFirst($where)->delete();
+        
         # 删除对应的角色中的配置
+        RoleRules::find($where)->delete();
+        
         # 删除对应的扩展中的信息
+        Extensions::find($where)->delete();
+        
+        # 删除配置表中的记录
+        Configs::find($where)->delete();
+    }
+    
+    public function initialize():void{
+        parent::initialize();
+        $this->hasMany(
+            'rule_id',
+            Configs::class,
+            'rule_id',
+            ['alias' => 'Configs']
+        );
+        $this->hasMany(
+            'rule_id',
+            Extensions::class,
+            'rule_id',
+            ["alias" => "Extensions"]
+        );
     }
 }

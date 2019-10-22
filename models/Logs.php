@@ -6,7 +6,7 @@ use PowerModelBase as PMB;
  * @author vanni.fan
  */
 class Logs extends PMB{
-    public function initialize(){
+    public function initialize():void{
         parent::initialize();
         $this->hasOne(
             'user_id',
