@@ -22,7 +22,7 @@
             <td class="text-center"><?=$user->user_id?></td>
                 <td><?=$user->name?></td>
                 <td><?=$user->nickname?></td>
-                <td><?=$user->roles ? $user->roles->name : '未指定'?></td>
+                <td><?=$user->Role ? $user->Role->name : '未指定'?></td>
                 <td><?=$user->mobile?></td>
                 <td id="status_<?=$user->user_id?>" class="text-center"><?=$user->enabled?'是':'否'?></td>
                 <td class="text-center">

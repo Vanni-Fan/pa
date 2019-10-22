@@ -8,7 +8,7 @@ use PowerModelBase as PMB;
 class Extensions extends PMB{
     public function initialize():void{
         parent::initialize();
-        $this->hasOne(
+        $this->belongsTo(
             'rule_id',
             Rules::class,
             'rule_id',

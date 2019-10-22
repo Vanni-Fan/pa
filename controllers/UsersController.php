@@ -10,7 +10,7 @@ class UsersController extends AdminBaseController {
         $this->view->users  = Users::find(['offset'=>($this->current_page-1) * $this->page_size,'limit' => $this->page_size]);
         $this->view->page   = $this->getPaginatorString(Users::count());
         $this->view->enable_url = $this->url('display');
-        $this->render(null, $this->item_id ? true : false);
+        $this->render('', $this->item_id ? true : false);
     }
     
     public static function getItemOwner($item_id = null): int

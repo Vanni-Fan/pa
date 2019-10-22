@@ -37,7 +37,7 @@
             <div class="form-group">
                 <label for="exampleInputFile">选择角色</label>
                 <?php
-                $role_id = $user->roles->role_id ?? 0;
+                $role_id = $user->Role->role_id ?? 0;
                 foreach($roles as $role){
                     $check = $role->role_id == $role_id ? ' checked=""' : '';
                     if(!$c->isAllowed('update', $role->role_id, $role_id)) continue;

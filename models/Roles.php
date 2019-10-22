@@ -1,7 +1,7 @@
 <?php
 namespace Power\Models;
-use PowerModelBase as PMB;
 use Power\Models\Users;
+use PowerModelBase as PMB;
 
 /**
  * 基础模型
@@ -15,6 +15,18 @@ class Roles extends PMB{
             Users::class,
             'role_id',
             ["alias" => "User"]
+        );
+        $this->hasMany(
+            'role_id',
+            RoleExtensions::class,
+            'role_id',
+            ["alias" => "Extensions"]
+        );
+        $this->hasMany(
+            'role_id',
+            RoleRules::class,
+            'role_id',
+            ["alias" => "Rules"]
         );
     }
 }

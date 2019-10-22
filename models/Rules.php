@@ -180,5 +180,11 @@ class Rules extends PMB{
             'rule_id',
             ["alias" => "Extensions"]
         );
+        $this->hasMany(
+            'rule_id',
+            RoleRules::class,
+            'rule_id',
+            ["alias" => "Rules"]
+        );
     }
 }

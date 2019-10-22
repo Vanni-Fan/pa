@@ -8,7 +8,7 @@ use PowerModelBase as PMB;
 class Logs extends PMB{
     public function initialize():void{
         parent::initialize();
-        $this->hasOne(
+        $this->belongsTo(
             'user_id',
             Users::class,
             'user_id',

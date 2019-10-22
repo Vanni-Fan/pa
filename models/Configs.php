@@ -8,13 +8,13 @@ use PowerModelBase as PMB;
 class Configs extends PMB{
     public function initialize():void{
         parent::initialize();
-        $this->hasOne(
+        $this->belongsTo(
             'user_id',
             Users::class,
             'user_id',
             ['alias' => 'User']
         );
-        $this->hasOne(
+        $this->belongsTo(
             'rule_id',
             Rules::class,
             'rule_id',

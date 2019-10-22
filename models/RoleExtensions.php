@@ -8,13 +8,13 @@ use PowerModelBase as PMB;
 class RoleExtensions extends PMB{
     public function initialize():void {
         parent::initialize();
-        $this->hasOne(
+        $this->belongsTo(
             'role_id',
             Roles::class,
             'role_id',
             ["alias" => "Role"]
         );
-        $this->hasOne(
+        $this->belongsTo(
             'extend_id',
             Extensions::class,
             'extend_id',
