@@ -1,20 +1,19 @@
 <?php
 namespace plugins\Tables\Controllers;
 use HtmlBuilder\Components;
-use HtmlBuilder\Components\Table;
 use HtmlBuilder\Element;
 use HtmlBuilder\Forms;
 use HtmlBuilder\Layouts;
 use HtmlBuilder\Parser\AdminLte\Parser;
-use HtmlBuilder\Validate;
 use PDO;
 use Phalcon\Db\Adapter\Pdo\Factory;
+use Phalcon\Text;
 use Power\Controllers\AdminBaseController;
 use PA;
 use Power\Models\Roles;
 use Power\Models\Rules;
-use Tables\PluginsTableMenus;
-use Tables\PluginsTableSources;
+use Tables\System\PluginsTableMenus;
+use Tables\System\PluginsTableSources;
 
 
 
@@ -37,14 +36,137 @@ class ManagerController extends AdminBaseController
      * 生成模型文件
      */
     public function make_model(){
-
+        $menu_id   = $this->getParam('id','int');
+        $menu_info = PluginsTableMenus::query()
+                                      ->createBuilder()
+                                      ->from(['s' => PluginsTableSources::class])
+                                      ->join(PluginsTableMenus::class, 's.id=m.source_id', 'm')
+                                      ->where('m.id=?0', [$menu_id])
+                                      ->columns('m.table_name,m.model_file,s.name,s.is_system,s.path,s.host,s.dbname,s.port,s.user,s.password,s.type')
+                                      ->getQuery()
+                                      ->execute();
+        if($menu_info){
+            $menu_info = $menu_info[0];
+            $is_system = $menu_info->is_system;
+            if(!$menu_info->path){
+                $path = $is_system ? (POWER_BASE_DIR.'models/') : (POWER_DATA.'TablesPlugins/Tables/'.$menu_info->dbname.'/');
+            }else{
+                $path = $menu_info->path.'/';
+            }
+            is_dir($path) || mkdir($path, 0777, true);
+            $class_name  = Text::camelize($menu_info->table_name);
+            $target_file = $path . $class_name . '.php';
+            if(!file_exists($target_file)){
+                if($is_system){
+                    $tmp_content =
+                        "<?php\n".
+                        "/** The file is generated automatically by TablePlugin */\n".
+                        "namespace Power\Models;\n".
+                        "class $class_name extends PowerModelBase{\n}";
+                }else{
+                    $temp_file   = realpath(__DIR__.'/../ModelTemplate.php');
+                    $db_connect  = [
+                        'host'     => $menu_info->host,
+                        'dbname'   => $menu_info->dbname,
+                        'port'     => $menu_info->port,
+                        'username' => $menu_info->user,
+                        'password' => $menu_info->password,
+                        'adapter'  => $menu_info->type,
+                    ];
+                    $tmp_content = str_replace(
+                        ['__DB_NAME__','__TABLE_NAME__','__MODEL_NAME__','__DB_INFO__'],
+                        [$menu_info->dbname, $menu_info->table_name, $class_name, var_export($db_connect,1)],
+                        file_get_contents($temp_file)
+                    );
+                }
+                file_put_contents($target_file, $tmp_content);
+                PluginsTableMenus::find($menu_id)->update(['model_file'=>realpath($target_file)]);
+            }
+            
+//            print_r($menu_info->toArray());
+//            echo $target_file,"\n\n";
+//            echo PA::$db->getSQLStatement();
+//            exit;
+        }else{
+            throw new \Exception('数据不存在');
+        }
+        $this->response->redirect($this->url('display',['item_id'=>$this->item_id,'action'=>'set','event'=>'setting']));
     }
 
+    
+    public function disable_rule(){
+        $menu_id = $this->getParam('id','int');
+        $menu_info = PluginsTableMenus::findFirst($menu_id);
+        if($menu_info) {
+            Rules::deleteRule($menu_info->rule_id);
+            $menu_info->rule_id = null;
+            $menu_info->save();
+        }
+        $this->response->redirect($this->url('display',['item_id'=>$this->item_id,'action'=>'set','event'=>'setting']));
+    }
     /**
      * 生成菜单
      */
     public function generate_rule(){
-
+        $menu_id = $this->getParam('id','int');
+        $menu_info = PluginsTableMenus::query()
+                                      ->createBuilder()
+                                      ->from(['s'=>PluginsTableSources::class])
+                                      ->join(PluginsTableMenus::class,'s.id=m.source_id','m')
+                                      ->where('m.id=?0',[$menu_id])
+                                      ->columns('m.table_name,m.rule_id,m.model_file,s.name,s.is_system,m.source_id,s.dbname')
+                                      ->getQuery()
+                                      ->execute();
+        if(!$menu_info) throw new \Exception('数据不存在');
+        # 创建菜单，并赋予管理员
+        $menu_info = $menu_info[0];
+        if(!$menu_info->rule_id){
+            $parent = Rules::findFirst(['data_source="TablePlugins" and params=?0','bind'=>['['.$menu_info->source_id.']'],'columns'=>'rule_id']);
+            if($parent){
+                $parent_id = $parent['rule_id'];
+            }else{
+                $p_rule = new Rules;
+                $p_rule->create(
+                    [
+                        'name'         => '[' . $menu_info->name . ']库',
+                        'params'       => '[' . $menu_info->source_id.']',
+                        'icon'         => 'fa fa-database',
+                        'parent_id'    => 0,
+                        'enabled'      => 1,
+                        'data_source'  => 'TablePlugins',
+                        'created_time' => time(),
+                        'created_user' => $this->getUserId(),
+                    ]
+                );
+                $parent_id = $p_rule->rule_id;
+            }
+            $rule = Rules::getInstance();
+            $rule->create(
+                [
+                    'name'         => '[' . $menu_info->table_name . ']表',
+                    'router'       => '{"controller":"tables","action":"index","namespace":"plugins\\\\Tables\\\\Controllers","priority":10}',
+                    'params'       => '{"source_id":' . $menu_info->source_id . ',"table":"' . $menu_info->table_name . '"}',
+                    'icon'         => 'fa fa-table',
+                    'parent_id'    => $parent_id,
+                    'enabled'      => 1,
+                    'data_source'  => 'TablePlugins',
+                    'created_time' => time(),
+                    'created_user' => $this->getUserId(),
+                ]
+            );
+            # 更新管理员权限
+            $role = Roles::findFirstByRoleId(1);
+            $role_rules = json_decode($role->rules,1);
+            $role_rules[$rule->rule_id] = 255;
+            $role->rules = json_encode($role_rules,JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            $role->save();
+            
+            # 更新菜单ID
+            $menu = PluginsTableMenus::findFirst($menu_id);
+            $menu->rule_id = $rule->rule_id;
+            $menu->save();
+        }
+        $this->response->redirect($this->url('display',['item_id'=>$this->item_id,'action'=>'set','event'=>'setting']));
     }
 
     /**
@@ -176,10 +298,9 @@ OUT
         ];
 
         # 条件
-        $model = $this->params['type'] == 'menu' ? \Tables\PluginsTableMenus::class : \Tables\PluginsTableSources::class;
+        $model = $this->params['type'] == 'menu' ? PluginsTableMenus::class : PluginsTableSources::class;
         if(isset($_POST['filters'])){
             call_user_func_array([$model,'parseWhere'],[['where'=>&$_POST['filters']], &$where]);
-//            $model->parseWhere($_POST['filters'], $where);
         }
 //        print_r($where);
         # 排序
@@ -199,11 +320,18 @@ OUT
                 $v['rule_name']   = $rule ? $rule->name : '';
                 $v['source_name'] = $source ? $source->name : '';
                 if(!$v['model_file']){
-                    $url1 = $this->getUrl(['command'=>'make_model']);
+                    $url1 = $this->getUrl(['command'=>'make_model','id'=>$v['id']]);
                     $v['model_file'] = '<a href="'.$url1.'">生成模型</a>';
                 }
-                $url2 = $this->getUrl(['command'=>'generate_rule']);
-                $v['action'] = '<a href="'.$url2.'">启用</a>';
+                if(!$v['rule_id']){
+                    $url2 = $this->getUrl(['command'=>'generate_rule','id'=>$v['id']]);
+                    $v['action'] = '<a href="'.$url2.'">启用</a>';
+                }else{
+                    $url2 = $this->getUrl(['command'=>'disable_rule','id'=>$v['id']]);
+                    $v['action'] = '<a href="'.$url2.'">禁用</a>';
+                    $url3 = $this->routerUrl('display',['controller'=>'rules','namespace'=>'Power\\Controllers'],['item_id'=>$v['rule_id']]);
+                    $v['rule_name'] = '<a href="'.$url3.'">' . $v['rule_name'] . '</a>';
+                }
                 return $v;
             },$data->toArray());
 
@@ -249,18 +377,19 @@ OUT
                                 Forms::input('name', '名称',$default->name??'')->required(),
                                 Forms::input('host', '主机', $default->host??'')->required()->inputMask("'alias':'ip'"),
                                 Forms::input('user', '用户', $default->user??'')->required(),
-                                Forms::input('path','模型保存目录',$default->path??'')->required()->tooltip('Model类文件保存的目录')
+                                Forms::select('type','类型', $default->type??'')->choices([
+                                                                                            ['text' => 'MySQL', 'value' => 'mysql'],
+                                                                                            ['text' => 'SQLite', 'value' => 'sqlite'],
+                                                                                            ['text' => 'PostgreSQL', 'value' => 'postgresql'],
+                                                                                        ])->required(),
                             )
                             , 6
                         )->column(
                             Element::create('div')->add(
-                                Forms::select('type','类型', $default->type??'')->choices([
-                                                   ['text' => 'MySQL', 'value' => 'mysql'],
-                                                   ['text' => 'SQLite', 'value' => 'sqlite'],
-                                                   ['text' => 'PostgreSQL', 'value' => 'postgresql'],
-                                               ])->required(),
+                                Forms::input('dbname', '数据库名称',$default->dbname??'')->required(),
                                 Forms::input('port', '端口', $default->port??'')->required()->subtype('number'),
                                 Forms::input('password', '密码', $default->password??'')->required()->subtype('password'),
+                                Forms::input('path','模型保存目录',$default->path??'')->tooltip('Model类文件保存的目录')
                             )
                             , 6
                         ),
@@ -365,7 +494,7 @@ OUT
      * 删除
      */
     public function delete(){
-        $model = $this->params['type'] == 'menu' ? \Tables\PluginsTableMenus::class : \Tables\PluginsTableSources::class;
+        $model = $this->params['type'] == 'menu' ? PluginsTableMenus::class : PluginsTableSources::class;
         if(strpos($this->params['id'],',')){
             $ids = explode(',',$this->params['id']);
         }else{

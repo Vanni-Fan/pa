@@ -6,6 +6,7 @@ use Phalcon\Mvc\Model;
  */
 abstract class PowerModelBase extends Model{
     private static $instances = [];
+    private static $describe = [];
     private static $fields = [];
     public function initialize(){
         PA::$di->set('db',PA::$db);
@@ -14,7 +15,7 @@ abstract class PowerModelBase extends Model{
     }
     
     /**
-     * 活动字段信息
+     * 获得字段信息，1维数组
      * @return array
      */
     public static function fields():array{
@@ -23,6 +24,17 @@ abstract class PowerModelBase extends Model{
             self::$fields[static::class] = $obj->getModelsMetaData()->getDataTypes($obj);
         }
         return self::$fields[static::class];
+    }
+    
+    /**
+     * 获得字段详情，2维数组
+     */
+    public static function describe():array{
+        if(empty(self::$describe[static::class])) {
+            $obj = self::getInstance();
+            self::$describe[static::class] = $obj->getReadConnection()->describeColumns($obj->getSource());
+        }
+        return self::$describe[static::class];
     }
     
     /**

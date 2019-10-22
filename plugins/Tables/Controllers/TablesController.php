@@ -1,5 +1,8 @@
 <?php
 namespace plugins\Tables\Controllers;
+use HtmlBuilder\Components;
+use HtmlBuilder\Parser\AdminLte\Parser;
+use Phalcon\Text;
 use Power\Controllers\AdminBaseController;
 
 class TablesController extends AdminBaseController
@@ -13,37 +16,8 @@ class TablesController extends AdminBaseController
     public function initialize()
     {
         parent::initialize();
-        $params = $this->dispatcher->getParams();
-        $table  = ucfirst($params['table']);
-        $this->params = $params;
-        $this->title = $table;
-        $this->table = $table;
-        $this->subtitle = "Management tool for table:<u>$table</u> from plugin:<u>TablesPlugins</u>.";
-        $model_dir  = POWER_DATA.'/TablesPlugins/';
-        $model_file = $model_dir.$table.'.php';
-        $model_class= '\\Tables\\'.$table;
-        $db_var = var_export($params['db'],1);
-        if(!is_dir($model_dir)) mkdir($model_dir);
-        $file_body = '';
-        if(!file_exists($model_file) || filesize($model_file) != strlen($file_body)) file_put_contents($model_file, $file_body);
-        require $model_file;
-        $this->model = new $model_class();
-        $this->fields = array_column($this->model->getWriteConnection()->query('describe '.strtolower($table))->fetchAll(FETCH_ASSOC), null,'Field');
-        $this->primary = array_filter($this->fields, function($v){
-            return $v['Key'] == 'PRI';
-        });
-        $this->fixField();
-        $this->view->fields = $this->fields;
-        $this->view->primary = $this->primary;
-        $this->view->table  = $table;
-        $this->view->primary= $this->primary;
-    
-        $this->addJs('/dist/tables.plugins.js');
-        $this->addJs('/dist/bower_components/bootstrap/js/modal.js');
-        $this->addJs('/dist/bower_components/datatables.net/js/jquery.dataTables.min.js');
-        $this->addJs('/dist/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js');
-        $this->addCss('/dist/tables.plugins.css');
-        $this->addCss('/dist/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css');
+        $this->title = '数据表操作';
+        $this->subtitle = 'Management tool for table:<u>$table</u> from plugin:<u>TablesPlugins</u>.';
     }
     
     public function fixField(){
@@ -59,40 +33,79 @@ class TablesController extends AdminBaseController
         }
     }
     
-    public function indexAction(){
-        $where  = [];
-        $script = '';
-        if($this->request->get('field')){
-            $fields     = $this->request->get('field');
-            $operations = $this->request->get('operations');
-            $values     = $this->request->get('value');
-            foreach($fields as $i=>$field){
-                if(!in_array($field, array_keys($this->fields))) throw new \Exception("Field:$sort not exists!");
-                $condition[]     = $field . ' ' . $operations[$i] . " ?$i";
-                $where['bind'][] = $values[$i];
-                $script .= "addField(!$i, '$field', '{$operations[$i]}', '{$values[$i]}');\n";
-            }
-            $where['conditions'] = implode(' AND ', $condition);
-        }
-        if($sort = $this->request->get('sort_field')){
-            $method = $this->request->get('sort_method');
-            if(!in_array($sort, array_keys($this->fields))) throw new \Exception("Field:$sort not exists!");
-            if(!in_array($method, ['asc','desc'])) throw new \Exception("Sore method must be asc or desc");
-            $where['order'] = "$sort $method";
-        }
-        $count = $this->model->find($where)->count();
-        $cur_page  = $this->getParam('page') ?? 1;
-        $page_size = $this->page_size;
-        $where['offset'] = ($cur_page-1) * $page_size;
-        $where['limit']  = $this->page_size;
-        $this->addScript($script);
-        $this->view->conditions = ['>','<','=','>=','<=','!=','in','like'];
-        $this->view->data       = $this->model->find($where);
-        $this->view->where      = $where;
-        $this->view->page       = $this->getPaginatorString($count, $cur_page, $this->page_size,5);
-        $this->render();
+    private function getModel(){
+        $params = $this->getParam();
+        $fields = 'Tables\\mp\\'.Text::camelize($params['Rule']['params']['table']);
+        $object = call_user_func([$fields, 'getInstance']);
+        return $object;
     }
     
+    public function indexAction(){
+        $parse  = new Parser();
+        $params = $this->getParam();
+        $fields = 'Tables\\mp\\'.Text::camelize($params['Rule']['params']['table']);
+        $object = call_user_func([$fields, 'getInstance']);
+        $fields = [];
+        foreach($object->describe() as $field){
+            $fields[] = [
+                'name'=>$field->getName(),
+                'text'=>$field->getName(),
+                'type'=>$field->getType(),
+                'sort'=>1
+            ];
+        }
+        
+        $this->view->contents = $parse->parse(
+            Components::table($params['Rule']['name'].'的数据')
+                      ->fields($fields)
+                      ->canEdit(true)
+                      ->createApi($this->url('append'))
+                      ->updateApi($this->url('update',['item_id'=>'{ID}']))
+                      ->queryApi($this->url('list',['ajax'=>'getList']))
+        );
+        $parse->setResources($this);
+        $this->render(null);
+    }
+    public function listAction(){
+        $size  = $_POST['limit']['size']??$this->page_size;
+        $page  = $_POST['limit']['page']??1;
+        $where = [
+            'conditions' => '',
+            'limit'      => $size,
+            'offset'     => ($page - 1) * $size,
+            'bind'       => []
+        ];
+    
+        # 条件
+        $model = $this->getModel();
+        if(isset($_POST['filters'])){
+            call_user_func_array([$model,'parseWhere'],[['where'=>&$_POST['filters']], &$where]);
+        }
+//        print_r($where);
+        # 排序
+        if(isset($_POST['sort'])){
+            $where['order'] = '';
+            foreach($_POST['sort'] as $sort){
+                $where['order'] .= $sort['name'].' '.$sort['type'].',';
+            }
+            $where['order'] = substr($where['order'],0,-1);
+        }
+    
+        $data = $model->find($where);
+
+        $this->jsonOut(
+            [
+               'list'=>$data,
+               'total'=>$model->count(['conditions'=>$where['conditions'],'bind'=>$where['bind']]),
+               'page'=>$page,
+               'size'=>$size,
+               'query'=>[
+                   'filter'=>$_POST['filters']??[],
+                   'limit'=>$_POST['limit']??['page'=>$page, 'size'=>$size]
+               ]
+            ]
+        );
+    }
     public function displayAction(){
         $where = [
             array_key_first($this->primary) . ' = ?0',

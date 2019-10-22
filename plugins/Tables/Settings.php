@@ -27,6 +27,7 @@ class Settings {
           "user" TEXT,
           "password" TEXT,
           "path" TEXT,
+          "is_system" INTEGER,
           "status" INTEGER,
           PRIMARY KEY ("id")
         );';
@@ -55,21 +56,24 @@ class Settings {
             'path'     => POWER_BASE_DIR . 'models/'
         ];
         PA::$db->execute(
-            'INSERT INTO "plugins_table_sources"("name","dbname","type","host","port","user","password","path","status")
-              VALUES("系统",:name,:type,:host,:port,:user,:password,:path,0)',
+            'INSERT INTO "plugins_table_sources"("name","dbname","type","host","port","user","password","path","is_system","status")
+              VALUES("系统",:name,:type,:host,:port,:user,:password,:path,1,0)',
             $sys_ds
         );
         PA::$db->execute($sql2);
         // 2、 创建 model
+        $db_name = 'System';
         $template = file_get_contents(__DIR__ .'/ModelTemplate.php');
-        file_put_contents(POWER_DATA . 'TablesPlugins/PluginsTableMenus.php',str_replace(
-            ['__MODEL_NAME__','__DB_INFO__'],
-            ['PluginsTableMenus', var_export(PA::$config['pa_db']->toArray(),1)],
+        $dir = POWER_DATA . 'TablesPlugins/'.$db_name.'/';
+        is_dir($dir) || mkdir($dir,0777, true);
+        file_put_contents($dir . 'PluginsTableMenus.php',str_replace(
+            ['__DB_NAME__','__TABLE_NAME__','__MODEL_NAME__','__DB_INFO__'],
+            [$db_name, (PA::$config['pa']['prefix']??'').'plugins_table_menus','PluginsTableMenus', var_export(PA::$config['pa_db']->toArray(),1)],
             $template
         ));
-        file_put_contents(POWER_DATA . 'TablesPlugins/PluginsTableSources.php',str_replace(
-            ['__MODEL_NAME__','__DB_INFO__'],
-            ['PluginsTableSources', var_export(PA::$config['pa_db']->toArray(),1)],
+        file_put_contents($dir . 'PluginsTableSources.php',str_replace(
+            ['__DB_NAME__','__TABLE_NAME__','__MODEL_NAME__','__DB_INFO__'],
+            [$db_name, (PA::$config['pa']['prefix']??'').'plugins_table_sources', 'PluginsTableSources', var_export(PA::$config['pa_db']->toArray(),1)],
             $template
         ));
 
@@ -82,5 +86,14 @@ class Settings {
         if(file_exists(POWER_DATA . 'TablesPlugins/PluginsTableSources.php')) unlink(POWER_DATA . 'TablesPlugins/PluginsTableSources.php');
         if(file_exists(POWER_DATA . 'TablesPlugins/PluginsTableMenus.php')) unlink(POWER_DATA . 'TablesPlugins/PluginsTableMenus.php');
         return true;
+    }
+    public static function autoload(){ // 自动加载
+        static $is_loaded = false;
+        if($is_loaded) return;
+        $dirs = PA::$loader->getDirs();
+        $dirs[] = POWER_DATA.'TablesPlugins';
+        PA::$loader->registerDirs($dirs);
+        PA::$loader->register();
+        $is_loaded = true;
     }
 }

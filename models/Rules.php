@@ -8,27 +8,6 @@ use Logger\Logger;
  * @author vanni.fan
  */
 class Rules extends PMB{
-    /**
-     * 获得全部菜单
-     */
-//    public static function all($ids = []){
-//        $menus  = [];
-//        $parent = [0=>&$menus];
-//        $query  = ['order'=>'level,index'];
-//        if($ids){
-//            $query['conditions'] = 'rule_id IN ({rule_ids:array})';
-//            $query['bind']['rule_ids'] = $ids;
-//        }
-////        exit(print_r(self::find($query)->toArray()));
-//        foreach(self::find($query) as $row){
-//            $row  = self::getRuleExtend($row->toArray());
-//            $pid  = $row['parent_id'];
-//            $subs = count($parent[$pid]);
-//            $parent[$pid][$subs] = $row;// 将自己添加到父级里面
-//            $parent[$row['rule_id']] = &$parent[$pid][$subs]['sub'];
-//        }
-//        return $menus;
-//    }
     
     /**
      * 将多维菜单，展开成2维菜单，去掉 sub ，添加 level
@@ -167,5 +146,15 @@ class Rules extends PMB{
                 }
             }
         }
+    }
+    
+    /**
+     * 删除指定的权限
+     */
+    public static function deleteRule(int $rule_id){
+        # 删除自己
+        self::findFirst($rule_id)->delete();
+        # 删除对应的角色中的配置
+        # 删除对应的扩展中的信息
     }
 }

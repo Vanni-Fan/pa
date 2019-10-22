@@ -36,6 +36,13 @@ $routers = [
             'priority'   => 20,
             'params'     => 3
         ], # 删除的POST形式
+        PA_URL_PATH.'menu/{rule_id:[0-9]+}/items/:params' => [
+            'namespace'  => 'Power\Controllers',
+            'controller' => 'Router',
+            'action'     => 'list',
+            'priority'  => 10,
+            'params'     => 2
+        ],         # 首页列表页面
     ],
     'GET' => [
         PA_URL_PATH => [

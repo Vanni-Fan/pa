@@ -19,13 +19,15 @@
             <section class="content">
                 <!-- 具体的内容页 -->
                 <?php
+                if(isset($template_file)) {
                     $_file = $template_file;
-                    $file  = substr(realpath($_file.'.phtml'),0,-6);
-                    if(file_exists($file.'.phtml')){
+                    $file  = substr(realpath($_file . '.phtml'), 0, -6);
+                    if (file_exists($file . '.phtml')) {
                         $this->partial($file);
-                    }else{
+                    } else {
                         echo "没有 {$_file}.phtml 文件";
                     }
+                }else echo $contents ?? '';
                 ?>
             </section>
             <div id="over_bg"></div>

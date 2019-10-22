@@ -10,6 +10,7 @@ use Phalcon\Mvc\Application;
 use Phalcon\Mvc\Dispatcher;
 use Phalcon\Db\Adapter\Pdo\Factory as DB;
 use PA;
+use Power\Models\Plugins;
 
 class App{
     public function __construct()
@@ -192,8 +193,20 @@ class App{
         PA::$di->setShared('router', PA::$router);
 
         # 数据库查询SQL监听
-        PA::$em->attach('db', function (){});
+        PA::$em->attach('db', function ($event, $connection){
+//            echo "\n\n",$connection->getSQLStatement(),"\n\n";
+        });
         PA::$db->setEventsManager(PA::$em);
+        
+        # 加载插件的 autoload
+        $plubins = Plugins::find(['enabled=1','columns'=>'name']);
+        if($plubins) foreach($plubins as $p){
+            $class = '\\plugins\\'.$p->name.'\\Settings';
+            if(method_exists($class,'autoload')) {
+                call_user_func([$class, 'autoload']);
+            }
+        }
+        
         return $this;
     }
     public function run($config_file=null){

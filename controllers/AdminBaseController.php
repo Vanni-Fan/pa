@@ -355,7 +355,7 @@ class AdminBaseController extends Controller{
      * @param null $file 指定渲染的模板： controller/action 形式，默认为当前的 controller/action
      * @param bool $partial 是否部分渲染：默认全框架渲染，如果为真，只只渲染模板文件，不渲染layout
      */
-    public function render($file=null, $partial=false){
+    public function render($file='', $partial=false){
         $this->view->js            = $this->js_files;
         $this->view->css           = $this->css_files;
         $this->view->style         = $this->styles;
@@ -407,16 +407,21 @@ class AdminBaseController extends Controller{
             }
         }else $dir = $this->template_path;
         $this->view->setViewsDir($dir);
-        if(!$file){
-            # 使用类名(去掉Controller后缀) + '/' + 方法名(去掉Action后缀)
-            $file = substr(array_slice(explode('\\',$caller['class']),-1)[0], 0, -10).  // 调用者的类名，去掉 Controller 后缀
-                    '/' .
-                    substr($caller['function'],0,-6); // 调用者的方法名，去掉 Action 后缀
+        
+        if($file === null){ // 不需要模板
+            $this->view->pick($this->layout);
+        }else{
+            if(!$file){
+                # 使用类名(去掉Controller后缀) + '/' + 方法名(去掉Action后缀)
+                $file = substr(array_slice(explode('\\',$caller['class']),-1)[0], 0, -10).  // 调用者的类名，去掉 Controller 后缀
+                        '/' .
+                        substr($caller['function'],0,-6); // 调用者的方法名，去掉 Action 后缀
+            }
+            # 模板文件统一使用小写路径
+            $this->view->template_file = $dir . strtolower($file);
+            if($partial) $this->view->partial($file);
+            else         $this->view->pick($this->layout);
         }
-        # 模板文件统一使用小写路径
-        $this->view->template_file = $dir . strtolower($file);
-        if($partial) $this->view->partial($file);
-        else         $this->view->pick($this->layout);
     }
     
     public function setTemplatePath($path){
