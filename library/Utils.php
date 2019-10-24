@@ -86,7 +86,7 @@ class Utils{
 //            $value = self::vpath($index, $bind_data, $str);
             $value = self::vpath($index, $bind_data, $default ?? $index);
 //            echo " $func ( $index ) = $value \n";
-            return self::funcall($func, $value);
+            return self::pipe($func, $value);
         }
     }/*}}}*/
 
@@ -191,7 +191,7 @@ class Utils{
 //                    echo "简易语法的数组合并\n";
                     #$func = array_pop($_exp);
                     $func = array_shift($_exp);
-                    $$result = self::funcall($func, array_map(function($v)use($rex,&$bind_data){
+                    $$result = self::pipe($func, array_map(function($v)use($rex,&$bind_data){
                         return preg_match($rex,$v) ? self::parseBind($v,$bind_data) : $v;
                     }, $_exp));
                 }
@@ -331,7 +331,7 @@ class Utils{
             }else{
                 $return = $data[$path] ?? ($func?$path:$return); // 如果没有则返回原始字符串
             }
-            if($func) $return = self::funcall($func, $return);
+            if($func) $return = self::pipe($func, $return);
             if(is_array($return)){
                 Logger\Logger::error(['模板字符:',$match,'结果:',$return,'搜索的对象为：',$data]);
                 throw new Exception("模板字符：【{$match[1]}】的替换结果应该是字符串！但是获得的是数组【".json_encode($return)."】。\n用于查找的数组为：".json_encode($data));
@@ -450,7 +450,7 @@ class Utils{
                 }
                 # 执行过滤函数
                 $value['func'] = array_key_exists('func', $value) ? trim($value['func']) : null;
-                if(!empty($value['func'])) $_value = self::funcall($value['func'], $_value); 
+                if(!empty($value['func'])) $_value = self::pipe($value['func'], $_value); 
                 $out[$field] = $_value;
             }else{
                 $out[$field] = $value;
@@ -470,18 +470,18 @@ class Utils{
         }
     }
     
-    /*{{{*/ /** 函数调用，ext：funcall('funa|funb|func=2,_,3','value')
+    /*{{{*/ /** 函数调用，ext：pipe('funa|funb|func=2,_,3','value')
      * 和 ThinkPHP 的模板函数调用一致，下划线 _ 表示参数1的占位符，如果没有则固定放在第一个参数
      * Fun_A | Fun_B=参数_2,参数_3 | Fun_C | Fun_D=参数2,_,参数3
      *
-     * $a = Utils::funcall('strtotime|strval|intval|date=Y-m-d,_|Utils::test', '2019-11-12');
+     * $a = Utils::pipe('strtotime|strval|intval|date=Y-m-d,_|Utils::test', '2019-11-12');
      * var_dump($a);
      *
      * @param string $func 函数调用的描述字符串
      * @param mixed $value 调用函数时提供的值
      * @param mixed
      */ /*}}}*/
-    public static function funcall(string $func, $value=null){/*{{{*/
+    public static function pipe(string $func, $value=null){/*{{{*/
         $funs = preg_split('/\s*\|\s*/', $func);
         foreach($funs as $index => $fun){
             $position = strpos($fun, '=');
@@ -610,17 +610,17 @@ class Utils{
         } 
     }/*}}}*/
 
-    /*{{{*//** 使用 vpath 初始化数组，ext：path2arr('a.b.*.c','default_value',$out_arr); var_dump($out_arr);
+    /*{{{*//** 使用 vpath 初始化数组，ext：vpath2arr('a.b.*.c','default_value',$out_arr); var_dump($out_arr);
      *
      * 举例：
      * $a = $b = [];
-     * Utils::path2arr('a.b.c', 1, $a);
-     * Utils::path2arr('b.*.c', 1, $a);
-     * Utils::path2arr('c.*', 1, $a);
-     * Utils::path2arr('d.*.e.*', 1, $a);
-     * Utils::path2arr('d.*.k', 1, $a);
-     * Utils::path2arr('i.j.k.*.m.k.*.k', 1, $a);
-     * Utils::path2arr('*.j.k.*.m.k.*.k', 1, $b);
+     * Utils::vpath2arr('a.b.c', 1, $a);
+     * Utils::vpath2arr('b.*.c', 1, $a);
+     * Utils::vpath2arr('c.*', 1, $a);
+     * Utils::vpath2arr('d.*.e.*', 1, $a);
+     * Utils::vpath2arr('d.*.k', 1, $a);
+     * Utils::vpath2arr('i.j.k.*.m.k.*.k', 1, $a);
+     * Utils::vpath2arr('*.j.k.*.m.k.*.k', 1, $b);
      * print_r($a);
      * print_r($b);
      *
@@ -628,7 +628,7 @@ class Utils{
      * @param mixed $default 默认值
      * @param &array $arr 需要设置的数组
      *//*}}}*/
-    public static function path2arr(string $path, $default, array &$arr){/*{{{*/
+    public static function vpath2arr(string $path, $default, array &$arr){/*{{{*/
         $ref = &$arr;
         foreach(explode('.',$path) as $p) $ref = &$ref[$p=='*' ? 0 : $p];
         $ref = $default;
@@ -756,8 +756,7 @@ class Utils{
             $cache = new Phalcon\Cache\Backend\File($front,['cacheDir'=>$dir]);
         }
         return func_num_args()===1 ? $cache->get($key) : $cache->save($key, $val, $expire);
-    }
-/*}}}*/
+    }/*}}}*/
 
     /*{{{*//** 解密
      * @param string $str 需要解密的原始字符串

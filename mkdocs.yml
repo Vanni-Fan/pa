@@ -1,11 +1,33 @@
-site_name: Premission Admin
-site_description: 权限管理框架
+site_name: 基于Phalcon的PHP框架:PA
 site_author: Vanni Fan
 docs_dir: docs
 site_dir: public/docs
 theme:
-  name: 'material'
-  language: 'zh'
-extra:
-  search:
-    language: 'jp'
+  name: 'readthedocs'
+#theme:
+#  name: 'material'
+#  language: 'zh'
+nav:
+    - 开始使用: README.md
+    - 系统配置: config.md
+    - 系统介绍: 
+      - 系统架构: system/index.md
+      - 用户管理: system/user.md
+      - 角色管理: system/role.md
+      - 插件管理: system/plugin.md
+      - 权限管理: system/rule.md
+      - 扩展权限: system/extend.md
+      - 扩展属性: system/attribute.md
+    - HTML构建器: 
+      - 构建器: htmlbuilder/index.md
+      - 组件: htmlbuilder/components.md
+      - 表单: htmlbuilder/forms.md
+      - 布局: htmlbuilder/layouts.md
+      - 解析器:
+        - AdminLTE样式HTML输出: htmlbuilder/parser.md
+        - VUE对象输出: todo.md
+    - 模块开发: module.md
+    - 类库说明: 
+      - Utils类: library/utils.md
+    - 性能对比: performance.md
+    - 常见问题: qa.md
