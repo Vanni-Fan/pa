@@ -2,8 +2,8 @@ site_name: 基于Phalcon的PHP框架:PA
 site_author: Vanni Fan
 docs_dir: docs
 site_dir: site
-theme:
-  name: 'readthedocs'
+#theme:
+#  name: 'readthedocs'
 #theme:
 #  name: 'material'
 #  language: 'zh'
