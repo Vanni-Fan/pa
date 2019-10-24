@@ -1,4 +1,5 @@
 ### 它是什么
+- [文档](https://pa-docs.readthedocs.io/zh/latest/)
 - 基于 Phalcon 的通用管理后台
 - 基本权限，8个粒度，1个字节存储
   - 普通权限（针对用户自己创建的内容）
