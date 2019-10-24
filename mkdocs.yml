@@ -4,9 +4,9 @@ docs_dir: docs
 site_dir: site
 #theme:
 #  name: 'readthedocs'
-#theme:
-#  name: 'material'
-#  language: 'zh'
+theme:
+  name: 'material'
+  language: 'zh'
 nav:
     - 开始使用: README.md
     - 系统配置: config.md
