@@ -38,9 +38,24 @@ class Users extends PMB{
     
     public static function getInfo($user_id){
         $result = self::findFirst($user_id);
-        $return['rules']  = $result->Role ? json_decode($result->Role->rules,1) : [];
-        $return['role']   = $result->Role ? $result->Role->name : '未指定角色';
-        $return['extensions'] = $result->Role ? json_decode($result->Role->extensions, 1) : [];
+        if($result->Role){
+            $return['menus'] = [];
+            foreach($result->Role->Permissions as $permission){
+//                $menu = $permission->Menu;
+                $return['menus'][$permission->Menu->menu_id] = $permission->value;
+            }
+//            print_r($result->Role->Permissions[0]->Menu->toArray());
+//            $return['menus']  = array_column($result->Role->Permissions->toArray(), 'rule_value','menu_id');
+            $return['role']   = $result->Role->name;
+        }else{
+            $return['menus']  = [];
+            $return['role']   = '用户未设置角色';
+        }
+//        print_r($return);
+//        exit;
+//        $return['menus']  = $result->Role ? $result->Role->menus : [];
+//        $return['role']   = $result->Role ? $result->Role->name : '未指定角色';
+//        $return['extensions'] = $result->Role ? $result->Role->Extensions : [];
         $return = array_merge($result->toArray(), $return);
         return $return;
     }
@@ -61,9 +76,21 @@ class Users extends PMB{
         );
         $this->hasMany(
             'user_id',
-            Configs::class,
+            UserConfigs::class,
             'user_id',
             ["alias" => "Configs"]
+        );
+        $this->belongsTo(
+            'created_user',
+            Users::class,
+            'user_id',
+            ["alias" => "CreatedUser"]
+        );
+        $this->belongsTo(
+            'updated_user',
+            Users::class,
+            'user_id',
+            ["alias" => "UpdatedUser"]
         );
     }
     

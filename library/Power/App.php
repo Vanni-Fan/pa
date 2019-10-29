@@ -95,13 +95,13 @@ class App{
             }
         }
         # 加载数据库路由
-        $db_router = \Power\Models\Rules::find(['url_suffix is not null','columns'=>'url_suffix,router']);
+        $db_router = \Power\Models\Menus::find(['url_suffix is not null','columns'=>'url_suffix,router']);
         foreach($db_router as $_router){
             $routers['*'][$_router->url_suffix] = json_decode($_router->router,1);
         }
         
         # 合并数据库配置
-        $db_config = array_column(PA::$db->fetchAll('SELECT name,value FROM '.PA::$config->path('pa_db.prefix').'configs'),'value','name');
+        $db_config = array_column(PA::$db->fetchAll('SELECT var_name as name,var_default as value FROM '.PA::$config->path('pa_db.prefix').'configs'),'value','name');
         PA::$config->merge(new \Phalcon\Config($db_config));// 数据配置
         
         # 获得所有子模块名称
@@ -199,7 +199,7 @@ class App{
         PA::$db->setEventsManager(PA::$em);
         
         # 加载插件的 autoload
-        $plubins = Plugins::find(['enabled=1','columns'=>'name']);
+        $plubins = Plugins::find(['is_enabled=1','columns'=>'name']);
         if($plubins) foreach($plubins as $p){
             $class = '\\plugins\\'.$p->name.'\\Settings';
             if(method_exists($class,'autoload')) {

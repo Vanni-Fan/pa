@@ -33,6 +33,7 @@ class ErrorController extends Controller{
         if(PA::$config['debug']){
             echo '<h1>发生错误</h1>';
             echo '<h2>'.$exception->getMessage().'</h2>';
+            echo '<pre>'.PA::$db->getSQLStatement().'</pre>';
             echo '<pre>'.$exception->getTraceAsString().'</pre>';
         }else{
             echo '<h1>网站有点问题。。。</h1>';

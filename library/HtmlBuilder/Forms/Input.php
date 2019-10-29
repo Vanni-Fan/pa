@@ -38,13 +38,13 @@ class Input extends Element{
     /**
      * Input constructor.
      * @param string $name 表单中的名称
-     * @param string $subtype 子类型：mail, url, tel, mobile, currency, number, hidden, password, time, date, color
-     * @param string $value 默认值
      * @param string $label 标签
+     * @param string $value 默认值
+     * @param string $subtype 子类型：mail, url, tel, mobile, currency, number, hidden, password, time, date, color
      */
-    public function __construct(string $name, string $subtype='text', string $value='', string $label=''){
+    public function __construct(string $name='', string $label='', string $value=null, string $subtype='text'){
         parent::__construct('input',$name);
-        $this->value = $value;
+        if(null !== $value) $this->value = $value;
         $this->subtype = $subtype;
         switch($subtype){
             case 'mail':

@@ -8,35 +8,35 @@ $routers = [
             'action'     => 'login',
             'priority'  => 10,
         ], # 登录
-        PA_URL_PATH.'menu/{rule_id:[0-9]+}/item/:params' =>[
+        PA_URL_PATH.'menu/{menu_id:[0-9]+}/item/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'append',
             'params'     => 2,
             'priority'  => 10,
         ], # 添加的动作
-        PA_URL_PATH.'menu/{rule_id:[0-9]+}/item/new/:params' =>[
+        PA_URL_PATH.'menu/{menu_id:[0-9]+}/item/new/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'append',
             'params'     => 2,
             'priority'  => 10,
         ], # 添加的动作
-        PA_URL_PATH.'menu/{rule_id:[0-9]+}/item/{item_id:[0-9]+}/:params' =>[
+        PA_URL_PATH.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9]+}/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'update',
             'priority'  => 10,
             'params'     => 3
         ], # 修改动作
-        PA_URL_PATH.'menu/{rule_id:[0-9]+}/item/{item_id:[0-9,]+}/delete/:params' =>[
+        PA_URL_PATH.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9,]+}/delete/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'delete',
             'priority'   => 20,
             'params'     => 3
         ], # 删除的POST形式
-        PA_URL_PATH.'menu/{rule_id:[0-9]+}/items/:params' => [
+        PA_URL_PATH.'menu/{menu_id:[0-9]+}/items/:params' => [
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'list',
@@ -69,35 +69,35 @@ $routers = [
             'action'     => 'render',
             'priority'  => 10,
         ], # 显示资源文件
-        PA_URL_PATH.'menu/{rule_id:[0-9]+}/index/:params' => [
+        PA_URL_PATH.'menu/{menu_id:[0-9]+}/index/:params' => [
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'index',
             'priority'  => 10,
             'params'     => 2
         ],         # 首页列表页面
-        PA_URL_PATH.'menu/{rule_id:[0-9]+}/items/:params' => [
+        PA_URL_PATH.'menu/{menu_id:[0-9]+}/items/:params' => [
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'list',
             'priority'  => 10,
             'params'     => 2
         ],         # 首页列表页面
-        PA_URL_PATH.'menu/{rule_id:[0-9]+}/item/new/:params' =>[
+        PA_URL_PATH.'menu/{menu_id:[0-9]+}/item/new/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'new',
             'priority'  => 10,
             'params'     => 2
         ],              # 添加Item的页面
-        PA_URL_PATH.'menu/{rule_id:[0-9]+}/item/{item_id:[0-9]+}/:params' =>[
+        PA_URL_PATH.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9]+}/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'display',
             'priority'  => 10,
             'params'     => 3
         ], # 显示Item页面
-        PA_URL_PATH.'menu/{rule_id:[0-9]+}/item/{item_id:[0-9,]+}/delete/:params' =>[
+        PA_URL_PATH.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9,]+}/delete/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'delete',
@@ -106,7 +106,7 @@ $routers = [
         ], # 删除的Get形式
     ],
     'DELETE' => [
-        PA_URL_PATH.'menu/{rule_id:[0-9]+}/item/{item_id:[0-9,]+}/:params' =>[
+        PA_URL_PATH.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9,]+}/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'delete',
@@ -115,14 +115,14 @@ $routers = [
         ], # 删除的 DELETE 形式
     ],
     'PUT' => [  
-        PA_URL_PATH.'menu/{rule_id:[0-9]+}/item/:params' =>[ 
+        PA_URL_PATH.'menu/{menu_id:[0-9]+}/item/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'append',
             'priority'  => 10,
             'params'     => 2
         ], # 添加的动作
-        PA_URL_PATH.'menu/{rule_id:[0-9]+}/item/{item_id:[0-9]+}/:params' =>[
+        PA_URL_PATH.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9]+}/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'update',

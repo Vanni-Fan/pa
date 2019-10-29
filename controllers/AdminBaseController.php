@@ -1,9 +1,9 @@
 <?php
 namespace Power\Controllers;
+use Power\Models\UserConfigs;
 use Power\Models\Configs;
-use Power\Models\Extensions;
 use Power\Models\Logs;
-use Power\Models\Rules;
+use Power\Models\menus;
 use Power\Models\Users;
 use Phalcon\Mvc\Controller;
 use PA;
@@ -35,15 +35,15 @@ class AdminBaseController extends Controller{
     protected $current_page = 1;
 
     # 权限的设置
-    protected $rules    = [];
-    protected $rule_id  = 1;
+    protected $menus    = [];
+    protected $menu_id  = 1;
     protected $item_id  = 0;
     protected $is_admin = true;
-    protected $extensions = [];
+    protected $configs = [];
     protected $settings = [];
     
     public function getItemId(){return $this->item_id;}
-    public function getRuleId(){return $this->rule_id;}
+    public function getRuleId(){return $this->menu_id;}
     public function addCss($css_file,$position='after'){
         $plus = PA::$config['debug'] ? ('?'.random_int(1000000,9999999)) : '';
         $this->css_files[$position][] = '<link rel="stylesheet" href="'.$css_file.$plus.'" type="text/css" />';
@@ -62,7 +62,7 @@ class AdminBaseController extends Controller{
     public function isAllowed(string $action, int $owner=null, int $operator=null):bool{ // 权限， 所有者， 操作者
         if(!$operator) $operator = $this->getUserId();
         if(!$owner) $owner = $this->getUserId();
-        return Rules::isAllowed($action, $owner, $operator, $this->rules[$this->rule_id]);
+        return Menus::isAllowed($action, $owner, $operator, $this->menus[$this->menu_id]);
     }
     
     /**
@@ -74,17 +74,17 @@ class AdminBaseController extends Controller{
     }
     
     /**
-     * 获得记录的所有者，如果item_id为空，表示首页或者列表页
+     * 获得记录的所有者，如果item_id为空，表示首页或者列表页，请重载此方法
      * @param int|array $item_id_or_items null
      * @return int|array
      */
     public static function getItemOwner($item_id_or_items=null){
         if(!$item_id_or_items) return 1;
-        return 1;
+        return is_array($item_id_or_items) ? array_fill_keys($item_id_or_items,1) : ($item_id_or_items ?? 1);
     }
 
     /**
-     * 获得菜单的自定义角标，需要返回： [$rule_id=>'<i class="fa fa-angle-left pull-right">23</i>'...]
+     * 获得菜单的自定义角标，需要返回： [$menu_id=>'<i class="fa fa-angle-left pull-right">23</i>'...]
      */
     public function getMenuBadges(){return [];}
     
@@ -136,29 +136,30 @@ class AdminBaseController extends Controller{
             ]
         );
         # 设置基本信息
-        $this->rules   = $this->userinfo['rules'];
+        $this->menus   = $this->userinfo['menus'];
         $this->layout  = POWER_VIEW_DIR . 'layouts/index';
-        $rule_id = $this->getParam('rule_id','int');
-        if(!$rule_id){
-            $defined_url_suffix = Rules::findFirstByUrlSuffix($_SERVER['REQUEST_URI']);
-            if($defined_url_suffix) $rule_id = $defined_url_suffix->rule_id;
+        $menu_id = $this->getParam('menu_id','int');
+        if(!$menu_id){
+            $defined_url_suffix = Menus::findFirstByUrlSuffix($_SERVER['REQUEST_URI']);
+            if($defined_url_suffix) $menu_id = $defined_url_suffix->menu_id;
         }
-        if(!$rule_id){
-            $rule_id = array_key_first($this->rules);
+        if(!$menu_id){
+            $menu_id = array_key_first($this->menus);
         }
-        $this->rule_id = $rule_id;
-        $this->item_id = $this->getParam('item_id','int',0);
+        $this->menu_id = $menu_id;
+        $this->item_id = $this->getParam('item_id');
+        if(strpos($this->item_id,',')) $this->item_id = explode(',',$this->item_id);
         $this->current_page = $this->getParam('page','int',1);
         
         # 扩展权限
-        list('rule'=>$this->extensions,'attribute'=>$this->settings) = Extensions::getExtensionsByUser($this->tokeninfo['user_id']);
+        list('rule'=>$this->configs,'attribute'=>$this->settings) = Configs::getConfigsByUser($this->tokeninfo['user_id']);
         # 扩展属性
-        if(!array_key_exists($this->rule_id, $this->rules)) throw new \Exception('Permission Denied(rule not exists).');
+        if(!array_key_exists($this->menu_id, $this->menus)) throw new \Exception('Permission Denied(rule not exists).');
         
-        $ower_id = static::getItemOwner($this->item_id);
-        if(!is_array($ower_id)) $ower_id = [$ower_id]; // 删除时可以传入多个ID，用逗号分隔
-        foreach($ower_id as $ower){
-            if(!Rules::isAllowed($this->dispatcher->getActionName(), $ower, $this->userinfo["user_id"],$this->rules[$this->rule_id])){
+        $owner_id = static::getItemOwner($this->item_id);
+        if(!is_array($owner_id)) $owner_id = [$this->item_id=>$owner_id]; // 删除时可以传入多个ID，用逗号分隔
+        foreach($owner_id as $owner){
+            if(!Menus::isAllowed($this->dispatcher->getActionName(), $owner, $this->userinfo["user_id"],$this->menus[$this->menu_id])){
                 throw new \Exception('Permission Denied.');
             }
         }
@@ -176,7 +177,7 @@ class AdminBaseController extends Controller{
      * @return string
      */
     public function url($action='index', $params=[]){
-        $url     = PA_URL_PATH.'menu/'.($params['rule_id']??$this->rule_id);
+        $url     = PA_URL_PATH.'menu/'.($params['menu_id']??$this->menu_id);
         $item_id = $params['item_id'] ?? $this->item_id ?? 0;
         $all_actions = [
             'index'   => '/index',
@@ -191,7 +192,7 @@ class AdminBaseController extends Controller{
         $url .= $all_actions[$action];
         
 //        $url_params = $this->getParam();     // Phalcon 的URL中参数
-        unset($params['rule_id'], $params['item_id']);
+        unset($params['menu_id'], $params['item_id']);
 //        foreach(array_merge($url_params, $params) as $k=>$v){ # 手动指定的参数大于URL现在的参数
         foreach($params as $k=>$v){
             $url .= '/'.$k.'/'.$v;
@@ -213,7 +214,7 @@ class AdminBaseController extends Controller{
      * @throws \Exception
      */
     public function routerUrl(string $action='index', array $router=[], array $params=[]):string {
-        $all = Rules::find()->toArray();
+        $all = Menus::find()->toArray();
         # 模块名称，如果不提供，那么默认为当前模块
         $module_name = $this->dispatcher->getModuleName();
         if($module_name && !isset($router['module'])) $router['module'] = $module_name;
@@ -241,7 +242,7 @@ class AdminBaseController extends Controller{
         });
         
         if(!$matched) throw new \Exception('找不到控制器');
-        $params['rule_id'] = current($matched)['rule_id'];
+        $params['menu_id'] = current($matched)['menu_id'];
         return $this->url($action, $params);
     }
    
@@ -291,29 +292,29 @@ class AdminBaseController extends Controller{
     }
     
     # 获得当前权限
-    public static function getRules(int $user_id):array{
-        return $this->rules;
+    public static function getmenus(int $user_id):array{
+        return $this->menus;
     }
     
     public function setSettings($name, $value){
         if(is_int($name)){
-            $extends = Extensions::findFirst($name);
+            $extends = Configs::findFirst($name);
         }else{
-            $extends = Extensions::findFirst(['type=?0 and rule_id=?1 and extend_name=?2','bind'=>['attribute',$this->rule_id, $name]]);
+            $extends = Configs::findFirst(['type=?0 and menu_id=?1 and var_name=?2','bind'=>['attribute',$this->menu_id, $name]]);
         }
         
         if(!$extends || $extends->type!=='attribute') throw new \Exception("没有找到{$name}相关属性的配置");
-        if($extends->extend_value_type !== 'text' && is_string($value)) throw  new \Exception("{$name}属性的值类型应该是{$extends->extend_value_type},但是当前给到是一个字符串");
+        if($extends->var_type !== 'text' && is_string($value)) throw  new \Exception("{$name}属性的值类型应该是{$extends->var_type},但是当前给到是一个字符串");
         $value = is_string($value) ? $value : json_encode($value,JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        $config = Configs::findFirst(['user_id=?0 and rule_id=?1','bind'=>[$this->getUserId(), $this->rule_id]]);
+        $config = UserConfigs::findFirst(['user_id=?0 and menu_id=?1','bind'=>[$this->getUserId(), $this->menu_id]]);
         if($config){
             $config->update(['value'=>$value]);
         }else{
-            $config = new Configs();
+            $config = new UserConfigs();
             $config->create(
                 [
                     'user_id'=>$this->getUserId(),
-                    'rule_id'=>$this->rule_id,
+                    'menu_id'=>$this->menu_id,
                     'name'=>$name,
                     'value'=>$value,
                 ]
@@ -323,27 +324,27 @@ class AdminBaseController extends Controller{
     }
 
     public function getSettings($name=null){
-        $all_settings = array_merge($this->settings[$this->rule_id]??[], $this->settings[0]??[]);
+        $all_settings = array_merge($this->settings[$this->menu_id]??[], $this->settings[0]??[]);
         return $name ? ($all_settings[$name] ?? null) : $all_settings;
     }
     
     public function getExceptions($name=null){
-        $all_extensions = array_merge($this->extensions[$this->rule_id]??[], $this->extensions[0]??[]);
-        return $name ? ($all_extensions[$name] ?? null) : $all_extensions;
+        $all_configs = array_merge($this->configs[$this->menu_id]??[], $this->configs[0]??[]);
+        return $name ? ($all_configs[$name] ?? null) : $all_configs;
     }
     
     public function settingAction(){
         if(isset($_POST['extend'])){
-            foreach($_POST['extend'] as $rule_id => $setting){
+            foreach($_POST['extend'] as $menu_id => $setting){
                 foreach($setting as $key=>$val){
                     $data = [
                         'user_id' => $this->getUserId(),
-                        'rule_id' => $rule_id,
+                        'menu_id' => $menu_id,
                         'name'    => $key,
                     ];
-                    $config = Configs::findFirst(['user_id=?0 and rule_id=?1 and name=?2', 'bind'=>array_values($data)]);
+                    $config = UserConfigs::findFirst(['user_id=?0 and menu_id=?1 and name=?2', 'bind'=>array_values($data)]);
                     if($config) $config->update(['value'=>$val]);
-                    else (new Configs())->create($data + ['value'=>$val]);
+                    else (new UserConfigs())->create($data + ['value'=>$val]);
                 }
             }
         }
@@ -372,18 +373,18 @@ class AdminBaseController extends Controller{
             $this->view->menuBadges    = $this->getMenuBadges();
             $this->view->notifications = $this->getNotifications();
             $this->view->settings      = $this->getSettings();
-            $this->view->setting_items = \AdminHelper::getExtensionsHtml(
-                Extensions::getExtensions('attribute'),
+            $this->view->setting_items = \AdminHelper::getConfigsHtml(
+                Configs::getConfigs('attribute'),
                 $this->settings
             );
 
             # 获得当前用户权限下的菜单
-            #$this->view->menu = Rules::getChildIds(); // 所有菜单
-            $this->view->menu = Rules::allBySubRule(array_keys($this->rules));
+            #$this->view->menu = Menus::getChildIds(); // 所有菜单
+            $this->view->menu = Menus::allBySubRule(array_keys($this->menus));
     
             # 获得当前菜单的面包屑
             $current_menu_path = [];
-            Rules::getParentIds($this->rule_id, $current_menu_path);
+            Menus::getParentIds($this->menu_id, $current_menu_path);
             $this->view->current_menu_path = $current_menu_path;
             array_unshift($current_menu_path,['icon'=>'','name'=>'首页','url'=>'/']);
             $this->view->breadcrumbs = $current_menu_path;

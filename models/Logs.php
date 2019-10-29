@@ -14,5 +14,11 @@ class Logs extends PMB{
             'user_id',
             ['alias' => 'User']
         );
+        $this->belongsTo(
+            'menu_id',
+            Menus::class,
+            'menu_id',
+            ['alias' => 'Menu']
+        );
     }
 }

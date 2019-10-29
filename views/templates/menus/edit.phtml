@@ -1,0 +1,242 @@
+<style>
+    .box-body label{
+        text-align: right;
+        line-height: 35px;
+    }
+    .must-start::after{
+        content: '*';
+        color: red;
+        font-size: 20px;
+        position: absolute;
+        top: 2px;
+        padding-left: 5px;
+    }
+    .icons{
+        height:300px;
+        overflow-y: scroll;
+    }
+    .modal-body i{
+        padding: 5px;
+        font-size: 30px;
+    }
+    #error{
+        font-size:30px;
+        text-align: center;
+        font-weight: 700;
+        color: red;
+    }
+</style>
+
+<form method="post" action="<?=$c->url('update',['item_id'=>$c->getItemId()])?>" onsubmit="return formCheck()">
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">基本信息</h3>
+    </div>
+    <div class="box-body">
+        <div class="row">
+            <!-- 名称、图标 -->
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="name" class="col-sm-4 control-label must-start">菜单名称</label>
+                    <div class="col-sm-8">
+                        <div class="input-group">
+                            <input name="name" type="text" class="form-control" id="name" value="<?=$rule['name']??''?>" placeholder="输入名字">
+                            <span class="input-group-addon" onclick="showIcons()"><i id="current_icon" class="<?=$rule['icon']??'fa fa-fonticons'?>"></i></span>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="icon" value="<?=$rule['icon']??''?>">
+            </div>
+        
+            <!-- 父级 -->
+            <div class="col-sm-6">
+                <label class="col-sm-4" for="parent_id">父级菜单</label>
+                <div class="col-sm-8">
+                    <select id="parent_id" name="parent_id" data-placeholders="选择一个父级菜单，默认：根节点" class="form-control" style="width: 100%">
+                        <option></option>
+                        <?php foreach($menus as $menu){ if($menu['rule_id'] == ($rule['rule_id']??0)) continue; ?>
+                        <option value="<?=$menu['rule_id']?>"<?=$menu['rule_id'] == ($rule['parent_id']??0) ? ' selected' : ''?>>
+                            <?=str_repeat('　',$menu['level'])?><?=$menu['level']?'> ':''?><?=$menu['name']?>
+                        </option>
+                        <?php } ?>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 菜单功能 -->
+            <div class="col-sm-6">
+                <label class="col-sm-4 must-start">菜单功能</label>
+                <div class="col-sm-8">
+                    <div class="col-xs-6">
+                        <label><input onclick="$('#router_box').hide('slow');" <?=empty($rule['router'])?' checked':''?> type="radio" name="is_dir" value="1">菜单目录</label>
+                    </div>
+                    <div class="col-xs-6">
+                        <label><input onclick="$('#router_box').show('slow');" <?=empty($rule['router'])?'':' checked'?> type="radio" name="is_dir" value="0">功能链接</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 菜单权重 -->
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="index" class="col-sm-4 control-label">菜单权重</label>
+                    <div class="col-sm-8">
+                        <input name="index" value="<?=$rule['index']??''?>" type="number" class="form-control" id="index" placeholder="用于菜单排序，默认：0">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="box-footer">
+        <button type="button" class="btn btn-default" onclick="history.back()">取消</button>
+        <button type="submit" class="btn btn-info pull-right">提交</button>
+    </div>
+</div>
+
+
+<div class="box box-primary" id="router_box"<?=empty($rule['router'])?' style="display: none;"':''?>>
+    <div class="box-header with-border">
+        <h3 class="box-title">菜单功能</h3>
+    </div>
+    <div class="box-body">
+        <div class="row">
+
+            <!-- 控制器 -->
+            <div class="col-sm-6">
+                <label class="col-sm-4 must-start" for="router_controller">控制器类</label>
+                <div class="col-sm-8">
+                    <input name="router[controller]" value="<?=$rule['router']['controller']??''?>" id="router_controller" type="text" class="form-control" placeholder="控制器类名，不需要输入 Controller 后缀">
+                </div>
+            </div>
+
+            <!-- 动作 -->
+            <div class="col-sm-6">
+                <label class="col-sm-4" for="router_action">动作函数</label>
+                <div class="col-sm-8">
+                    <input name="router[action]" value="<?=$rule['router']['action']??''?>" type="text" class="form-control" id="router_action" placeholder="动作函数名，默认：index，需要输入 Action 后缀">
+                </div>
+            </div>
+
+            
+            <!-- 模块 -->
+            <div class="col-sm-6">
+                <label class="col-sm-4" for="router_module">功能模块</label>
+                <div class="col-sm-8">
+                    <select name="router[module]" value="<?=$rule['router']['module']??''?>" id="router_module" data-placeholders="选择或者输入模块名，默认不分模块" class="form-control" style="width: 100%">
+                        <option></option>
+                        <?php foreach($modules as $name=>$module){ ?>
+                        <option value="<?=$name?>"<?=$name==($rule['router']['module']??'') ? ' selected' : ''?>><?=$name?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- 代码位置 -->
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="router_path" class="col-sm-4 control-label">代码目录</label>
+                    <div class="col-sm-8">
+                        <input name="router[path]" value="<?=$rule['router']['path']??''?>" type="text" class="form-control" id="router_path" placeholder="输入的目录将被添加到 autoload 加载路径">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 名字空间 -->
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="router_namespace" class="col-sm-4 control-label">名字空间</label>
+                    <div class="col-sm-8">
+                        <input name="router[namespace]" value="<?=$rule['router']['namespace']??''?>" type="text" class="form-control" id="router_namespace" placeholder="名字空间，默认：根名字空间">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 权重 -->
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="router_priority" class="col-sm-4 control-label">路由权重</label>
+                    <div class="col-sm-8">
+                        <input name="router[priority]" value="<?=$rule['router']['priority']??''?>" type="number" class="form-control" id="router_priority" placeholder="相同路由匹配是权重高的优先，默认：0">
+                    </div>
+                </div>
+            </div>
+        
+            <!-- 权重 -->
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="url_suffix" class="col-sm-4 control-label">URL后缀</label>
+                    <div class="col-sm-8">
+                        <input name="url_suffix" value="<?=$rule['url_suffix']??''?>" type="text" class="form-control" id="url_suffix" placeholder="默认空，如果指定，那么浏览器中将显示指定的URL">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 权重 -->
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="params" class="col-sm-4 control-label">扩展参数</label>
+                    <div class="col-sm-8">
+                        <input name="params" value="<?=htmlentities($rule['params']??'')?>" type="text" class="form-control" id="params" placeholder="JSON格式的扩展参数，默认空">
+                    </div>
+                </div>
+            </div>
+            
+            
+        </div>
+    </div>
+</div>
+
+</form>
+
+<script type="text/javascript" src="/dist/bower_components/select2/dist/js/select2.full.min.js"></script>
+
+<script>
+    var modal = null;
+    $(function(){
+        $('select').each(function(i,e){
+            var e = $(e);
+            var option = {placeholder:e.data('placeholders')};
+            if(e.data('editable'))option.tags = true;
+            e.select2(option);
+        });
+    });
+    function showIcons(){
+        $.ajax('<?=$c->url('index',['action'=>'getIcons'])?>',{
+        
+        }).done( function(d){
+            modal = showDialogs({
+                title: '选择一个标签',
+                //*  width: 宽，默认auto
+                // height:300,
+                body: '<div class="icons">'+d+'</div>',
+                close: {text: '关闭', click: function(_){_.close()}}
+            })
+        });
+    }
+    function selectIcon(dom){
+        var icon = $(dom).attr('class');
+        $('input[name="icon"]').val(icon);
+        $('#current_icon').attr('class', icon);
+        modal.close();
+    }
+    function formCheck(){
+        var name = $('#name').val();
+        var mfun = $('input[name="is_dir"]');
+        var is_dir = mfun[0].checked == true;
+        var is_router = mfun[1].checked == true;
+        var controller = $('#router_controller').val();
+        var params = $('#params').val();
+        if(!name) return showDialogs({body:'<div id="error">没有输入菜单名称</div>',delay:1500}) && false;
+        if(!is_dir && !is_router) return showDialogs({body:'<div id="error">请选择菜单功能</div>',delay:1500}) && false;
+        if(is_router && !controller) return showDialogs({body:'<div id="error">请至少输入控制器的类名</div>',delay:1500}) && false;
+        if(params){
+            try{
+                var a = typeof(JSON.parse(params));
+                if(a!=='object') return showDialogs({body:'<div id="error">扩展参数里面填写的内容应该是一个对象</div>',delay:1500}) && false;
+            }catch (e) {
+                return showDialogs({body:'<div id="error">扩展参数里面填写的内容不是标准的JSON格式</div>',delay:1500}) && false;
+            }
+        }
+        return true;
+    }
+</script>

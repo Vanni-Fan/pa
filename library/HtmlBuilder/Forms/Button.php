@@ -46,15 +46,20 @@ class Button extends Element
      * @var string 子类型，input:带输入框的按钮组合； group:按钮组合； default:单个按钮
      */
     public $subtype = 'default';// input, group, default
-    
+
     /**
      * Button constructor.
+     * @param string $name
      * @param string $label 按钮的文字
+     * @param null $value
+     * @param string $subtype
      */
-    public function __construct(string $label='')
+    public function __construct(string $name='', string $label='', $value=null, string $subtype='button')
     {
-        parent::__construct('button');
+        parent::__construct('button', $name);
         $this->label = $label;
+        $this->subtype = $subtype;
+        if(null !== $value) $this->value = $value;
     }
     
     /**

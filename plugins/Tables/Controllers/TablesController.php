@@ -35,18 +35,24 @@ class TablesController extends AdminBaseController
     
     private function getModel(){
         $params = $this->getParam();
-        $fields = 'Tables\\mp\\'.Text::camelize($params['Rule']['params']['table']);
-        $object = call_user_func([$fields, 'getInstance']);
+        $source = \Tables\System\PluginsTableSources::findFirst($params['Rule']['params']['source_id']);
+        if(!$source){
+            throw new \Exception('没有对应的数据源');
+        }else $source = $source->toArray();
+        $table = Text::camelize($params['Rule']['params']['table']);
+        if($source['is_system']){
+            $object = call_user_func(['\\Power\\Models\\'.$table,'getInstance']);
+        }else{
+            $object = call_user_func(['\\Tables\\'.Text::camelize(strtr(dirname($source['dbname']),['.','-'])).'\\'.$table, 'getInstance']);
+        }
         return $object;
     }
     
     public function indexAction(){
         $parse  = new Parser();
         $params = $this->getParam();
-        $fields = 'Tables\\mp\\'.Text::camelize($params['Rule']['params']['table']);
-        $object = call_user_func([$fields, 'getInstance']);
         $fields = [];
-        foreach($object->describe() as $field){
+        foreach($this->getModel()->describe() as $field){
             $fields[] = [
                 'name'=>$field->getName(),
                 'text'=>$field->getName(),

@@ -1,0 +1,70 @@
+<style>
+    .json-code{
+        width: calc(35% - 20px);
+        cursor: pointer;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        height: 25px;
+        white-space: nowrap;
+        position: absolute;
+    }
+</style>
+<div class="box">
+    <div class="box-header with-border">
+        <h3 class="box-title">权限列表</h3>
+        <a href="<?=$c->url('append')?>" class="btn btn-success btn-sm">添加新权限</a>
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+        <table class="table table-bordered table-striped">
+            <tbody><tr>
+                <th>名称</th>
+                <th width="200px">指定URL</th>
+                <th width="35%">路由信息</th>
+                <th width="35%">参数信息</th>
+                <th width="100" style="text-align: center">操作</th>
+            </tr>
+            <?php foreach($menus as $rule){ ?>
+            <tr>
+                <td style="padding-left:<?=($rule['level'] * 30)+10?>px;">
+                    <?=$rule['icon']?('<i class="'.$rule['icon'].'"></i>'):''?>
+                    <?=$rule['name']?>
+                </td>
+                <td><?=$rule['url_suffix']?></td>
+                <td><div class="json-code"><?=json_encode($rule['router'])?></div></td>
+                <td><div class="json-code"><?=json_encode($rule['params'])?></div></td>
+                <td style="text-align: center">
+                    <a href="<?=$c->url('update',['item_id'=>$rule['rule_id']])?>">修改</a>
+                    <a href="<?=$c->url('delete',['item_id'=>$rule['rule_id']])?>" class="del">删除</a>
+                </td>
+            </tr>
+            <?php } ?>
+    </tbody></table>
+    </div>
+</div>
+<script>
+    $(function(){
+        $('.json-code').click(function(e){
+            showDialogs({
+                body:'<pre style="max-height:300px;">' + JSON.stringify(JSON.parse(e.target.innerText),'',4) + '</pre>',
+                close:{text:"关闭",click:function(_){_.close()}}
+            })
+        });
+        $('.del').click(function(e){
+            var obj = $(e.target);
+            showDialogs({
+                title:'是否删除此功能菜单',
+                body:'如果删除的菜单下面有子菜单，那么会将子菜单的父级设置成【根节点】',
+                ok:{text:'确认',click:function(o){
+                    $.ajax(obj.attr('href'),{
+                        method:'delete'
+                    }).done(function(d){
+                        location.reload();
+                    })
+                }},
+                close:{text:'取消',click:function(o){o.close()}}
+            });
+            return false;
+        })
+    });
+</script>

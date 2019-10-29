@@ -11,7 +11,7 @@ use Phalcon\Text;
 use Power\Controllers\AdminBaseController;
 use PA;
 use Power\Models\Roles;
-use Power\Models\Rules;
+use Power\Models\menus;
 use Tables\System\PluginsTableMenus;
 use Tables\System\PluginsTableSources;
 
@@ -84,7 +84,7 @@ class ManagerController extends AdminBaseController
             }
             
 //            print_r($menu_info->toArray());
-//            echo $target_file,"\n\n";
+            echo $target_file,"\n\n";
 //            echo PA::$db->getSQLStatement();
 //            exit;
         }else{
@@ -98,8 +98,8 @@ class ManagerController extends AdminBaseController
         $menu_id = $this->getParam('id','int');
         $menu_info = PluginsTableMenus::findFirst($menu_id);
         if($menu_info) {
-            Rules::deleteRule($menu_info->rule_id);
-            $menu_info->rule_id = null;
+            Menus::deleteRule($menu_info->menu_id);
+            $menu_info->menu_id = null;
             $menu_info->save();
         }
         $this->response->redirect($this->url('display',['item_id'=>$this->item_id,'action'=>'set','event'=>'setting']));
@@ -114,33 +114,32 @@ class ManagerController extends AdminBaseController
                                       ->from(['s'=>PluginsTableSources::class])
                                       ->join(PluginsTableMenus::class,'s.id=m.source_id','m')
                                       ->where('m.id=?0',[$menu_id])
-                                      ->columns('m.table_name,m.rule_id,m.model_file,s.name,s.is_system,m.source_id,s.dbname')
+                                      ->columns('m.table_name,m.menu_id,m.model_file,s.name,s.is_system,m.source_id,s.dbname')
                                       ->getQuery()
                                       ->execute();
         if(!$menu_info) throw new \Exception('数据不存在');
         # 创建菜单，并赋予管理员
         $menu_info = $menu_info[0];
-        if(!$menu_info->rule_id){
-            $parent = Rules::findFirst(['data_source="TablePlugins" and params=?0','bind'=>['['.$menu_info->source_id.']'],'columns'=>'rule_id']);
+        if(!$menu_info->menu_id){
+            $parent = Menus::findFirst(['params=?0','bind'=>['['.$menu_info->source_id.']'],'columns'=>'menu_id']);
             if($parent){
-                $parent_id = $parent['rule_id'];
+                $parent_id = $parent['menu_id'];
             }else{
-                $p_rule = new Rules;
+                $p_rule = new menus;
                 $p_rule->create(
                     [
                         'name'         => '[' . $menu_info->name . ']库',
                         'params'       => '[' . $menu_info->source_id.']',
                         'icon'         => 'fa fa-database',
                         'parent_id'    => 0,
-                        'enabled'      => 1,
-                        'data_source'  => 'TablePlugins',
+                        'is_enabled'      => 1,
                         'created_time' => time(),
                         'created_user' => $this->getUserId(),
                     ]
                 );
-                $parent_id = $p_rule->rule_id;
+                $parent_id = $p_rule->menu_id;
             }
-            $rule = Rules::getInstance();
+            $rule = Menus::getInstance();
             $rule->create(
                 [
                     'name'         => '[' . $menu_info->table_name . ']表',
@@ -148,22 +147,21 @@ class ManagerController extends AdminBaseController
                     'params'       => '{"source_id":' . $menu_info->source_id . ',"table":"' . $menu_info->table_name . '"}',
                     'icon'         => 'fa fa-table',
                     'parent_id'    => $parent_id,
-                    'enabled'      => 1,
-                    'data_source'  => 'TablePlugins',
+                    'is_enabled'      => 1,
                     'created_time' => time(),
                     'created_user' => $this->getUserId(),
                 ]
             );
             # 更新管理员权限
             $role = Roles::findFirstByRoleId(1);
-            $role_rules = json_decode($role->rules,1);
-            $role_rules[$rule->rule_id] = 255;
-            $role->rules = json_encode($role_rules,JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            $role_menus = json_decode($role->menus,1);
+            $role_menus[$rule->menu_id] = 255;
+            $role->menus = json_encode($role_menus,JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             $role->save();
             
             # 更新菜单ID
             $menu = PluginsTableMenus::findFirst($menu_id);
-            $menu->rule_id = $rule->rule_id;
+            $menu->menu_id = $rule->menu_id;
             $menu->save();
         }
         $this->response->redirect($this->url('display',['item_id'=>$this->item_id,'action'=>'set','event'=>'setting']));
@@ -198,7 +196,11 @@ class ManagerController extends AdminBaseController
         foreach($tables as $table) {
             $menu_table = PluginsTableMenus::findFirst(['source_id=?0 and table_name=?1', 'bind' => [$source_id, $table]]);
             if(!$menu_table){
-                (new PluginsTableMenus)->create(['rule_id'=>null,'source_id'=>$source_id,'table_name'=>$table,'model_file'=>null]);
+                $model_file = null;
+                if($source_info->is_system){
+                    $model_file = realpath(POWER_BASE_DIR . 'models/'.Text::camelize($table).'.php');
+                }
+                (new PluginsTableMenus)->create(['menu_id'=>null,'source_id'=>$source_id,'table_name'=>$table,'model_file'=>$model_file]);
             }
         }
         $this->response->redirect($this->url('display',['item_id'=>$this->item_id,'action'=>'set','event'=>'setting']));
@@ -261,14 +263,14 @@ OUT
                 ->query(['limit'=>['page'=>1,'size'=>$this->page_size]])
                 ->queryApi($this->getUrl(['command'=>'getList','type'=>'menu']))
                 ->createApi($this->getUrl(['command'=>'show','type'=>'menu','sub_command'=>'new']))
-                ->updateApi($this->routerUrl('update',['namespace'=>'Power\\Controllers','controller'=>'rules'],['item_id'=>'{id}']))
+                ->updateApi($this->routerUrl('update',['namespace'=>'Power\\Controllers','controller'=>'menus'],['item_id'=>'{id}']))
                 ->deleteApi($this->getUrl(['command'=>'delete','type'=>'menu','sub_command'=>'show','id'=>'{id}']))
                 ->fields(
                     [
                         ['name'=>'id','text'=>'id','sort'=>1, 'filter'=>1],
                         ['name'=>'source_id','text'=>'所属数据源ID','show'=>0],
                         ['name'=>'source_name','text'=>'所属数据源','render'=>'i=>"["+i+"]"'],
-                        ['name'=>'rule_id','text'=>'菜单ID','show'=>0],
+                        ['name'=>'menu_id','text'=>'菜单ID','show'=>0],
                         ['name'=>'rule_name','text'=>'菜单名称'],
                         ['name'=>'table_name','text'=>'表名','sort'=>1, 'filter'=>1],
                         ['name'=>'model_file','text'=>'模型文件','filter'=>1],
@@ -315,7 +317,7 @@ OUT
         $data = call_user_func([$model,'find'], $where);
         if($this->params['type'] == 'menu'){
             $data = array_map(function($v){
-                $rule = Rules::findFirstByRuleId($v['rule_id']);
+                $rule = Menus::findFirstByMenuId($v['menu_id']);
                 $source = PluginsTableSources::findFirstById($v['source_id']);
                 $v['rule_name']   = $rule ? $rule->name : '';
                 $v['source_name'] = $source ? $source->name : '';
@@ -323,13 +325,13 @@ OUT
                     $url1 = $this->getUrl(['command'=>'make_model','id'=>$v['id']]);
                     $v['model_file'] = '<a href="'.$url1.'">生成模型</a>';
                 }
-                if(!$v['rule_id']){
+                if(!$v['menu_id']){
                     $url2 = $this->getUrl(['command'=>'generate_rule','id'=>$v['id']]);
                     $v['action'] = '<a href="'.$url2.'">启用</a>';
                 }else{
                     $url2 = $this->getUrl(['command'=>'disable_rule','id'=>$v['id']]);
                     $v['action'] = '<a href="'.$url2.'">禁用</a>';
-                    $url3 = $this->routerUrl('display',['controller'=>'rules','namespace'=>'Power\\Controllers'],['item_id'=>$v['rule_id']]);
+                    $url3 = $this->routerUrl('display',['controller'=>'menus','namespace'=>'Power\\Controllers'],['item_id'=>$v['menu_id']]);
                     $v['rule_name'] = '<a href="'.$url3.'">' . $v['rule_name'] . '</a>';
                 }
                 return $v;
@@ -403,21 +405,21 @@ OUT
             );
         }else{
             $menus = array_map(function($v){
-                return ['text'=>str_repeat('&nbsp;　&nbsp;',$v['level']) . $v['name'], 'value'=>$v['rule_id']];
-            },Rules::getFlatMenus());
+                return ['text'=>str_repeat('&nbsp;　&nbsp;',$v['level']) . $v['name'], 'value'=>$v['menu_id']];
+            },Menus::getFlatMenus());
             $sources = PluginsTableSources::find(['columns'=>'id as value,name as text'])->toArray();
             $this->view->content = $parser->parse(
                 Forms::form($this->getUrl(['command' => 'update']))->add(
                     Layouts::box(
                         Element::create('div')->add(
-                            Forms::select('rule_id','上级目录菜单', $default->rule_id??'','select2')
+                            Forms::select('menu_id','上级目录菜单', $default->menu_id??'','select2')
                                  ->choices($menus)
                                  ->required()
                                  ->description(
                                      '如果找不到对应的菜单目录，请在《<a href="'
-                                     .$this->routerUrl('index',['namespace'=>'Power\\Controllers','controller'=>'rules'])
+                                     .$this->routerUrl('index',['namespace'=>'Power\\Controllers','controller'=>'menus'])
                                      .'">系统管理->权限管理</a>》中<a href="'
-                                     .$this->routerUrl('new',['namespace'=>'Power\\Controllers','controller'=>'rules'])
+                                     .$this->routerUrl('new',['namespace'=>'Power\\Controllers','controller'=>'menus'])
                                      .'">创建菜单</a>。'
                                  )
                                  ->tooltip('将此功能放到什么菜单位置下面'),
@@ -454,24 +456,23 @@ OUT
                 $model = new PluginsTableMenus();
                 $model->create($_POST);
                 # 插入一个菜单
-                $rule = new Rules;
+                $rule = new menus;
                 $id = $rule->create([
                     'name'      => $_POST['name'],
                     'router'    => '{"controller":"tables","action":"index","namespace":"plugins\\\\Tables\\\\Controllers","priority":10}',
                     'params'    => '{"source_id":' . $_POST['source_id'] . ',"table":"' . $_POST['table_name'] . '"}',
-                    'parent_id' => $_POST['rule_id'],
+                    'parent_id' => $_POST['menu_id'],
                     'index'     => 0,
                     'enabled'   => 1,
                     'icon'      => 'fa fa-table',
-                    'data_source'  => 'tables',
                     'created_time' => time(),
                     'created_user' => $this->getUserId(),
                 ]);
                 # 更新管理员权限
                 $role = Roles::findFirstByRoleId(1);
-                $role_rules = json_decode($role->rules,1);
-                $role_rules[$rule->rule_id] = 255;
-                $role->rules = json_encode($role_rules,JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                $role_menus = json_decode($role->menus,1);
+                $role_menus[$rule->menu_id] = 255;
+                $role->menus = json_encode($role_menus,JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                 $role->save();
                 # 跳转回去
 //                $this->response->redirect($this->url('index',['action'=>'set','event'=>'setting']),true);

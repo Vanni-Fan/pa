@@ -26,7 +26,7 @@ class PluginsController extends AdminBaseController {
         switch($event){
             case 'enable':
             case 'disable':
-                $plugin->enabled = ['enable'=>1,'disable'=>0][$event];
+                $plugin->is_enabled = ['enable'=>1,'disable'=>0][$event];
                 $plugin->save();
                 break;
             case 'delete':

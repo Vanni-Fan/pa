@@ -79,6 +79,16 @@ class Element{
      * @var string 在输入框后面条件的图标
      */
     public $badgeIcon='';
+    /**
+     * @var array 样式
+     */
+    public $style = '';
+
+    /**
+     * @var string 样式类
+     */
+    public $class = '';
+
     public $events=[];
     /**
      * @var array 子元素
@@ -93,6 +103,24 @@ class Element{
     public function __construct(string $type, string $name=''){
         $this->type = $type;
         $this->name = $name;
+    }
+
+    /**
+     * @param string $style
+     * @return $this
+     */
+    public function style(string $style){
+        $this->style = $style;
+        return $this;
+    }
+
+    /**
+     * @param string $class
+     * @return $this
+     */
+    public function class(string $class){
+        $this->class = $class;
+        return $this;
     }
 
     /**
@@ -136,10 +164,10 @@ class Element{
 
     /**
      * 设置标签占的宽度，12分之几
-     * @param int $labelWidth
+     * @param int|string:auto $labelWidth
      * @return self
      */
-    public function labelWidth(int $labelWidth){
+    public function labelWidth($labelWidth){
         $this->labelWidth = $labelWidth;
         return $this;
     }

@@ -3,7 +3,7 @@
 return [
     # 调试开关
     'debug'       => 1,
-    'trace'       => 1,
+    'trace'       => 0,
 
     # 应用的基础目录
     'application' => POWER_BASE_DIR,
@@ -17,7 +17,15 @@ return [
         'dbname'  => POWER_DATA . '/powerdb.sql3.db',
 //        'prefix'  => 'pa_'
     ],
-    
+
+//    'pa_db'       => [
+//        'adapter' => 'mysql',
+//        'dbname'  => 'pa',
+//        'username'=> 'root',
+//        'password'=> '123456',
+////        'prefix'  => 'pa_'
+//    ],
+
     # Power Admin 的Cookie加密Key
     'cookie_key'    => file_get_contents(POWER_DATA .'/cookie.key'),
     'cookie_cipher' => 'aes-192-cbc',

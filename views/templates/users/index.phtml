@@ -24,10 +24,10 @@
                 <td><?=$user->nickname?></td>
                 <td><?=$user->Role ? $user->Role->name : '未指定'?></td>
                 <td><?=$user->mobile?></td>
-                <td id="status_<?=$user->user_id?>" class="text-center"><?=$user->enabled?'是':'否'?></td>
+                <td id="status_<?=$user->user_id?>" class="text-center"><?=$user->is_enabled?'是':'否'?></td>
                 <td class="text-center">
                     <?php if($c->isAllowed('update', $user->user_id, $c->getUserId())) { ?>
-                    <a id="enable_<?=$user->user_id?>" data-val="<?=$user->enabled?>" onclick="enabled(<?=$user->user_id?>,event);" href="#"><?=$user->enabled?'禁用':'启用'?></a>
+                    <a id="enable_<?=$user->user_id?>" data-val="<?=$user->is_enabled?>" onclick="enabled(<?=$user->user_id?>,event);" href="#"><?=$user->is_enabled?'禁用':'启用'?></a>
                     <a href="<?=$c->url('display',['item_id'=>$user->user_id])?>">修改</a>
                     <?php } ?>
                     <?php if($c->isAllowed('delete', $user->user_id, $c->getUserId())) { ?>

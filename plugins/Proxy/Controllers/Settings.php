@@ -29,15 +29,15 @@ class Settings {
         );';
         $sql2 = 'CREATE TABLE IF NOT EXISTS "plugins_table_menus" (
           "id" INTEGER NOT NULL,
-          "rule_id" INTEGER,
+          "menu_id" INTEGER,
           "source_id" integer,
           "table_name" TEXT,
           PRIMARY KEY ("id")
         );';
         $now = date('Y-m-d H:i:s');
         PA::$db->execute(
-            'INSERT INTO "plugins"("name", "class_name", "enabled", "icon_url", "images", "description", "permission", "official_url", "author", "author_url", "version", "match_version", "license", "status_time", "publish_date", "inserted_time", "data_source", "created_time", "updated_time", "created_user", "updated_user")' .
-            'VALUES ("Tables", NULL, 1, NULL, NULL, "对MySQL表进行增删改查的简易操作", NULL, "http://pa.com", "Vanni Fan", "http://vanni.fan", "1.0", "^1.0", "BSD", ?1, ?1, ?1, NULL, NULL, NULL, NULL, NULL)'
+            'INSERT INTO "plugins"("name", "class_name", "is_enabled", "icon_url", "images", "description", "permission", "official_url", "author", "author_url", "version", "match_version", "license", "status_time", "publish_date", "inserted_time", "created_time", "updated_time", "created_user", "updated_user")' .
+            'VALUES ("Tables", NULL, 1, NULL, NULL, "对MySQL表进行增删改查的简易操作", NULL, "http://pa.com", "Vanni Fan", "http://vanni.fan", "1.0", "^1.0", "BSD", ?1, ?1, ?1, NULL, NULL, NULL, NULL)'
         ,[$now]);
         PA::$db->execute($sql1);
         PA::$db->execute($sql2);

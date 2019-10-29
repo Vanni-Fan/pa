@@ -18,15 +18,21 @@ class Roles extends PMB{
         );
         $this->hasMany(
             'role_id',
-            RoleExtensions::class,
+            Permissions::class,
             'role_id',
-            ["alias" => "Extensions"]
+            ["alias" => "Permissions"]
         );
-        $this->hasMany(
-            'role_id',
-            RoleRules::class,
-            'role_id',
-            ["alias" => "Rules"]
+        $this->belongsTo(
+            'created_user',
+            Users::class,
+            'user_id',
+            ["alias" => "CreatedUser"]
+        );
+        $this->belongsTo(
+            'updated_user',
+            Users::class,
+            'user_id',
+            ["alias" => "UpdatedUser"]
         );
     }
 }

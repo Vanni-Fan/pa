@@ -118,4 +118,29 @@ abstract class PowerModelBase extends Model{
 //        $params['bindTypes'][$bind_index] = $fields[$conditions['key']];
         return $conditions['key'] . ' ' . ($conditions['op']??'=') . ' ?'.$bind_index;
     }
+
+    public function beforeSave(){
+        $fields = self::fields();
+        if(array_key_exists('updated_time', $fields)){
+            if(empty($this->updated_time)) $this->updated_time = $fields['updated_time'] === \Phalcon\Db\Column::TYPE_INTEGER ? time() : date('Y-m-d H:i:s');
+        }
+        if(array_key_exists('updated_user', $fields)) {
+            if (empty($this->updated_user)) {
+                $tokeninfo = PA::$config['cookie_parser']($_COOKIE[PA::$config['cookie_name']]);
+                $this->updated_user = $tokeninfo['user_id'] ?? null;
+            }
+        }
+    }
+    public function beforeCreate(){
+        $fields = self::fields();
+        if(array_key_exists('created_time', $fields)) {
+            if (empty($this->created_time)) $this->created_time = $fields['created_time'] === \Phalcon\Db\Column::TYPE_INTEGER ? time() : date('Y-m-d H:i:s');
+        }
+        if(array_key_exists('created_user', $fields)) {
+            if (empty($this->created_user)) {
+                $tokeninfo = PA::$config['cookie_parser']($_COOKIE[PA::$config['cookie_name']]);
+                $this->created_user = $tokeninfo['user_id'] ?? null;
+            }
+        }
+    }
 }

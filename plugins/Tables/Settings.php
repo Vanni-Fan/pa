@@ -33,7 +33,7 @@ class Settings {
         );';
         $sql2 = 'CREATE TABLE IF NOT EXISTS "plugins_table_menus" (
           "id" INTEGER NOT NULL,
-          "rule_id" INTEGER,
+          "menu_id" INTEGER,
           "source_id" integer,
           "model_file" TEXT,
           "table_name" TEXT,
@@ -41,8 +41,8 @@ class Settings {
         );';
         $now = date('Y-m-d H:i:s');
         PA::$db->execute(
-            'INSERT INTO "plugins"("name", "class_name", "enabled", "icon_url", "images", "description", "permission", "official_url", "author", "author_url", "version", "match_version", "license", "status_time", "publish_date", "inserted_time", "data_source", "created_time", "updated_time", "created_user", "updated_user")' .
-            'VALUES ("Tables", NULL, 1, NULL, NULL, "对MySQL表进行增删改查的简易操作", NULL, "http://pa.com", "Vanni Fan", "http://vanni.fan", "1.0", "^1.0", "BSD", ?1, ?1, ?1, NULL, NULL, NULL, NULL, NULL)'
+            'INSERT INTO "plugins"("name", "class_name", "is_enabled", "icon_url", "images", "description", "permission", "official_url", "author", "author_url", "version", "match_version", "license", "status_time", "publish_date", "inserted_time", "created_time", "updated_time", "created_user", "updated_user")' .
+            'VALUES ("Tables", NULL, 1, NULL, NULL, "对MySQL表进行增删改查的简易操作", NULL, "http://pa.com", "Vanni Fan", "http://vanni.fan", "1.0", "^1.0", "BSD", ?1, ?1, ?1, NULL, NULL, NULL, NULL)'
         ,[$now]);
         PA::$db->execute($sql1);
         # 系统的数据源默认插入，但是不可编辑
@@ -64,7 +64,7 @@ class Settings {
         // 2、 创建 model
         $db_name = 'System';
         $template = file_get_contents(__DIR__ .'/ModelTemplate.php');
-        $dir = POWER_DATA . 'TablesPlugins/'.$db_name.'/';
+        $dir = POWER_DATA . 'TablesPlugins/Tables/'.$db_name.'/';
         is_dir($dir) || mkdir($dir,0777, true);
         file_put_contents($dir . 'PluginsTableMenus.php',str_replace(
             ['__DB_NAME__','__TABLE_NAME__','__MODEL_NAME__','__DB_INFO__'],
@@ -83,8 +83,9 @@ class Settings {
         $plugin->delete();
         PA::$db->execute('drop table if exists "plugins_table_sources"');
         PA::$db->execute('drop table if exists "plugins_table_menus"');
-        if(file_exists(POWER_DATA . 'TablesPlugins/PluginsTableSources.php')) unlink(POWER_DATA . 'TablesPlugins/PluginsTableSources.php');
-        if(file_exists(POWER_DATA . 'TablesPlugins/PluginsTableMenus.php')) unlink(POWER_DATA . 'TablesPlugins/PluginsTableMenus.php');
+        $dir = POWER_DATA . 'TablesPlugins/Tables/System/';
+        if(file_exists($dir . 'PluginsTableSources.php')) unlink($dir . 'PluginsTableSources.php');
+        if(file_exists($dir . 'PluginsTableMenus.php'))   unlink($dir . 'PluginsTableMenus.php');
         return true;
     }
     public static function autoload(){ // 自动加载

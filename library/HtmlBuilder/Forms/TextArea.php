@@ -14,20 +14,21 @@ class TextArea extends Element
      * @var string 富编辑器样式： simple,  ckeditor, wysihtml5
      */
     public $subtype='simple';// ckeditor, wysihtml5
-    
+
     /**
      * TextArea constructor.
-     * @param string $label
      * @param string $name
+     * @param string $label
      * @param string $value
+     * @param string $subtype
      * @param int    $rows
      */
-    public function __construct(string $label='', string $name='', string $value='', $rows = 3)
+    public function __construct(string $name='', string $label='', string $value=null, string $subtype='simple', int $rows = 3)
     {
-        parent::__construct('textarea');
+        parent::__construct('textarea', $name);
         $this->rows = $rows;
         $this->label = $label;
-        $this->name = $name;
-        $this->value = $value;
+        if(null !== $value) $this->value = $value;
+        $this->subtype = $subtype;
     }
 }

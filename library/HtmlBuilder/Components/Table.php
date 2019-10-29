@@ -11,7 +11,9 @@ class Table extends Element
     
     public $fixedLeft      = true; // todo
     public $fixedRight     = true; // todo
-    
+
+    public $canMin         = true;  // 是否可用最小化
+    public $canClose       = false; // 是否可用关闭
     public $canEdit        = false; // 编辑栏的标题，如果有表示可以编辑
     public $editColWidth   = 90;    // 编辑栏宽
     public $editCallback   = '';    // 编辑的回调函数
@@ -43,8 +45,8 @@ class Table extends Element
 
     public $createApi      = ''; // 创建数据的API
     public $queryApi       = ''; // 获得数据的API
-    public $updateApi      = ''; // 编辑数据的API 其中 {id} 会被替换成真实 ID
-    public $deleteApi      = ''; // 删除数据的API 其中 {id} 会被替换成真实 ID
+    public $updateApi      = ''; // 编辑数据的API 其中 _ID_ 会被替换成真实 ID
+    public $deleteApi      = ''; // 删除数据的API 其中 _ID_ 会被替换成真实 ID
 
     public $verticalLine   = ''; // 垂直线 todo
     public $horizontalLine = ''; // 水平线 todo

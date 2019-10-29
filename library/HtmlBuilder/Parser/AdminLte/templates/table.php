@@ -1,5 +1,6 @@
 <?php
-$this->js('/dist/plugins/twbs-pagination/jquery.twbsPagination.min.js');
+//$this->js('/dist/plugins/twbs-pagination/jquery.twbsPagination.min.js');
+$this->js('/dist/plugins/twbs-pagination/jquery.twbsPagination.js');
 $this->js('/dist/plugins/vue/vue.js');
 $this->js('/dist/vue.component.js');
 
@@ -107,6 +108,7 @@ OUT
 
 // HTML 模板，缓存
 $this->html(/** @lang HTML */<<<'OUT'
+<div id="test"></div>
 <div class="box box-primary" id="htmlbuilder-table-template" style="display:none;">
     <div class="box-header with-border">
         <h3 class="box-title"><?=$name?></h3>
@@ -143,7 +145,9 @@ $this->html(/** @lang HTML */<<<'OUT'
                     Rows per page:
                     <select class="input-sm page-size" onchange="HtmlBuilder_table_changePageSize($(this))">
                         <option value="10">10</option>
-                        <option value="25">25</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
                         <option value="50">50</option>
                         <option value="100">100</option>
                     </select>
@@ -237,8 +241,8 @@ function HtmlBuilder_table_delItems(id, items){
         ok:{
             text:'确定',
             click:function(o){
-                var deleteApi = window[id].deleteApi.replace('{id}', items);
-                $.ajax(deleteApi, {data:{query:window[id].query}, method:'POST'}).done(function(data){
+                var deleteApi = window[id].deleteApi.replace('_ID_', items);
+                $.ajax(deleteApi, {data:window[id].query, method:'POST'}).done(function(data){
                     HtmlBuilder_table_setData(data,id);
                     $('#'+id+' i.check-all').removeClass('fa-check-square-o').addClass('fa-square-o');
                 });
@@ -280,18 +284,24 @@ function HtmlBuilder_table_init(id){
     // 初始化表头
     var html = '';
     obj.find('.table-edit-btn>*').attr('data-id', id);
-    if(options.canEdit){
+    if(options.canEdit){ // 去掉编辑按钮
         obj.find('.add-el a').attr('href', options.createApi);
     }else{
         obj.find('.del-el,.add-el').remove();
     }
-    if(!options.selectMode){
+    if(!options.selectMode){ // 去掉选择模块
         obj.find('.select-el').remove();
     }
-    if(options.description){
+    if(options.description){ // 去掉表头描述
         obj.find('.table-description').text(options.description);
     }else{
         obj.find('.table-description').remove();
+    }
+    if(!options.canMin){ // 去掉最小化
+        obj.find('.box-tools button[data-widget="collapse"]').remove();
+    }
+    if(!options.canClose){ // 去掉关闭按钮
+        obj.find('.box-tools button[data-widget="remove"]').remove();
     }
     
     for(var index in options.fields){
@@ -384,7 +394,7 @@ function HtmlBuilder_table_setFilter(id, field) {
             text:'确定',
             click:function(o){ //HtmlBuilder_table_filterConfirm
                 var f = window['FILTERS_'+id].getFilters();
-                console.log(id,f);
+                // console.log(id,f);
                 if(!window['FILTERS_'+id].checkFilters(f)){
                     showDialogs({
                         body:'有些条件不完整，请修复',
@@ -477,13 +487,13 @@ function HtmlBuilder_table_setData(data, id) {
         for(var i in options.fields){
             var def = options.fields[i]; // defined
             var val = data.list[row][def.name] || ''; // 当前字段值，不存在则为空
-            val = def.render ? eval(def.render)(val) : val; // 使用 render 函数处理内容
+            val = def.render ? eval(def.render)(val, def) : val; // 使用 render 函数处理内容
             var cls = def.hasOwnProperty('class') ? def.class : '';
             cls += (def.hasOwnProperty('show') && def.show == 0) ? ' hidden' : '';
             tr += '<td data-field="' + def.name + '" class="' + cls + '">' + val + '</td>';
         }
         if(options.canEdit){
-            var updateApi = options.updateApi.replace('{id}', primary);
+            var updateApi = options.updateApi.replace('_ID_', primary);
             var edit_str = '<a title="编辑" href="' + updateApi + '"><i class="fa fa-edit" style="font-size:18px"></i></a>&nbsp; '+
                            '<a title="删除" href="#" onclick="HtmlBuilder_table_delItems(\'' + id + '\',\'' + primary + '\');return false;"><i class="fa fa-trash-o" style="font-size:18px"></i></a>';
             if(options.editCallback){
@@ -500,12 +510,16 @@ function HtmlBuilder_table_setData(data, id) {
     var offset = (data.page - 1 ) * data.size + 1;
     var end = offset + parseInt((data.list.length < data.size ? data.list.length : data.size)) - 1;
     obj.find('.page-status').text(offset + '-' + end + ' of ' + data.total);
-    obj.find('.dataTables_paginate').twbsPagination({
-        totalPages: Math.ceil(data.total/data.size)||1,
-        startPage: data.page,
+    obj.find('.input-sm.page-size').val(data.size);
+    var po = obj.find('.dataTables_paginate');
+    var totalPages = Math.ceil(data.total/data.size)||1;
+    var startPage = data.page > totalPages ? totalPages : data.page;
+    po.twbsPagination('destroy');
+    po.twbsPagination({
+        totalPages: totalPages,
+        startPage: startPage,
         onPageClick: function (event, page) {
             var tmp = Object.assign({}, window[id].query.limit);
-            console.log(tmp);
             if($.isEmptyObject(tmp) || tmp.page === page) return;
             options.query.limit.page = page;
             window[id] = options;

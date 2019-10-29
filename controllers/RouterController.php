@@ -1,6 +1,6 @@
 <?php
 namespace Power\Controllers;
-use Power\Models\Rules;
+use Power\Models\menus;
 use Phalcon\Mvc\Controller;
 use PA, Utils, Exception;
 
@@ -13,9 +13,9 @@ class RouterController extends Controller {
         # 获得参数
         $param = Utils::getDispatchParamsByKey($this->dispatcher);
         # 获得Rule ID以及表中定义的参数
-        $rule  = Rules::findFirstByRuleId($param['rule_id']);
+        $rule  = Menus::findFirstByMenuId($param['menu_id']);
         if(!$rule)throw new Exception('Permission Denied.');
-        $rule  = Rules::getRuleExtend($rule->toArray());
+        $rule  = Menus::getRuleExtend($rule->toArray());
         $forward = $rule['router'];
         $forward['params'] = array_merge($rule['params'], $param);
         $forward['params']['Rule'] = $rule;

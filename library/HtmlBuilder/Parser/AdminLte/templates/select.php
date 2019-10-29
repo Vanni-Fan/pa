@@ -18,10 +18,17 @@ $this->style(/** @lang CSS */'
 
 '
 );
+if(empty($style)){
+    $style = $visible ? 'display:flex;' : 'display:none;';
+    foreach($styles as $k=>$v){
+        $style .= $k.':'.$v.';';
+    };
+}
+
 ?>
-<div id="<?=$id?>" class="form-group htmlbuild-form <?=$attributes['class']??''?>" style="<?=$visible?'':'display:none;'?>">
+<div id="<?=$id?>" class="<?=$attributes['class']??'form-group htmlbuild-form'?>" style="<?=$style?>">
     <?php include(__DIR__.'/_label.php'); ?>
-    <div class="<?=$labelWidth?('col-sm-'.(12-$labelWidth)):''?>" id="<?=$id?>" style="<?=($labelWidth)?'padding:0':''?>">
+    <div class="<?=$next_element_class??''?>" id="<?=$id?>" style="<?=($labelWidth)?'padding:0':''?>">
         <select
                 id="<?=$id?>-select"
                 name="<?=$name?>"

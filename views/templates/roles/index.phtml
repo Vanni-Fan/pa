@@ -110,7 +110,7 @@
     .role-menu .table-bordered>tbody>tr>th{
         background-color:#daebf5;
         color:#2278ab;
-        font-size:20px;
+        font-size:16px;
         font-weight:700;
     }
     .role-menu .table-bordered>tbody>tr>th i{
@@ -181,7 +181,7 @@
         <?php foreach($roles as $i => $role){ ?>
         <!-- <h4 class="role-title box-title<?=$role_id==$role->role_id?' select':' unselect'?>"> -->
         <h4 class="role-title <?=$role_id==$role->role_id?' select':' unselect'?>">
-            <label class="box-title"><input value="<?=$role->role_id?>" class="role_items" name="role_id" type="radio"<?=$role_id==$role->role_id?' checked':''?>><?=$role->name?></label>
+            <label class="box-title" style="font-size:16px;"><input value="<?=$role->role_id?>" class="role_items" name="role_id" type="radio"<?=$role_id==$role->role_id?' checked':''?>><?=$role->name?></label>
             <?php if($i>0){ ?>
                 <i class="remove operate-btn fa fa-remove" data-type="delete" data-url="<?=$c->url('delete',['item_id'=>$role->role_id])?>"></i>
             <?php } ?>
@@ -205,8 +205,8 @@
         <table class="table table-bordered table-striped">
             <tr>
                 <th rowspan="2"><i class="fa fa-bars"></i>菜单项</th>
-                <th colspan="4" class="min-th" style="font-size:20px !important;">全局权限</th>
-                <th colspan="4" class="min-th" style="font-size:20px !important;">个人权限</th>
+                <th colspan="4" class="min-th" style="font-size:16px !important;">全局权限</th>
+                <th colspan="4" class="min-th" style="font-size:16px !important;">个人权限</th>
             </tr>
             <tr>
                 <th class="min-th" width="35">增</th>
@@ -218,20 +218,29 @@
                 <th class="min-th" width="35">改</th>
                 <th class="min-th" width="35">查</th>
             </tr>
-            <?php foreach($menus as $menu){
+            <?php foreach($menus as $row=>$menu){
                 $class = 'valign title'.$menu['level'];
-                if(!in_array($menu['rule_id'], $rules)) $class .= ' role-small-title';
+                if(!in_array($menu['menu_id'], $menus)) $class .= ' role-small-title';
             ?>
-                <tr>
+            <tr>
                 <td class="<?=$class?>"<?=$menu['router']?'':' colspan="9"'?> style="padding-left:<?=$menu['level'] * 30 + 10?>px;">
-                    <?=$menu['name']?><?=$rule_extends_html[$menu['rule_id']]??''?>
+                    <?=$menu['name']?><?=$rule_extends_html[$menu['menu_id']]??''?>
+                    <span class="text-info" style="cursor:pointer;margin-left:10px;" onclick="toggleExt(event, <?=$row?>)">【扩展权限<i class="fa fa-plus"></i>】</span>
                 </td>
                 <?php if($menu['router']){ for($i=7; $i>=0; $i--){ ?>
-                <?php $checked = ((1<<$i) & ($rules[$menu['rule_id']]??0)) === (1<<$i) ? ' checked' : ''; ?>
+                <?php $checked = ((1<<$i) & ($menus[$menu['menu_id']]??0)) === (1<<$i) ? ' checked' : ''; ?>
                 <td class="<?=$class?>">
-                    <label class="role-label"><input value="1" name="rule_id[<?=$menu['rule_id']?>][<?=$i?>]" type="checkbox"<?=$checked?>><i class="fa fa-check-square"></i></label>
+                    <label class="role-label" style="height: 18px;"><input value="1" name="menu_id[<?=$menu['menu_id']?>][<?=$i?>]" type="checkbox"<?=$checked?>><i class="fa fa-check-square"></i></label>
                 </td>
                 <?php }} ?>
+            </tr>
+            <tr id="extend_<?=$row?>" style="display: none;">
+                <td colspan="9" style="padding-left:<?=$menu['level'] * 30 + 10?>px;">
+                    <div style="border-style: dashed;border-color: #0b97c4;border-width:1px;padding: 10px;">
+                        <?=$test_div?>
+                        <?=$test_div?>
+                    </div>
+                </td>
             </tr>
             <?php } ?>
         </table>
@@ -242,26 +251,30 @@
 <div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title">全局扩展权限</h3>
+        <div class="box-tools pull-right">
+            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus text-info"></i></button>
+        </div>
     </div>
     <!-- /.box-header -->
     <!-- form start -->
     <div class="box-body">
+        <?=$test_div?>
+        <?=$test_div?>
         <?=$global_extends_html[0]??''?>
     </div>
 </div>
     <button type="submit" class="btn role-save-btn btn-primary">保存</button>
 </form>
 <script>
-    function toggleExt(e){
-        var o = $(e.target);
+    function toggleExt(e, row){
+        var o = $(e.currentTarget);
         var i = o.find('i');
-        var d = o.next();
-        if(i.hasClass('fa-caret-down')){
-            d.show('slow');
-            i.removeClass('fa-caret-down').addClass('fa-caret-up');
+        if(i.hasClass('fa-plus')){ //  fa-minus:- fa-plus
+            $('#extend_'+row).show();
+            i.removeClass('fa-plus').addClass('fa-minus');
         }else{
-            d.hide('slow');
-            i.removeClass('fa-caret-up').addClass('fa-caret-down');
+            $('#extend_'+row).hide();
+            i.removeClass('fa-minus').addClass('fa-plus');
         }
     }
 $(function(){

@@ -1,0 +1,222 @@
+<style>
+.box-body label{
+    text-align: right;
+    line-height: 35px;
+}
+.must-start::after{
+    content: '*';
+    color: red;
+    font-size: 20px;
+    position: absolute;
+    top: 2px;
+    padding-left: 5px;
+}
+</style>
+<form onsubmit="return checkForm();" method="post" action="<?=$c->getItemId() ? $c->url('update',['item_id'=>$c->getItemId()]) : $c->url('new') ?>">
+<div class="box box-primary">
+    <div class="box-body">
+        <div class="row">
+            <!-- 类型 -->
+            <div class="col-sm-6">
+                <label class="col-sm-4 must-start" for="type">配置类型</label>
+                <div class="col-sm-8">
+                    <label>
+                        <input value="rule" type="radio" name="type" class="minimal" <?=($data['type']??'rule')=='rule'?'checked':''?>>权限&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    </label>
+                    <label>
+                        <input value="attribute" type="radio" name="type" class="minimal"<?=($data['type']??'rule')=='attribute'?'checked':''?>>属性
+                    </label>
+                </div>
+            </div>
+
+            <!-- 类型 -->
+            <div class="col-sm-6">
+                <label class="col-sm-4 must-start" for="is_enabled">是否启用</label>
+                <div class="col-sm-8">
+                    <label>
+                        <input value="1" type="radio" name="is_enabled" class="minimal" <?=($data['is_enabled']??1)==1?'checked':''?>>启用&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    </label>
+                    <label>
+                        <input value="0" type="radio" name="is_enabled" class="minimal"<?=($data['is_enabled']??1)==0?'checked':''?>>禁用
+                    </label>
+                </div>
+            </div>
+
+
+            <!-- 中文名称 -->
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="name" class="col-sm-4 control-label must-start">中文名称</label>
+                    <div class="col-sm-8">
+                        <input name="name" type="text" class="form-control" id="name" value="<?=$data['name']??''?>" placeholder="输入名字">
+                    </div>
+                </div>
+            </div>
+    
+            <!-- 变量名称 -->
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="var_name" class="col-sm-4 control-label must-start">变量名称</label>
+                    <div class="col-sm-8">
+                        <?php if($c->getParam('type')=='rule') { ?>
+                        <div class="input-group">
+                        <span class="input-group-addon">
+                            <label style="line-height: normal;margin: 0;"><input name="is_action_name" value="1" <?=empty($data['is_action_name'])?'':' checked'?> style="top: 2px;position: relative;" type="checkbox">与动作函数同名</label>
+                        </span>
+                        <?php } ?>
+                            <input name="var_name" type="text" class="form-control" id="var_name" value="<?=$data['var_name']??''?>" placeholder="输入名字">
+                        <?php if($c->getParam('type')=='rule') { ?>
+                        </div>
+                        <?php } ?>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 依附位置 -->
+            <div class="col-sm-6">
+                <label class="col-sm-4 must-start" for="menu_id">配置范围</label>
+                <div class="col-sm-8">
+                    <select id="menu_id" name="menu_id" class="form-control">
+                        <?php $menu_id = $data['menu_id'] ?? ''; ?>
+                        <option value=""<?=$menu_id==0?' selected':''?>>全局配置</option>
+                        <optgroup label="权限菜单">
+                        <?php foreach($menus as $m){ ?>
+                        <option<?=$menu_id==$m['menu_id']?' selected':''?> value="<?=$m['menu_id']?>"><?=str_repeat('　　',$m['level']).$m['name']?></option>
+                        <?php } ?>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+    
+            <!-- 说明 -->
+            <div class="col-sm-6">
+                <label class="col-sm-4" for="remark">配置说明</label>
+                <div class="col-sm-8">
+                    <input name="remark" type="text" class="form-control" id="description" value="<?=$data['remark']??''?>" placeholder="输入名字">
+                </div>
+            </div>
+            
+            <!-- 值类型 -->
+            <div class="col-sm-6">
+                <label class="col-sm-4 must-start" for="var_type">值类型</label>
+                <div class="col-sm-8">
+                    <select id="var_type" name="var_type" class="form-control">
+                        <option value="text"<?=($data['var_type']??'')=='text' ? ' selected':''?>>text</option>
+                        <option value="list"<?=($data['var_type']??'')=='list' ? ' selected':''?>>list</option>
+                        <option value="hash"<?=($data['var_type']??'')=='hash' ? ' selected':''?>>hash</option>
+                    </select>
+                </div>
+                <span id="var_type_help" class="text-info" style="margin-left:15px;"></span>
+            </div>
+            
+            <!-- 备选项类型 -->
+            <div class="col-sm-6">
+                <label class="col-sm-4 must-start" for="options_type">选项类型</label>
+                <div class="col-sm-8">
+                    <?php
+                    $all_types = [
+                        ['group'=>1, 'name'=>'文本框'],
+                        ['value'=>'Input:text',       'name'=>'普通文本','temp'=>'null','text'=>''],
+                        ['value'=>'Input:mail',       'name'=>'邮件地址','temp'=>'null','text'=>''],
+                        ['value'=>'Input:url',        'name'=>'网址','temp'=>'null','text'=>''],
+                        ['value'=>'Input:tel',        'name'=>'电话号码','temp'=>'null','text'=>''],
+                        ['value'=>'Input:mobile',     'name'=>'手机号码','temp'=>'null','text'=>''],
+                        ['value'=>'Input:currency',   'name'=>'货币','temp'=>'null','text'=>''],
+                        ['value'=>'Input:number',     'name'=>'数字','temp'=>'null','text'=>''],
+                        ['value'=>'Input:password',   'name'=>'密码','temp'=>'null','text'=>''],
+                        ['value'=>'Input:time',       'name'=>'时间','temp'=>'null','text'=>''],
+                        ['value'=>'Input:date',       'name'=>'日期','temp'=>'null','text'=>''],
+                        ['value'=>'Input:color',      'name'=>'颜色','temp'=>'null','text'=>''],
+                        ['group'=>1, 'name'=>'下拉框'],
+                        ['value'=>'Select:single',    'name'=>'下拉选项','temp'=>'{"options_url":"http://..你的URL.."}','text'=>'请在下面填写获取这些选项的URL'],
+                        ['value'=>'Select:multiple',  'name'=>'下拉多选','temp'=>'{"options_url":"http://..你的URL.."}','text'=>'请在下面填写获取这些选项的URL'],
+                        ['value'=>'Select:tags',      'name'=>'标签选择','temp'=>'{"options_url":"http://..你的URL.."}','text'=>'请在下面填写获取这些选项的URL'],
+                        ['group'=>1, 'name'=>'多行输入框'],
+                        ['value'=>'TextArea:simple',  'name'=>'文本域','temp'=>'null','text'=>''],
+                        ['value'=>'TextArea:ckeditor','name'=>'富文本(ckeditor)','temp'=>'null','text'=>''],
+                        ['value'=>'TextArea:wyihtml5','name'=>'富文本(wyihtml5)','temp'=>'null','text'=>''],
+                        ['group'=>1, 'name'=>'文件上传'],
+                        ['value'=>'File:image',        'name'=>'单张图片上传','temp'=>'{"corpWidth":100,"corpHeight":100,"upload_url":"http://..你的URL..","accept":"image/*"}','text'=>'单张图片上传，corpWidth、corpHeight、upload_url 为切图时的可选项'],
+                        ['value'=>'File:file',         'name'=>'单个文件上传','temp'=>'{"accept":"*"}','text'=>'accept 为接受的文件类型'],
+                        ['value'=>'File:multipeImages','name'=>'多张图片上传','temp'=>'{"corpWidth":1,"corpHeight":1,"upload_url":"http://..你的URL.."}','text'=>'单张图片上传，corpWidth、corpHeight、upload_url 为切图时的可选项L'],
+                        ['value'=>'File:multipeFiles', 'name'=>'多个文件上传','temp'=>'{"accept":"*"}','text'=>'accept 为接受的文件类型'],
+                        ['group'=>1, 'name'=>'选择框'],
+                        ['value'=>'Check:checkbox',    'name'=>'复选框','temp'=>'{"options_url":"http://..你的URL.."}','text'=>'请在下面填写获取这些选项的URL'],
+                        ['value'=>'Check:radio',       'name'=>'单选框','temp'=>'{"options_url":"http://..你的URL.."}','text'=>'请在下面填写获取这些选项的URL'],
+                        ['group'=>1, 'name'=>'固定项'],
+                        ['value'=>'Button:inputButton','name'=>'固定选项','temp'=>'["选项A","选项B","USA","China","English"]','text'=>'按照下面的格式提供一个JSON数组，字符串必须用英文双引号包裹'],
+                        ['value'=>'Button:inputButton','name'=>'Hash选项','temp'=>'{"选项A":"选项值","YES":"是","NO":"否"}','text'=>'按照下面的格式提供一个JSON对象，键名和字符串必须使用英文双引号包裹'],
+                    ];
+
+                    ?>
+                    <select id="options_type" name="options_type" class="form-control" data-help="#options_type_help" data-temp="#options" onchange="selectChange(event);">
+                        <?php foreach($all_types as $type){
+                            if(isset($type['group'])){
+                                echo '<optgroup label="',$type['name'],'"></optgroup>';
+                            }else{
+                                echo '<option data-temp=\'',$type['temp'],'\' data-help="',$type['text'],'">',$type['name'],'</option>';
+                            }
+                        }?>
+                        <option value=""<?=($data['options_type']??'')=='null' ? ' selected':''?>>null</option>
+                        <option value="callback"<?=($data['options_type']??'')=='callback' ? ' selected':''?>>callback</option>
+                        <option value="hash"<?=($data['options_type']??'')=='hash' ? ' selected':''?>>hash</option>
+                    </select>
+                </div>
+                <span id="options_type_help" class="text-info" style="margin-left:15px;"></span>
+            </div>
+    
+            <!-- 默认值 -->
+            <div class="col-sm-6">
+                <label class="col-sm-4 must-start" for="var_default">默认值</label>
+                <div class="col-sm-8">
+                    <textarea name="var_default" id="var_default" rows="10" class="form-control"><?=$data['var_default']??''?></textarea>
+                </div>
+            </div>
+
+            <!-- 备选值 -->
+            <div class="col-sm-6">
+                <label class="col-sm-4" for="options">选项值</label>
+                <div class="col-sm-8">
+                    <textarea name="options" id="options" rows="10" class="form-control"><?=$data['options']??''?></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="box-footer">
+        <button type="button" class="btn btn-default" onclick="history.back()">取消</button>
+        <button type="submit" class="btn btn-info pull-right">提交</button>
+    </div>
+</div>
+</form>
+<script>
+    function selectChange(e) {
+        var obj = $(e.currentTarget);
+        var opt = obj.find("option:selected");
+        $(obj.data('help')).text(opt.data('help'));
+        $(obj.data('temp')).val(JSON.stringify(opt.data('temp'),null, 4));
+
+    }
+    function checkForm(){
+        if($('#name').val()==''){
+            showDialogs({
+                body:'请输入名称',
+                delay:1500
+            });
+            return false;
+        }
+        if($('#var_name').val()==''){
+            showDialogs({
+                body:'请输入变量名称',
+                delay:1500
+            });
+            return false;
+        }
+        if($('#var_default').val()==''){
+            showDialogs({
+                body:'请输入默认值',
+                delay:1500
+            });
+            return false;
+        }
+    }
+</script>

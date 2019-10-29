@@ -13,10 +13,10 @@ class UsersController extends AdminBaseController {
         $this->render('', $this->item_id ? true : false);
     }
     
-    public static function getItemOwner($item_id = null): int
-    {
-        return $item_id;
-    }
+//    public static function getItemOwner($item_id = null): int
+//    {
+//        return $item_id;
+//    }
     
     public function newAction(){
         $this->subtitle = '添加新用户';
@@ -30,7 +30,7 @@ class UsersController extends AdminBaseController {
         $this->subtitle = '修改用户信息';
         if($this->getParam('type')=='enable'){
             $user = Users::findFirst($this->item_id);
-            $user->enabled = $this->getParam('enabled');
+            $user->is_enabled = $this->getParam('is_enabled');
             $user->save();
             header('content-type:application/json;charset=utf8');
             return json_encode(['ok'=>1]);
@@ -46,7 +46,7 @@ class UsersController extends AdminBaseController {
     
     public function updateAction(){
         $data = $_POST;
-        $data['enabled'] = 1;
+        $data['is_enabled'] = 1;
         if($this->item_id){
             $user = Users::findFirst($this->item_id);
             if(empty($data['password'])){

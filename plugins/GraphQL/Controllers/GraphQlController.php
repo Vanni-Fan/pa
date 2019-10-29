@@ -7,12 +7,12 @@ use GraphQL\Type\Schema;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use plugins\GraphQL\Types;
+use Power\Models\UserConfigs;
 use Power\Models\Configs;
-use Power\Models\Extensions;
 use Power\Models\Logs;
 use Power\Models\Plugins;
 use Power\Models\Roles;
-use Power\Models\Rules;
+use Power\Models\menus;
 use Power\Models\Users;
 use PowerModelBase;
 
@@ -68,7 +68,7 @@ class GraphQlController extends ApiController
             configs{
                 config_id
                 user_id
-                rule_id
+                menu_id
                 name
                 value
             }
@@ -127,13 +127,13 @@ class GraphQlController extends ApiController
                             'args' => ['filter'=>['type' => Types::filter(),'defaultValue' => ['op'=>'=']]]
                         ],
                         'configs' => [
-                            'type' => Type::listOf(Types::table('\\'.Configs::class)), // 对应一个数组
+                            'type' => Type::listOf(Types::table('\\'.UserConfigs::class)), // 对应一个数组
                             'args' => ['filter'=>['type' => Types::filter(),'defaultValue' => ['op'=>'=']]]
                         ],
-                        'extensions' => [
-                            'type' => Type::listOf(Types::table('\\'.Extensions::class)), // 对应一个数组
-                            'args' => ['filter'=>['type' => Types::filter(),'defaultValue' => ['op'=>'=']]]
-                        ],
+//                        'extensions' => [
+//                            'type' => Type::listOf(Types::table('\\'.Configs::class)), // 对应一个数组
+//                            'args' => ['filter'=>['type' => Types::filter(),'defaultValue' => ['op'=>'=']]]
+//                        ],
                         'plugins' => [
                             'type' => Type::listOf(Types::table('\\'.Plugins::class)), // 对应一个数组
                             'args' => ['filter'=>['type' => Types::filter(),'defaultValue' => ['op'=>'=']]]
@@ -142,8 +142,8 @@ class GraphQlController extends ApiController
                             'type' => Type::listOf(Types::table('\\'.Roles::class)), // 对应一个数组
                             'args' => ['filter'=>['type' => Types::filter(),'defaultValue' => ['op'=>'=']]]
                         ],
-                        'rules' => [
-                            'type' => Type::listOf(Types::table('\\'.Rules::class)), // 对应一个数组
+                        'menus' => [
+                            'type' => Type::listOf(Types::table('\\'.Menus::class)), // 对应一个数组
                             'args' => ['filter'=>['type' => Types::filter(),'defaultValue' => ['op'=>'=']]]
                         ],
                     ],

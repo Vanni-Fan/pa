@@ -41,12 +41,12 @@ class Check extends Element
     
     /**
      * Check constructor.
-     * @param string $label 标签名称
      * @param string $name 表单中的名称
+     * @param string $label 标签名称
      * @param  mixed $value 表单的默认值
      * @param string $subtype 样式
      */
-    public function __construct(string $label, string $name, $value, string $subtype='checkbox')
+    public function __construct(string $name='', string $label='', $value=null, string $subtype='checkbox')
     {
         parent::__construct('check');
         $this->label = $label;
