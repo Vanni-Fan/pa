@@ -224,8 +224,10 @@
             ?>
             <tr>
                 <td class="<?=$class?>"<?=$menu['router']?'':' colspan="9"'?> style="padding-left:<?=$menu['level'] * 30 + 10?>px;">
-                    <?=$menu['name']?><?=$rule_extends_html[$menu['menu_id']]??''?>
+                    <?=$menu['name']?>
+                    <?php if(isset($configs[$menu['menu_id']])){ ?>
                     <span class="text-info" style="cursor:pointer;margin-left:10px;" onclick="toggleExt(event, <?=$row?>)">【扩展权限<i class="fa fa-plus"></i>】</span>
+                    <?php } ?>
                 </td>
                 <?php if($menu['router']){ for($i=7; $i>=0; $i--){ ?>
                 <?php $checked = ((1<<$i) & ($menus[$menu['menu_id']]??0)) === (1<<$i) ? ' checked' : ''; ?>
@@ -234,20 +236,21 @@
                 </td>
                 <?php }} ?>
             </tr>
+            <?php if(isset($configs[$menu['menu_id']])){ ?>
             <tr id="extend_<?=$row?>" style="display: none;">
                 <td colspan="9" style="padding-left:<?=$menu['level'] * 30 + 10?>px;">
                     <div style="border-style: dashed;border-color: #0b97c4;border-width:1px;padding: 10px;">
-                        <?=$test_div?>
-                        <?=$test_div?>
+                        <?=$configs[$menu['menu_id']]?>
                     </div>
                 </td>
             </tr>
-            <?php } ?>
+            <?php }} ?>
         </table>
     </div>
     <!-- /.box-body -->
 </div>
 
+<?php if(isset($configs[0])) { ?>
 <div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title">全局扩展权限</h3>
@@ -258,11 +261,11 @@
     <!-- /.box-header -->
     <!-- form start -->
     <div class="box-body">
-        <?=$test_div?>
-        <?=$test_div?>
-        <?=$global_extends_html[0]??''?>
+        <?=$configs[0]?>
     </div>
 </div>
+<?php } ?>
+
     <button type="submit" class="btn role-save-btn btn-primary">保存</button>
 </form>
 <script>

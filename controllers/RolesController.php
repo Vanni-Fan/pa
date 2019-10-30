@@ -1,7 +1,5 @@
 <?php
 namespace Power\Controllers;
-use HtmlBuilder\Forms;
-use HtmlBuilder\Parser\AdminLte\Parser;
 use Power\Models\Configs;
 use Power\Models\Roles;
 use Power\Models\menus;
@@ -12,12 +10,6 @@ class RolesController extends AdminBaseController {
     function displayAction(){ $this->indexAction(); }
     function newAction(){ $a = $this->dispatcher->setParam('is_new', true);$this->indexAction(); }
     function indexAction(){
-        $parser = new Parser();
-        $this->view->test_div = $parser->parse(
-            Forms::input('aaa','测试', 'hhhhh')
-        );
-        $parser->setResources($this);
-
         $menus = Menus::getFlatMenus(); // 全部的菜单
         $role_menus = []; // 角色的权限 TODO
         $is_new = $this->getParam('is_new');
@@ -43,13 +35,15 @@ class RolesController extends AdminBaseController {
             $this->view->menus   = json_decode($this->view->menus,1);
             $this->view->extends = json_decode($this->view->extends,1);
         }
-        $rule_extends = Configs::getConfigs('rule',true);
-        if($rule_extends) $global_extends[0] = $rule_extends[0];
-        else $global_extends[0] = [];
-        unset($rule_extends[0]);
         $this->view->menus = $menus;
+
+        $rule_extends = Configs::getConfigs('rule');
+        $this->view->configs = \AdminHelper::getConfigsHtmlGroup($rule_extends, $this->view->extends, $this);
+//        if($rule_extends) $global_extends[0] = $rule_extends[0];
+//        else $global_extends[0] = [];
+//        unset($rule_extends[0]);
 //        $this->view->rule_extends_html = \AdminHelper::getConfigsHtml($rule_extends[$this->getMenuId()], $this->view->extends, $this);
-        $this->view->global_extends_html = \AdminHelper::getConfigsHtml($global_extends, $this->view->extends, $this);
+//        $this->view->global_extends_html = \AdminHelper::getConfigsHtml($global_extends, $this->view->extends, $this);
         $this->render();
     }
     

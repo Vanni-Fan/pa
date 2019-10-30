@@ -21,7 +21,7 @@
                     <input type="checkbox"> <strong><?=$p->name?></strong>
                     <div>
                         <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'setting'])?>">设置</a> |
-                        <?php if($p->enabled) { ?>
+                        <?php if($p->is_enabled) { ?>
                         <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'disable'])?>">停用</a> |
                         <?php } else { ?>
                         <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'enable'])?>">启用</a> |

@@ -370,20 +370,8 @@ class AdminBaseController extends Controller{
             $this->view->menuBadges    = $this->getMenuBadges();
             $this->view->notifications = $this->getNotifications();
             $this->view->attributes    = $this->getAttributes();
+            $this->view->setting_items = \AdminHelper::getConfigsHtmlGroup(Configs::getConfigs('attribute'), $this->attributes, $this);
 
-            $configs_of_attributes     = Configs::getConfigs('attribute',true);
-            $this->view->setting_items = [
-                0=>\AdminHelper::getConfigsHtml(
-                    $configs_of_attributes[0]??[],
-                    $this->attributes,
-                    $this
-                ),
-                $this->getMenuId()=>\AdminHelper::getConfigsHtml(
-                    $configs_of_attributes[$this->getMenuId()]??[],
-                    $this->attributes,
-                    $this
-                ),
-            ];
             $this->view->js            = $this->js_files;
             $this->view->css           = $this->css_files;
             $this->view->style         = $this->styles;

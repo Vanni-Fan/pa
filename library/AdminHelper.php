@@ -116,9 +116,11 @@ class AdminHelper{
     public static function getConfigsHtmlGroup(array $configs, array $default, Controller $controller):array{
         if(empty($configs)) return '';
         $parser = new Parser();
-        $contents = '';
+        $contents = [];
         foreach($configs as $config) {
-            $contents .= $parser->parse(self::configToHtmlBuilder($config, $default[$config['menu_id']] ?? null));
+            $menu_id = $config['menu_id'] ?: 0;
+            if(!isset($contents[$menu_id])) $contents[$menu_id] = '';
+            $contents[$menu_id] .= $parser->parse(self::configToHtmlBuilder($config, $default[$config['menu_id']] ?? null));
         }
         $parser->setResources($controller);
         return $contents;
@@ -177,19 +179,31 @@ class AdminHelper{
                 break;
             case 'Check:checkbox':
             case 'Check:radio':
+            case 'JSON:array':
+            case 'JSON:object':
                 $sub_type = substr($row['options_type'],6);
-                $obj = new Check($row['var_name'], $row['name'],$default_value??$row['var_default'],$sub_type);
-                $obj->choices([
-                    ['value'=>1,'text'=>'AAAa'],
-                    ['value'=>2,'text'=>'BBB'],
-                    ['value'=>1,'text'=>'CCC'],
-                    ['value'=>1,'text'=>'DDD'],
-                ])->colCount(2);
+                $obj = new Check($row['var_name'], $row['name'],$default_value??$row['var_default']);
+                if(strpos($row['options_type'],'JSON')===0){
+                    $val = json_decode($row['options'], 1);
+                    $choices = [];
+                    foreach($val as $k=>$v){
+                        $choices[] = ['value'=>$k, 'text'=>$v];
+                    }
+                    $obj->choices($choices);
+                }else{
+                    $obj->subtype = $sub_type;
+                    $obj->choices([
+                        ['value'=>1,'text'=>'AAAa'],
+                        ['value'=>2,'text'=>'BBB'],
+                        ['value'=>1,'text'=>'CCC'],
+                        ['value'=>1,'text'=>'DDD'],
+                    ])->colCount(2);
+                }
+
                 return $obj;
                 break;
-            case 'JSON:array':
-                break;
-            case 'JSON:object':
+            default:
+                throw new \Exception('没有定义'.print_r($row,1));
         }
     }
 }
