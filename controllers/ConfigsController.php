@@ -130,6 +130,13 @@ class ConfigsController extends AdminBaseController {
     public function appendAction(){ $this->updateAction(); }
     public function updateAction(){
         $_POST['options_type'] = $_POST['options_type'] ?: null;
+        if($_POST['var_type'] !== 'text'){
+            $_POST['var_default'] = json_encode(json_decode($_POST['var_default'],1),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+        }
+        if($_POST['options']){
+            $_POST['options']     = json_encode(json_decode($_POST['options'],1),JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+        }else $_POST['options'] = null;
+
         $_POST['menu_id'] = $_POST['menu_id'] ?: null;
         $_POST['is_action_name'] = $this->request->getPost('is_action_name','int',0);
         if($this->item_id){
