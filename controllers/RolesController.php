@@ -43,16 +43,13 @@ class RolesController extends AdminBaseController {
             $this->view->menus   = json_decode($this->view->menus,1);
             $this->view->extends = json_decode($this->view->extends,1);
         }
-        $rule_extends = Configs::getConfigs('rule');
+        $rule_extends = Configs::getConfigs('rule',true);
         if($rule_extends) $global_extends[0] = $rule_extends[0];
         else $global_extends[0] = [];
         unset($rule_extends[0]);
         $this->view->menus = $menus;
-        $this->view->rule_extends_html = \AdminHelper::getConfigsHtml($rule_extends, $this->view->extends, [
-            '<span class="btn btn-info btn-flat btn-xs" onclick="toggleExt(event)">扩展权限<i class="fa fa-caret-up"></i></span><div class="ext">',
-            '</div>'
-        ]);
-        $this->view->global_extends_html = \AdminHelper::getConfigsHtml($global_extends, $this->view->extends);
+//        $this->view->rule_extends_html = \AdminHelper::getConfigsHtml($rule_extends[$this->getMenuId()], $this->view->extends, $this);
+        $this->view->global_extends_html = \AdminHelper::getConfigsHtml($global_extends, $this->view->extends, $this);
         $this->render();
     }
     

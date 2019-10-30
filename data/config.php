@@ -18,13 +18,13 @@ return [
 //        'prefix'  => 'pa_'
     ],
 
-//    'pa_db'       => [
-//        'adapter' => 'mysql',
-//        'dbname'  => 'pa',
-//        'username'=> 'root',
-//        'password'=> '123456',
-////        'prefix'  => 'pa_'
-//    ],
+    'pa_db'       => [
+        'adapter' => 'mysql',
+        'dbname'  => 'pa',
+        'username'=> 'root',
+        'password'=> '123456',
+//        'prefix'  => 'pa_'
+    ],
 
     # Power Admin 的Cookie加密Key
     'cookie_key'    => file_get_contents(POWER_DATA .'/cookie.key'),

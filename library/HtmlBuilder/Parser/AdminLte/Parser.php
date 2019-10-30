@@ -38,7 +38,7 @@ class Parser{
      * @return string
      */
     public function getScripts(){
-        return implode('',$this->scripts);
+        return implode(';',$this->scripts);
     }
     
     /**
@@ -64,6 +64,8 @@ class Parser{
      */
     public function parse(Element ...$elements):string {
         $out = '';
+        ob_start();
+
         foreach($elements as $element) {
             $template_dir  = POWER_BASE_DIR . 'library/HtmlBuilder/Parser/AdminLte/templates/';
             $template_file = $template_dir . $element->type . '.php';
@@ -78,15 +80,18 @@ class Parser{
                     '$("#' . $element->id.$event['selector'] .'").on("'.$event['event'].'", function(event){ '.$event['code'].'; });'
                 );
             }
-            $parse = function () use ($template_file, $element) {
+//            ob_start();
+//            $parse = function () use ($template_file, $element) {
                 extract(get_object_vars($element), EXTR_OVERWRITE);
                 require $template_file;
-            };
-    
-            ob_start();
-            $parse(); // $parse->call($this);
-            $out .= ob_get_clean();
+//            };
+//                    $out .= ob_get_flush();//ob_get_clean();
+
+//            ob_start();
+//            $parse();
+//             $parse->call($this);
         }
+        $out .= ob_get_clean();
         return $out;
     }
     
@@ -123,9 +128,16 @@ class Parser{
      */
     public function script(string $content):void{
         $hash = md5($content);
-        if(!isset($this->js[$hash])){
+        if(!isset($this->scripts[$hash])){
             $content = preg_replace('#^(\s*<script[^>]*>)|(</script>\s*)$#i','',$content);
             $this->scripts[$hash] = $content;
+//            $this->scripts[] = $content;
+//            exit;
+        }
+        file_put_contents('d:/log.txt','[[[[[[[[[[[[[[[[HASH'.$hash.$content.print_r($this,1).']]]]]]]]]]]]]]]]]'."\n", FILE_APPEND);
+        if(substr($content,0,9)==='/*vanni*/') {
+            print_r($this->scripts);
+            throw new \Exception('错误');
         }
     }
     

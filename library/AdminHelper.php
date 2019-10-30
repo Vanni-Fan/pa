@@ -1,4 +1,11 @@
 <?php
+use HtmlBuilder\Forms\Input;
+use HtmlBuilder\Forms\Select;
+use HtmlBuilder\Forms\TextArea;
+use HtmlBuilder\Forms\File;
+use HtmlBuilder\Forms\Check;
+use Phalcon\Mvc\Controller;
+use HtmlBuilder\Parser\AdminLte\Parser;
 
 class AdminHelper{
     /**
@@ -43,7 +50,11 @@ class AdminHelper{
         echo '</ul>';
     }
     
-    public static function getConfigsHtml(array $all_extends, array $default, array $wrapper=['','']):array{
+    public static function getConfigsHtml_new(array $all_extends, array $default, array $wrapper=['','']):array{
+        print_r($all_extends);
+        print_r($default);
+
+        exit;
         return $out = []; // todo TODO
         foreach($all_extends as $menu_id => $extends) {
             $tmp = $wrapper[0];
@@ -101,5 +112,84 @@ class AdminHelper{
         }
         return $out;
     }
-    
+
+    public static function getConfigsHtmlGroup(array $configs, array $default, Controller $controller):array{
+        if(empty($configs)) return '';
+        $parser = new Parser();
+        $contents = '';
+        foreach($configs as $config) {
+            $contents .= $parser->parse(self::configToHtmlBuilder($config, $default[$config['menu_id']] ?? null));
+        }
+        $parser->setResources($controller);
+        return $contents;
+    }
+
+    public static function getConfigsHtml(array $configs, array $default, Controller $controller):string{
+        if(empty($configs)) return '';
+        $parser = new Parser();
+        $contents = '';
+        foreach($configs as $config) {
+            $contents .= $parser->parse(self::configToHtmlBuilder($config, $default[$config['menu_id']] ?? null));
+        }
+        $parser->setResources($controller);
+        return $contents;
+    }
+
+    # 将 configs 中信息转换成 HtmlBuilder 对象
+    public static function configToHtmlBuilder($a_config_of_configs_table, $default_value=null){
+        $row = $a_config_of_configs_table;
+        switch($row['options_type']){
+            case 'Input:text':
+            case 'Input:mail':
+            case 'Input:url':
+            case 'Input:tel':
+            case 'Input:mobile':
+            case 'Input:currency':
+            case 'Input:number':
+            case 'Input:password':
+            case 'Input:time':
+            case 'Input:date':
+            case 'Input:color':
+                $sub_type = substr($row['options_type'],6);
+                return new Input($row['var_name'], $row['name'],$default_value[$row['var_name']]??$row['var_default'],$sub_type);
+                break;
+            case 'Select:single':
+            case 'Select:multiple':
+            case 'Select:tags':
+                $sub_type = substr($row['options_type'],7);
+                return new Select($row['var_name'], $row['name'],$default_value??$row['var_default'],$sub_type);
+                break;
+            case 'TextArea:simple':
+            case 'TextArea:ckeditor':
+            case 'TextArea:wyihtml5':
+                return new TextArea($row['var_name'], $row['name'],$default_value??$row['var_default']);
+                break;
+            case 'File:image':
+            case 'File:file':
+            case 'File:multipeImages':
+            case 'File:multipeFiles':
+                $obj = new File($row['var_name']);//, $row['name'],$default_value??$row['var_default']);
+                if(strrpos($row['options_type'],'mage')){
+                    $obj->accept('image/*');
+                    $obj->corpWidth = 200;
+                }
+                return $obj;
+                break;
+            case 'Check:checkbox':
+            case 'Check:radio':
+                $sub_type = substr($row['options_type'],6);
+                $obj = new Check($row['var_name'], $row['name'],$default_value??$row['var_default'],$sub_type);
+                $obj->choices([
+                    ['value'=>1,'text'=>'AAAa'],
+                    ['value'=>2,'text'=>'BBB'],
+                    ['value'=>1,'text'=>'CCC'],
+                    ['value'=>1,'text'=>'DDD'],
+                ])->colCount(2);
+                return $obj;
+                break;
+            case 'JSON:array':
+                break;
+            case 'JSON:object':
+        }
+    }
 }

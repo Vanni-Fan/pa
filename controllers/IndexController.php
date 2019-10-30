@@ -139,6 +139,16 @@ class IndexController extends AdminBaseController{
 //            )
         );
 
+        // 为什么在这里就可以
+//        $p2 = new Parser();
+//        $this->view->setting_items = [
+//            0 => $p2->parse(
+//                Forms::file('aaa'),
+//                Forms::file('bbb'),
+//            )
+//        ];
+//        $p2->setResources($this);
+
 //            Forms::textarea()->subtype('wysihtml5'),
 //            Forms::textarea()->subtype('simple')->label('xxxxx')->labelWidth(3),
 //            Forms::textarea()->subtype('ckeditor'),
@@ -147,53 +157,9 @@ class IndexController extends AdminBaseController{
 //print_r($inputs);
 //exit;
     
-        $this->addStyle($parser->getStyles());
-        $this->addScript($parser->getScripts());
-        foreach($parser->getJs() as $js) $this->addJs($js);
-        foreach($parser->getCss() as $css) $this->addCss($css);
+        $parser->setResources($this);
         $this->view->inputs = $inputs;
-//        $aaa = (object)['minValue'=>'xxx','maxValue'=>'yyy'];
-//        print_r($aaa);
-//        exit ($aaa->minValue);
-//        exit;
-        
-        # 方案 2
-//        $file  = POWER_BASE_DIR.'library/HtmlBuilder/Parser/AdminLte/templates/form.php';
-//        $obj   = Element::create('input')->add(
-//            Element::create('aaaabbbb')
-//        );
-//        $parse = function()use($file,$obj){
-//            extract(get_object_vars($obj),EXTR_OVERWRITE);
-//            require $file;
-//        };
-////        $parse->call($obj);
-//        $parse();
-        
-        /* 方案1
-        $v = new \Phalcon\Mvc\View();
-        $v->aaa = 123;
-        $v->bbb = 456;
-        $v->ccc = [111,222,333];
-        $v->setViewsDir(POWER_BASE_DIR.'library/HtmlBuilder/Parser/AdminLte/templates');
-       
-        $v->setDi(\PA::$di);
-        $v->registerEngines(
-            [
-                '.volt' => \Phalcon\Mvc\View\Engine\Volt::class
-            ]
-        );
-        $a = $v->getPartial('form');
-//        $a = $v->partial('form');
-//        $a = $v->getRender('templates','form');
-        //$a = $v->getContent();
-        echo \Phalcon\Tag::textField(array('name', 'size' => 32));
-        var_dump(''.$a);
-        */
-//        exit;
-        
-    
-    
-    
+
 //        $a = //new Parser(
 //            Layouts::columns(2)->add(
 //                Layouts::box('右边搜索栏')->add(
@@ -214,43 +180,7 @@ class IndexController extends AdminBaseController{
 //                )
 ////            )
 //        );
-//        print_r($a->parse());
-//        $a = FormElement::form('user_name')->add(
-//            FormElement::input('user_name')->class("SSS"),
-//            FormElement::input('sex'),
-//            FormElement::create('input','aa')->template('input')
-//        );
-//
-//        Element::create('form','');
-//        FormElement::create('input','user_name');
-//
-//        Element::form('abc');
-//        FormElement::input('user_name');
-//
-//        $b = AdminLteParser::parse($a);
-//
-//        $b = AdminLteParser::parse(
-//            Element::form('post')->add(
-//                FormElement::input('',''),
-//                FormElement::checkbox('',''),
-//                FormElement::radio(''),
-//                LayoutElement::col3()->add(
-//                    FormElement::input(''),
-//                    FormElement::checkbox()
-//                ),
-//                ComponentElement::date()
-//            )
-//        );
-//        $b = [
-//            'css_files' => [],
-//            'styles'    => '',
-//            'js_files'  => [],
-//            'js_init'   => '',
-//            'scripts'   => '',
-//        ];
-//
-//        exit(" this is $a ");
-
+//        var_dump(get_class($this->view));
         $this->render();
     }
 

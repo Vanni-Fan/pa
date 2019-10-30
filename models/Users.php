@@ -42,6 +42,7 @@ class Users extends PMB{
             $return['menus'] = [];
             foreach($result->Role->Permissions as $permission){
 //                $menu = $permission->Menu;
+                if($permission->type == 'menu')
                 $return['menus'][$permission->Menu->menu_id] = $permission->value;
             }
 //            print_r($result->Role->Permissions[0]->Menu->toArray());

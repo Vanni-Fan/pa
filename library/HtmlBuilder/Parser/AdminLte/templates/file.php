@@ -268,6 +268,9 @@ if($canCorp) {
             width:100%;
             text-align: center;
         }
+        .cropperWarpDiv>.top>div {
+            width: auto !important;
+        }
         .cropperWarpDiv>.body{
             z-index:10000;
             /*opacity: .05;*/
@@ -385,7 +388,7 @@ if($canCorp) {
             <div class="bottom"><input id="htmlBuilder_slider_bar" type="text" data-slider-handle="custom"></div>
         </div>'
     );
-    
+    $this->script('$(".cropperWarpDiv").remove().appendTo($("body"));');
     $this->script("handForm($('#$id').parents('form'));\n");
 }
 
@@ -412,7 +415,6 @@ $this->script("$(function(){
 ?>
 
 <?php if($subtype === 'single'){ ?>
-
 <div id="<?=$id?>" data-name="<?=$name?>" class="htmlbuild-file form-group htmlbuild-form <?=$attributes['class']??''?>" style="<?=$visible?'':'display:none;'?>">
     <?php include(__DIR__.'/_label.php'); ?>
     <input accept="<?=$accept?>" id="<?=$id?>-file" name="<?=$name?>" type="file" style="display: none">
@@ -424,7 +426,6 @@ $this->script("$(function(){
     <?php if($description){?><span id="<?=$id?>-description" class="help-block pull-left"><?=$description?></span><?php }?>
     <?php if($validators || $statistics){ ?><span id="<?=$id?>-message" class="help-block pull-right"></span><?php } ?>
 </div>
-
 <?php }elseif($subtype === 'multiple'){
 # 多文件上传的模板样式
 $this->html(/** @lang HTML */'

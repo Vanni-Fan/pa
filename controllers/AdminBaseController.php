@@ -1,5 +1,7 @@
 <?php
 namespace Power\Controllers;
+use HtmlBuilder\Forms;
+use HtmlBuilder\Parser\AdminLte\Parser;
 use Power\Models\UserConfigs;
 use Power\Models\Configs;
 use Power\Models\Logs;
@@ -39,11 +41,11 @@ class AdminBaseController extends Controller{
     protected $menu_id  = 1;
     protected $item_id  = 0;
     protected $is_admin = true;
-    protected $configs = [];
-    protected $settings = [];
+    protected $rules = [];
+    protected $attributes = [];
     
     public function getItemId(){return $this->item_id;}
-    public function getRuleId(){return $this->menu_id;}
+    public function getMenuId(){return $this->menu_id;}
     public function addCss($css_file,$position='after'){
         $plus = PA::$config['debug'] ? ('?'.random_int(1000000,9999999)) : '';
         $this->css_files[$position][] = '<link rel="stylesheet" href="'.$css_file.$plus.'" type="text/css" />';
@@ -152,7 +154,7 @@ class AdminBaseController extends Controller{
         $this->current_page = $this->getParam('page','int',1);
         
         # 扩展权限
-        list('rule'=>$this->configs,'attribute'=>$this->settings) = Configs::getConfigsByUser($this->tokeninfo['user_id']);
+        list('rule'=>$this->rules,'attribute'=>$this->attributes) = Configs::getConfigsByUser($this->tokeninfo['user_id']);
         # 扩展属性
         if(!array_key_exists($this->menu_id, $this->menus)) throw new \Exception('Permission Denied(rule not exists).');
         
@@ -160,6 +162,7 @@ class AdminBaseController extends Controller{
         if(!is_array($owner_id)) $owner_id = [$this->item_id=>$owner_id]; // 删除时可以传入多个ID，用逗号分隔
         foreach($owner_id as $owner){
             if(!Menus::isAllowed($this->dispatcher->getActionName(), $owner, $this->userinfo["user_id"],$this->menus[$this->menu_id])){
+                print_r($this->menus[$this->menu_id]);
                 throw new \Exception('Permission Denied.');
             }
         }
@@ -292,11 +295,11 @@ class AdminBaseController extends Controller{
     }
     
     # 获得当前权限
-    public static function getmenus(int $user_id):array{
+    public static function getMenus(int $user_id):array{
         return $this->menus;
     }
     
-    public function setSettings($name, $value){
+    public function setAttributes($name, $value){
         if(is_int($name)){
             $extends = Configs::findFirst($name);
         }else{
@@ -323,14 +326,14 @@ class AdminBaseController extends Controller{
         return true;
     }
 
-    public function getSettings($name=null){
-        $all_settings = array_merge($this->settings[$this->menu_id]??[], $this->settings[0]??[]);
-        return $name ? ($all_settings[$name] ?? null) : $all_settings;
+    public function getAttributes($name=null){
+        $all_attributes = array_merge($this->attributes[$this->menu_id]??[], $this->attributes[0]??[]);
+        return $name ? ($all_attributes[$name] ?? null) : $all_attributes;
     }
     
-    public function getExceptions($name=null){
-        $all_configs = array_merge($this->configs[$this->menu_id]??[], $this->configs[0]??[]);
-        return $name ? ($all_configs[$name] ?? null) : $all_configs;
+    public function getRules($name=null){
+        $all_rules = array_merge($this->rules[$this->menu_id]??[], $this->rules[0]??[]);
+        return $name ? ($all_rules[$name] ?? null) : $all_rules;
     }
     
     public function settingAction(){
@@ -357,26 +360,37 @@ class AdminBaseController extends Controller{
      * @param bool $partial 是否部分渲染：默认全框架渲染，如果为真，只只渲染模板文件，不渲染layout
      */
     public function render($file='', $partial=false){
-        $this->view->js            = $this->js_files;
-        $this->view->css           = $this->css_files;
-        $this->view->style         = $this->styles;
-        $this->view->script        = $this->scripts;
-        $this->view->title         = $this->title;
-        $this->view->subtitle      = $this->subtitle;
-        $this->view->tokeninfo     = $this->tokeninfo;
         $this->view->c             = $this;
         $this->view->r             = $this->request;
+
         if(!$partial && $this->is_admin){
             $this->view->tasks         = $this->getTasks();
             $this->view->messages      = $this->getMessages();
             $this->view->userinfo      = $this->getUserInfo();
             $this->view->menuBadges    = $this->getMenuBadges();
             $this->view->notifications = $this->getNotifications();
-            $this->view->settings      = $this->getSettings();
-            $this->view->setting_items = \AdminHelper::getConfigsHtml(
-                Configs::getConfigs('attribute'),
-                $this->settings
-            );
+            $this->view->attributes    = $this->getAttributes();
+
+            $configs_of_attributes     = Configs::getConfigs('attribute',true);
+            $this->view->setting_items = [
+                0=>\AdminHelper::getConfigsHtml(
+                    $configs_of_attributes[0]??[],
+                    $this->attributes,
+                    $this
+                ),
+                $this->getMenuId()=>\AdminHelper::getConfigsHtml(
+                    $configs_of_attributes[$this->getMenuId()]??[],
+                    $this->attributes,
+                    $this
+                ),
+            ];
+            $this->view->js            = $this->js_files;
+            $this->view->css           = $this->css_files;
+            $this->view->style         = $this->styles;
+            $this->view->script        = $this->scripts;
+            $this->view->title         = $this->title;
+            $this->view->subtitle      = $this->subtitle;
+            $this->view->tokeninfo     = $this->tokeninfo;
 
             # 获得当前用户权限下的菜单
             #$this->view->menu = Menus::getChildIds(); // 所有菜单

@@ -85,11 +85,17 @@ class Configs extends PMB{
         return $return;
     }
     
-    public static function getConfigs(string $type=null):array {
-        $where = $type ? ['type=?0','bind'=>[$type]] : [];
+    public static function getConfigs(string $type=null, bool $group=false):array {
+        $where = $type ? ['type=?0 and is_enabled=1','bind'=>[$type]] : [];
         $extends = [];
         foreach(Configs::find($where) as $e){
-            $extends[$e->menu_id??0][] = $e->toArray();
+            $e = $e->toArray();
+            $e['menu_id'] = $e['menu_id'] ?: 0;
+            if($group) {
+                $extends[$e['menu_id']][] = $e;
+            }else{
+                $extends[] = $e;
+            }
         }
         return $extends;
     }

@@ -1,10 +1,7 @@
 <?php
 
 if(empty($style)){
-    $style = $visible ? 'display:flex;' : 'display:none;';
-    foreach($styles as $k=>$v){
-        $style .= $k.':'.$v.';';
-    };
+    $style = $visible ? "display:flex;$style;" : 'display:none;';
 }
 
 echo '<',$type,' id="',$id,'" style="',$style,'" class="',($attributes['class']??''),'">',$label;

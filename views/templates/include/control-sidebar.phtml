@@ -1,6 +1,6 @@
 <?php
 if(!empty($setting_items)) {
-    $page_active = isset($setting_items[$c->getRuleId()]);
+    $is_current_page = !empty($setting_items[$c->getMenuId()]);
 ?>
 <style>
 .attribute label,.attribute div{
@@ -14,20 +14,20 @@ if(!empty($setting_items)) {
 <aside class="control-sidebar control-sidebar-dark">
     <!-- Create the tabs -->
     <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
-        <?php if($page_active) { ?>
+        <?php if($is_current_page) { ?>
         <li class="active"><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-gear"></i> 页面配置</a></li>
         <?php } ?>
         <?php if(!empty($setting_items[0])){ ?>
-        <li class="<?=$page_active?'':'active'?>"><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i> 系统配置</a></li>
+        <li class="<?=$is_current_page?'':'active'?>"><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i> 系统配置</a></li>
         <?php } ?>
     </ul>
     <!-- Tab panes -->
     <div class="tab-content">
-        <?php if($page_active) { ?>
+        <?php if($is_current_page) { ?>
         <!-- Home tab content -->
         <div class="tab-pane active" id="control-sidebar-home-tab">
             <form method="post" action="<?=$c->url('update',['action'=>'setting'])?>">
-            <div class="attribute"><?=$setting_items[$c->getRuleId()]?></div>
+            <div class="attribute"><?=$setting_items[$c->getMenuId()]?></div>
             <button type="button" onclick="updateAttribute(event)" class="btn btn-block btn-info" style="width: calc(100% - 30px);margin: auto;">保存</button>
             </form>
         </div>
@@ -35,7 +35,7 @@ if(!empty($setting_items)) {
     
         <?php if(!empty($setting_items[0])){ ?>
         <!-- Settings tab content -->
-        <div class="tab-pane <?=$page_active?'':'active'?>" id="control-sidebar-settings-tab">
+        <div class="tab-pane <?=$is_current_page?'':'active'?>" id="control-sidebar-settings-tab">
             <form method="post" action="<?=$c->url('update',['action'=>'setting'])?>">
             <div class="attribute"><?=$setting_items[0]?></div>
             <button type="button" onclick="updateAttribute(event)" class="btn btn-block btn-info" style="width: calc(100% - 30px);margin: auto;">保存</button>

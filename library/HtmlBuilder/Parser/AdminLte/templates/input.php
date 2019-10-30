@@ -63,7 +63,7 @@ if($validators){
                 $cond .= 'v.length>'.$v->rule->minLength.' && v.length<'.$v->rule->maxLength;
                 break;
             case 'regex':
-                $cond .= '/'.$v->rule->regex.'/.test(v)';
+                $cond .= '(new RegExp("'.$v->rule->regex.'")).test(v)';
                 break;
             case 'mail':
                 $cond .= '/^[^@ ]+@[^\.]+\.[a-z]{2,}$/i.test(v)';
