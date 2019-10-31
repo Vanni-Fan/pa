@@ -34,7 +34,7 @@
 <?php
 $this->css('/dist/plugins/iCheck/all.css');
 $this->js('/dist/plugins/iCheck/icheck.min.js');
-$this->script("$('#$id input').iCheck({{$subtype}Class:'i{$subtype}_{$flat}-{$style}'});");
+$this->script("$('#$id input').iCheck({{$subtype}Class:'i{$subtype}_{$flat}-{$iCheckStyle}'});");
 
 if($other) {
     $this->script("$('#$id-other-check').on('ifChecked',function(e){

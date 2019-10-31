@@ -54,8 +54,8 @@
                 <div class="col-sm-8">
                     <select id="parent_id" name="parent_id" data-placeholders="选择一个父级菜单，默认：根节点" class="form-control" style="width: 100%">
                         <option></option>
-                        <?php foreach($menus as $menu){ if($menu['rule_id'] == ($rule['rule_id']??0)) continue; ?>
-                        <option value="<?=$menu['rule_id']?>"<?=$menu['rule_id'] == ($rule['parent_id']??0) ? ' selected' : ''?>>
+                        <?php foreach($menus as $menu){ if($menu['menu_id'] == ($rule['menu_id']??0)) continue; ?>
+                        <option value="<?=$menu['menu_id']?>"<?=$menu['menu_id'] == ($rule['parent_id']??0) ? ' selected' : ''?>>
                             <?=str_repeat('　',$menu['level'])?><?=$menu['level']?'> ':''?><?=$menu['name']?>
                         </option>
                         <?php } ?>

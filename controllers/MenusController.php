@@ -9,10 +9,7 @@ class MenusController extends AdminBaseController {
     protected $title = '权限管理';
     
     function indexAction($is_new=false){
-        $menus = $menus = [];
-        Menus::getChildIds($menus);
-        Menus::expandMenu($menus, $menus);
-        $this->view->menus = $menus;
+        $this->view->menus = Menus::getFlatMenus();
         $this->render();
     }
     
@@ -57,7 +54,7 @@ class MenusController extends AdminBaseController {
     }
     
     function deleteAction(){
-        $this->modelsManager->executeQuery('UPDATE \Power\Models\menus SET parent_id = 0 where parent_id=?0',[$this->item_id]);
+        $this->modelsManager->executeQuery('UPDATE \Power\Models\Menus SET parent_id = null where parent_id=?0',[$this->item_id]);
         Menus::findFirst($this->item_id)->delete();
         $this->jsonOut(['code'=>'ok']);
     }
@@ -66,10 +63,7 @@ class MenusController extends AdminBaseController {
     function displayAction(){
         $this->addCss('/dist/bower_components/select2/dist/css/select2.min.css','before');
         # 所有父级菜单
-        $menus = $menus = [];
-        Menus::getChildIds($menus);
-        Menus::expandMenu($menus,$menus);
-        $this->view->menus = $menus;
+        $this->view->menus = Menus::getFlatMenus();
     
         # 所有模块
         $modules = PA::$app->getModules();

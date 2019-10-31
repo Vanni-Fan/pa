@@ -125,35 +125,32 @@
                     $all_types = [
                         ['group'=>1, 'name'=>'文本框'],
                         ['var_type'=>'text', 'value'=>'Input:text',       'name'=>'普通文本','temp'=>'{"minLength":0,"maxLength":255}','text'=>''],
-                        ['var_type'=>'text', 'value'=>'Input:mail',       'name'=>'邮件地址','temp'=>'','text'=>'xxx@xxx 样式的邮箱'],
-                        ['var_type'=>'text', 'value'=>'Input:url',        'name'=>'网址','temp'=>null,'text'=>'httpx://xxxx 样式的网址'],
-                        ['var_type'=>'text', 'value'=>'Input:tel',        'name'=>'电话号码','temp'=>'无','text'=>'xxxx-xxxxxxxx 样式的电话号码'],
-                        ['var_type'=>'text', 'value'=>'Input:mobile',     'name'=>'手机号码','temp'=>'无','text'=>'13xxxxxxxxx 样式的手机号码'],
-                        ['var_type'=>'text', 'value'=>'Input:currency',   'name'=>'货币','temp'=>'无','text'=>'￥xx.xx 样式的货币数字'],
+                        ['var_type'=>'text', 'value'=>'Input:mail',       'name'=>'邮件地址','temp'=>null,'text'=>'xxx@xxx 样式的邮箱，无参数'],
+                        ['var_type'=>'text', 'value'=>'Input:url',        'name'=>'网址','temp'=>null,'text'=>'httpx://xxxx 样式的网址，无参数'],
+                        ['var_type'=>'text', 'value'=>'Input:tel',        'name'=>'电话号码','temp'=>null,'text'=>'xxxx-xxxxxxxx 样式的电话号码，无参数'],
+                        ['var_type'=>'text', 'value'=>'Input:mobile',     'name'=>'手机号码','temp'=>null,'text'=>'13xxxxxxxxx 样式的手机号码，无参数'],
+                        ['var_type'=>'text', 'value'=>'Input:currency',   'name'=>'货币','temp'=>null,'text'=>'￥xx.xx 样式的货币数字'],
                         ['var_type'=>'text', 'value'=>'Input:number',     'name'=>'数字','temp'=>'{"minValue":0,"maxValue":999999999}','text'=>''],
                         ['var_type'=>'text', 'value'=>'Input:password',   'name'=>'密码','temp'=>'{"minLength":0,"maxLength":255}','text'=>''],
                         ['var_type'=>'text', 'value'=>'Input:time',       'name'=>'时间','temp'=>'{"minValue":"00:00:00","maxValue":"23:59:59"}','text'=>''],
                         ['var_type'=>'text', 'value'=>'Input:date',       'name'=>'日期','temp'=>'{"minValue":"0","maxValue":"9999-12-31"}','text'=>''],
-                        ['var_type'=>'text', 'value'=>'Input:color',      'name'=>'颜色','temp'=>'无','text'=>'颜色值为 #ffffff 的网页CSS颜色值'],
+                        ['var_type'=>'text', 'value'=>'Input:color',      'name'=>'颜色','temp'=>null,'text'=>'用于CSS的颜色值，无参数'],
                         ['group'=>1, 'name'=>'下拉框'],
-                        ['var_type'=>'text', 'value'=>'Select:single',    'name'=>'下拉选项','temp'=>'{"options_url":"http://..你的URL.."}','text'=>'请在下面填写获取这些选项的URL'],
-                        ['var_type'=>'list', 'value'=>'Select:multiple',  'name'=>'下拉多选','temp'=>'{"options_url":"http://..你的URL.."}','text'=>'请在下面填写获取这些选项的URL'],
-                        ['var_type'=>'list', 'value'=>'Select:tags',      'name'=>'标签选择','temp'=>'{"options_url":"http://..你的URL.."}','text'=>'请在下面填写获取这些选项的URL'],
+                        ['var_type'=>'text', 'value'=>'Select:single',    'name'=>'下拉选项','temp'=>'{"options_url":"通过URL获取","options_fun":"通过函数获取","options":["值+标签举例：",{"value":"YES","text":"是"},{"value":"0755","text":"深圳"},"值和标签一致举例：","ABC","USA","CN"]}','text'=>'按照下面的例子设置，三个选项选其一'],
+                        ['var_type'=>'list', 'value'=>'Select:multiple',  'name'=>'下拉多选','temp'=>'{"options_url":"通过URL获取","options_fun":"通过函数获取","options":["值+标签举例：",{"value":"YES","text":"是"},{"value":"0755","text":"深圳"},"值和标签一致举例：","ABC","USA","CN"]}','text'=>'按照下面的例子设置，三个选项选其一'],
+                        ['var_type'=>'list', 'value'=>'Select:tags',      'name'=>'标签选择','temp'=>'{"options_url":"通过URL获取","options_fun":"通过函数获取","options":["值+标签举例：",{"value":"YES","text":"是"},{"value":"0755","text":"深圳"},"值和标签一致举例：","ABC","USA","CN"]}','text'=>'按照下面的例子设置，三个选项选其一'],
                         ['group'=>1, 'name'=>'多行输入框'],
-                        ['var_type'=>'text', 'value'=>'TextArea:simple',  'name'=>'文本域','temp'=>'null','text'=>''],
-                        ['var_type'=>'text', 'value'=>'TextArea:ckeditor','name'=>'富文本(ckeditor)','temp'=>'null','text'=>''],
-                        ['var_type'=>'text', 'value'=>'TextArea:wyihtml5','name'=>'富文本(wyihtml5)','temp'=>'null','text'=>''],
+                        ['var_type'=>'text', 'value'=>'TextArea:simple',  'name'=>'文本域','temp'=>null,'text'=>''],
+                        ['var_type'=>'text', 'value'=>'TextArea:ckeditor','name'=>'富文本(ckeditor)','temp'=>null,'text'=>''],
+                        ['var_type'=>'text', 'value'=>'TextArea:wyihtml5','name'=>'富文本(wyihtml5)','temp'=>null,'text'=>''],
                         ['group'=>1, 'name'=>'文件上传'],
-                        ['var_type'=>'text', 'value'=>'File:image',        'name'=>'单张图片上传','temp'=>'{"corpWidth":100,"corpHeight":100,"upload_url":"http://..你的URL..","accept":"image/*"}','text'=>'单张图片上传，corpWidth、corpHeight、upload_url 为切图时的可选项'],
+                        ['var_type'=>'text', 'value'=>'File:image',        'name'=>'单张图片上传','temp'=>'{"corpWidth":100,"corpHeight":100,"upload_url":"上传地址","accept":"image/*"}','text'=>'如果有corp选项，则必须定义上传地址'],
                         ['var_type'=>'text', 'value'=>'File:file',         'name'=>'单个文件上传','temp'=>'{"accept":"*"}','text'=>'accept 为接受的文件类型'],
-                        ['var_type'=>'list', 'value'=>'File:multipeImages','name'=>'多张图片上传','temp'=>'{"corpWidth":1,"corpHeight":1,"upload_url":"http://..你的URL.."}','text'=>'单张图片上传，corpWidth、corpHeight、upload_url 为切图时的可选项L'],
+                        ['var_type'=>'list', 'value'=>'File:multipeImages','name'=>'多张图片上传','temp'=>'{"corpWidth":1,"corpHeight":1,"upload_url":"上传地址"}','text'=>'如果有corp选项，则必须定义上传地址'],
                         ['var_type'=>'list', 'value'=>'File:multipeFiles', 'name'=>'多个文件上传','temp'=>'{"accept":"*"}','text'=>'accept 为接受的文件类型'],
                         ['group'=>1, 'name'=>'选择框'],
-                        ['var_type'=>'list', 'value'=>'Check:checkbox',    'name'=>'复选框','temp'=>'{"options_url":"http://..你的URL.."}','text'=>'请在下面填写获取这些选项的URL'],
-                        ['var_type'=>'text', 'value'=>'Check:radio',       'name'=>'单选框','temp'=>'{"options_url":"http://..你的URL.."}','text'=>'请在下面填写获取这些选项的URL'],
-                        ['group'=>1, 'name'=>'固定项'],
-                        ['var_type'=>'list', 'value'=>'JSON:array','name'=>'固定的列表选项','temp'=>'["选项A","选项B","USA","China","English"]','text'=>'按照下面的格式提供一个JSON数组，字符串必须用英文双引号包裹'],
-                        ['var_type'=>'hash', 'value'=>'JSON:object','name'=>'固定的Hash选项','temp'=>'{"选项A":"选项值","YES":"是","NO":"否"}','text'=>'按照下面的格式提供一个JSON对象，键名和字符串必须使用英文双引号包裹'],
+                        ['var_type'=>'list', 'value'=>'Check:checkbox',    'name'=>'复选框','temp'=>'{"options_url":"通过URL获取","options_fun":"通过函数获取","options":["值+标签举例：",{"value":"YES","text":"是"},{"value":"0755","text":"深圳"},"值和标签一致举例：","ABC","USA","CN"],"colCount":2,"style":"blue","flat":"square"}','text'=>'按照下面的例子设置，三个选项选其一'],
+                        ['var_type'=>'text', 'value'=>'Check:radio',       'name'=>'单选框','temp'=>'{"options_url":"通过URL获取","options_fun":"通过函数获取","options":["值+标签举例：",{"value":"YES","text":"是"},{"value":"0755","text":"深圳"},"值和标签一致举例：","ABC","USA","CN"],"colCount":2,"style":"blue","flat":"square"}','text'=>'按照下面的例子设置，三个选项选其一'],
                     ];
 
                     ?>
@@ -174,7 +171,7 @@
             <div class="col-sm-6">
                 <label class="col-sm-3 must-start" for="var_default">默认值</label>
                 <div class="col-sm-9">
-                    <textarea name="var_default" id="var_default" rows="10" class="form-control"><?=$data['var_default']??''?></textarea>
+                    <textarea name="var_default" id="var_default" rows="20" class="form-control"><?=$data['var_default']??''?></textarea>
                 </div>
             </div>
 
@@ -182,7 +179,7 @@
             <div class="col-sm-6">
                 <label class="col-sm-3" for="options">选项参数</label>
                 <div class="col-sm-9">
-                    <textarea name="options" id="options" rows="10" class="form-control"><?=$data['options']??''?></textarea>
+                    <textarea name="options" id="options" rows="20" class="form-control"><?=$data['options']??''?></textarea>
                 </div>
             </div>
         </div>
@@ -235,13 +232,14 @@
             if(var_type !== input_type){
                 return err('类型不匹配','【<b class="text-red">变量类型：'+var_type_text+'</b>】需要类型【<b class="text-red">'+var_type+'</b>】，但【<b class="text-red">默认值</b>】类型是【<b class="text-red">'+input_type+'</b>】！');
             }
+
+            // 是否能匹配选项的类型
+            // var options_type = $('#options_type>option:selected').data('var_type');
+            // if(var_type !== options_type){
+            //     return err('类型不匹配','【<b class="text-red">变量类型：'+var_type_text+'</b>】需要类型【<b class="text-red">'+var_type+'</b>】，但【<b class="text-red">选项类型</b>】返回的是【<b class="text-red">'+options_type+'</b>】！');
+            // }
         }
 
-        // 是否能匹配选项的类型
-        var options_type = $('#options_type>option:selected').data('var_type');
-        if(var_type !== options_type){
-            return err('类型不匹配','【<b class="text-red">变量类型：'+var_type_text+'</b>】需要类型【<b class="text-red">'+var_type+'</b>】，但【<b class="text-red">选项类型</b>】返回的是【<b class="text-red">'+options_type+'</b>】！');
-        }
 
         // 选项值是否正确
         if($('#options_type>option:selected').data('temp')){

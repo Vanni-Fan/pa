@@ -27,7 +27,9 @@ class Utils{
         'match'       => '正则匹配',
         'not match'   => '正则不匹配',
     ];/*}}}*/
-
+    public static function getConditionOperators(){
+        return self::CONDITIONS_OPERATORS;
+    }
     public static function getDispatchParamsByKey(\Phalcon\Mvc\Dispatcher $dispatcher, $key=null){
         $params = [];
         $current_key = null;

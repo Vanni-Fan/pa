@@ -1,6 +1,7 @@
 <?php
 namespace Power\Controllers;
 use Power\Models\Configs;
+use Power\Models\Permissions;
 use Power\Models\Roles;
 use Power\Models\menus;
 
@@ -11,39 +12,33 @@ class RolesController extends AdminBaseController {
     function newAction(){ $a = $this->dispatcher->setParam('is_new', true);$this->indexAction(); }
     function indexAction(){
         $menus = Menus::getFlatMenus(); // 全部的菜单
-        $role_menus = []; // 角色的权限 TODO
         $is_new = $this->getParam('is_new');
+
+        // 全部的角色
         $this->view->roles = Roles::find();
         $this->view->is_new = $is_new;
+
         if($is_new){
             $this->view->role_id = 0;
-            $this->view->menus   = [];
-            $this->view->extends = [];
+            $this->view->permissions = [];
         }else{
             if($this->item_id){
                 $current_rule = array_column($this->view->roles->toArray(), null, 'role_id')[$this->item_id];
                 $this->view->role_id = $this->item_id;
-                $this->view->menus   = $current_rule['menus'];
-                $this->view->extends = $current_rule['configs'] ?: '[]';
             }else{
                 $this->view->role_id = $this->view->roles[0]->role_id;
-//                $this->view->menus   = $this->view->roles[0]->Permissions[0]->Menu;
-                $this->view->menus   = '[]';
-//                $this->view->extends = $this->view->roles[0]->configs ?: '[]';
-                $this->view->extends = '[]';
             }
-            $this->view->menus   = json_decode($this->view->menus,1);
-            $this->view->extends = json_decode($this->view->extends,1);
+            $this->view->permissions = Roles::getPermissions($this->view->role_id);
         }
         $this->view->menus = $menus;
 
         $rule_extends = Configs::getConfigs('rule');
-        $this->view->configs = \AdminHelper::getConfigsHtmlGroup($rule_extends, $this->view->extends, $this);
-//        if($rule_extends) $global_extends[0] = $rule_extends[0];
-//        else $global_extends[0] = [];
-//        unset($rule_extends[0]);
-//        $this->view->rule_extends_html = \AdminHelper::getConfigsHtml($rule_extends[$this->getMenuId()], $this->view->extends, $this);
-//        $this->view->global_extends_html = \AdminHelper::getConfigsHtml($global_extends, $this->view->extends, $this);
+//        echo "所有权限配置：",print_r($rule_extends,1);
+//        echo "配置了的权限：",print_r($this->view->permissions,1);
+//        exit;
+
+        // view->configs 扩展权限
+        $this->view->configs = \AdminHelper::getConfigsHtmlGroup($rule_extends, $this->view->permissions['config']??[], $this);
         $this->render();
     }
     
@@ -56,24 +51,45 @@ class RolesController extends AdminBaseController {
             }
             $menus[$menu_id] = $value;
         }
-        $menus  = json_encode($menus);
-        $extend = isset($_POST['extend']) ? json_encode($_POST['extend'],JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : null;
-        if($this->item_id){
-            $role  = Roles::findFirst($this->item_id);
-            $role->menus = $menus;
-            $role->configs = $extend;
-            $role->save();
+        $extend = $_POST['menu_configs'] ?? [];
+
+        // 不存在则创建，然后先删除权限，再创建权限
+        if(!$this->item_id){
+            $role = new Roles;
+            $role->create(['name'=>$_POST['role_name'],'is_enabled'=>1]);
+            $this->item_id = $role->role_id;
         }else{
-            $role = new Roles();
-            $role->create(
+            Permissions::find(['role_id=?0','bind'=>[$this->item_id]])->delete(); // 删除所有权限
+        }
+
+        // 添加菜单权限
+        foreach($menus as $menu_id=>$menu_value) {
+            (new Permissions)->create(
                 [
-                    'name'  => $_POST['role_name'],
-                    'menus' => $menus,
-                    'configs' => $extend
+                    'role_id'   => $this->item_id,
+                    'type'      => 'menu',
+                    'menu_id'   => $menu_id ?: null,
+                    'config_id' => null,
+                    'value'     => $menu_value
                 ]
             );
         }
-        $this->item_id = $role->role_id;
+        // 添加附件权限
+        foreach($extend as $menu_id=>$configs){
+            foreach($configs as $var_name=>$var_value){
+                $config = Configs::getConfig('rule', $menu_id, $var_name);
+                print_r($config);
+                (new Permissions)->create(
+                    [
+                        'role_id'   => $this->item_id,
+                        'type'      => 'config',
+                        'menu_id'   => $menu_id ?: null,
+                        'config_id' => $config['config_id'] ?: null,
+                        'value'     => $config['var_type'] === 'text' ? $var_value : json_encode($var_value)
+                    ]
+                );
+            }
+        }
         $this->indexAction();
     }
     

@@ -36,27 +36,24 @@ class Users extends PMB{
         return $token;
     }
     
-    public static function getInfo($user_id){
+    /**
+     * 获得指定用户的信息，包含可流量的菜单以及菜单的权限
+     * @param Int $user_id 用户ID
+     * @return array
+     */
+    public static function getInfo(int $user_id):array{
         $result = self::findFirst($user_id);
         if($result->Role){
             $return['menus'] = [];
             foreach($result->Role->Permissions as $permission){
-//                $menu = $permission->Menu;
                 if($permission->type == 'menu')
                 $return['menus'][$permission->Menu->menu_id] = $permission->value;
             }
-//            print_r($result->Role->Permissions[0]->Menu->toArray());
-//            $return['menus']  = array_column($result->Role->Permissions->toArray(), 'rule_value','menu_id');
             $return['role']   = $result->Role->name;
         }else{
             $return['menus']  = [];
             $return['role']   = '用户未设置角色';
         }
-//        print_r($return);
-//        exit;
-//        $return['menus']  = $result->Role ? $result->Role->menus : [];
-//        $return['role']   = $result->Role ? $result->Role->name : '未指定角色';
-//        $return['extensions'] = $result->Role ? $result->Role->Extensions : [];
         $return = array_merge($result->toArray(), $return);
         return $return;
     }

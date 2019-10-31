@@ -131,13 +131,6 @@ class Parser{
         if(!isset($this->scripts[$hash])){
             $content = preg_replace('#^(\s*<script[^>]*>)|(</script>\s*)$#i','',$content);
             $this->scripts[$hash] = $content;
-//            $this->scripts[] = $content;
-//            exit;
-        }
-        file_put_contents('d:/log.txt','[[[[[[[[[[[[[[[[HASH'.$hash.$content.print_r($this,1).']]]]]]]]]]]]]]]]]'."\n", FILE_APPEND);
-        if(substr($content,0,9)==='/*vanni*/') {
-            print_r($this->scripts);
-            throw new \Exception('错误');
         }
     }
     

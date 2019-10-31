@@ -9,7 +9,7 @@ class Check extends Element
     /**
      * @var string iCheck的样式，10种之一：black,red,green,blue,aero,grey,orange,yellow,pink,purple
      */
-    public $style = 'purple';//black,red,green,blue,aero,grey,orange,yellow,pink,purple
+    public $iCheckStyle = 'purple';//black,red,green,blue,aero,grey,orange,yellow,pink,purple
     /**
      * @var string 是扁平(flat)还是圆角(square)
      */
@@ -92,7 +92,9 @@ class Check extends Element
      * @return $this|Element
      */
     public function value($value){
-        $this->value = is_array($value) ? $value : [$value];
+        $value = is_array($value) ? $value : [$value];
+        $is_number_key = empty(array_filter(array_keys($value), function($v){return !is_int($v);}));
+        $this->value = $is_number_key ? $value : array_keys($value);
         return $this;
     }
 }

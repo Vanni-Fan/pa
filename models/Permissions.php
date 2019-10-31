@@ -22,7 +22,7 @@ class Permissions extends PMB{
         );
         $this->belongsTo(
             'config_id',
-            UserConfigs::class,
+            Configs::class,
             'config_id',
             ["alias" => "Config"]
         );

@@ -99,4 +99,10 @@ class Configs extends PMB{
         }
         return $extends;
     }
+
+    public static function getConfig(string $type, $menu_id, string $var_name):array{
+        $where = 'type=?0 and var_name=?1 and '.($menu_id ? ('menu_id='.(int)$menu_id) : 'menu_id is null');
+        $rs = self::findFirst([$where,'bind'=>[$type, $var_name]]);
+        return $rs ? $rs->toArray() : [];
+    }
 }

@@ -337,17 +337,25 @@ class AdminBaseController extends Controller{
     }
     
     public function settingAction(){
-        if(isset($_POST['extend'])){
-            foreach($_POST['extend'] as $menu_id => $setting){
+        if(isset($_POST['menu_configs'])){
+            foreach($_POST['menu_configs'] as $menu_id => $setting){
                 foreach($setting as $key=>$val){
-                    $data = [
-                        'user_id' => $this->getUserId(),
-                        'menu_id' => $menu_id,
-                        'name'    => $key,
-                    ];
-                    $config = UserConfigs::findFirst(['user_id=?0 and menu_id=?1 and name=?2', 'bind'=>array_values($data)]);
-                    if($config) $config->update(['value'=>$val]);
-                    else (new UserConfigs())->create($data + ['value'=>$val]);
+                    $menu_cond = $menu_id ? ('menu_id='.(int)$menu_id) : 'menu_id is null';
+                    # 获得Config ID
+                    $config = Configs::findFirst(['var_name=?0 and type="attribute" and '.$menu_cond, 'bind'=>$key]);
+                    if(!$config) continue;
+                    $config_id = $config->config_id;
+                    # 创建或更新配置
+                    $has_config = UserConfigs::findFirst(['user_id=?0 and config_id=?1', 'bind'=>[$this->getUserId(), $config_id]]);
+                    if($has_config) $has_config->update(['value'=>$val]);
+                    else (new UserConfigs())->create([
+                        'config_id'  => $config_id,
+                        'user_id'    => $this->getUserId(),
+                        'menu_id'    => $menu_id ?: null,
+                        'name'       => $key,
+                        'value'      => $config->var_type==='text' ? $val : json_decode($val),
+                        'is_enabled' => 1,
+                    ]);
                 }
             }
         }

@@ -34,8 +34,8 @@
                 <td><div class="json-code"><?=json_encode($rule['router'])?></div></td>
                 <td><div class="json-code"><?=json_encode($rule['params'])?></div></td>
                 <td style="text-align: center">
-                    <a href="<?=$c->url('update',['item_id'=>$rule['rule_id']])?>">修改</a>
-                    <a href="<?=$c->url('delete',['item_id'=>$rule['rule_id']])?>" class="del">删除</a>
+                    <a href="<?=$c->url('update',['item_id'=>$rule['menu_id']])?>">修改</a>
+                    <a href="<?=$c->url('delete',['item_id'=>$rule['menu_id']])?>" class="del">删除</a>
                 </td>
             </tr>
             <?php } ?>

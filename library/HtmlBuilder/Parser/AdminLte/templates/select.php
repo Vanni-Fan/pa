@@ -19,11 +19,9 @@ $this->style(/** @lang CSS */'
 '
 );
 if(empty($style)){
-    $style = $visible ? 'display:flex;' : 'display:none;';
-    foreach($styles as $k=>$v){
-        $style .= $k.':'.$v.';';
-    };
+    $style = $visible ? "display:flex;$style;" : 'display:none;';
 }
+
 
 ?>
 <div id="<?=$id?>" class="<?=$attributes['class']??'form-group htmlbuild-form'?>" style="<?=$style?>">

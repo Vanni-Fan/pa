@@ -114,7 +114,7 @@ class AdminHelper{
     }
 
     public static function getConfigsHtmlGroup(array $configs, array $default, Controller $controller):array{
-        if(empty($configs)) return '';
+        if(empty($configs)) return [];
         $parser = new Parser();
         $contents = [];
         foreach($configs as $config) {
@@ -126,20 +126,25 @@ class AdminHelper{
         return $contents;
     }
 
-    public static function getConfigsHtml(array $configs, array $default, Controller $controller):string{
+    public static function getConfigsHtml(array $configs, array $default, Controller $controller, string $form_prefix = 'menu_configs'):string{
         if(empty($configs)) return '';
         $parser = new Parser();
         $contents = '';
         foreach($configs as $config) {
-            $contents .= $parser->parse(self::configToHtmlBuilder($config, $default[$config['menu_id']] ?? null));
+            $contents .= $parser->parse(self::configToHtmlBuilder($config, $default[$config['menu_id']] ?? null, $form_prefix));
         }
         $parser->setResources($controller);
         return $contents;
     }
 
     # 将 configs 中信息转换成 HtmlBuilder 对象
-    public static function configToHtmlBuilder($a_config_of_configs_table, $default_value=null){
+    public static function configToHtmlBuilder($a_config_of_configs_table, $default_value=null, string $form_prefix = 'menu_configs'){
         $row = $a_config_of_configs_table;
+        $form_name = $form_prefix.'['.($row['menu_id']?:0).']['.$row['var_name'].']'.(in_array($row['var_type'],['list','hash'])?'[]':'');
+        if($row['var_type'] !== 'text'){
+            $row['var_default'] = json_decode($row['var_default'],1);
+        }
+        $default = $default_value[$row['var_name']]??$row['var_default'];
         switch($row['options_type']){
             case 'Input:text':
             case 'Input:mail':
@@ -153,24 +158,32 @@ class AdminHelper{
             case 'Input:date':
             case 'Input:color':
                 $sub_type = substr($row['options_type'],6);
-                return new Input($row['var_name'], $row['name'],$default_value[$row['var_name']]??$row['var_default'],$sub_type);
+                return new Input($form_name, $row['name'], $default, $sub_type);
                 break;
             case 'Select:single':
             case 'Select:multiple':
             case 'Select:tags':
+                $params   = json_decode($row['options'],1);
                 $sub_type = substr($row['options_type'],7);
-                return new Select($row['var_name'], $row['name'],$default_value??$row['var_default'],$sub_type);
+                $obj = new Select($form_name, $row['name'], $default);
+                if($sub_type==='tags'){
+                    $sub_type = 'multiple';
+                    $obj->isTags = true;
+                }
+                $obj->subtype = $sub_type;
+                $obj->choices(self::getChoices($params));
+                return $obj;
                 break;
             case 'TextArea:simple':
             case 'TextArea:ckeditor':
             case 'TextArea:wyihtml5':
-                return new TextArea($row['var_name'], $row['name'],$default_value??$row['var_default']);
+                return new TextArea($form_name, $row['name'], $default);
                 break;
             case 'File:image':
             case 'File:file':
             case 'File:multipeImages':
             case 'File:multipeFiles':
-                $obj = new File($row['var_name']);//, $row['name'],$default_value??$row['var_default']);
+                $obj = new File($form_name,$row['name']);//, $row['name'],$default_value??$row['var_default']);
                 if(strrpos($row['options_type'],'mage')){
                     $obj->accept('image/*');
                     $obj->corpWidth = 200;
@@ -179,31 +192,47 @@ class AdminHelper{
                 break;
             case 'Check:checkbox':
             case 'Check:radio':
-            case 'JSON:array':
-            case 'JSON:object':
-                $sub_type = substr($row['options_type'],6);
-                $obj = new Check($row['var_name'], $row['name'],$default_value??$row['var_default']);
-                if(strpos($row['options_type'],'JSON')===0){
-                    $val = json_decode($row['options'], 1);
-                    $choices = [];
-                    foreach($val as $k=>$v){
-                        $choices[] = ['value'=>$k, 'text'=>$v];
-                    }
-                    $obj->choices($choices);
-                }else{
-                    $obj->subtype = $sub_type;
-                    $obj->choices([
-                        ['value'=>1,'text'=>'AAAa'],
-                        ['value'=>2,'text'=>'BBB'],
-                        ['value'=>1,'text'=>'CCC'],
-                        ['value'=>1,'text'=>'DDD'],
-                    ])->colCount(2);
-                }
-
+                $params   = json_decode($row['options'],1);
+                $sub_type = ($row['var_type'] === 'text') ? 'radio' : 'checkbox';
+                $obj = new Check($form_name, $row['name'], $default, $sub_type);
+                $obj->choices(self::getChoices($params));
+                $obj->iCheckStyle = $params['style']??'blue';
+                $obj->flat = $params['flat']??'square';
+                $obj->colCount = $params['colCount']??3;
                 return $obj;
                 break;
             default:
                 throw new \Exception('没有定义'.print_r($row,1));
         }
+    }
+
+    private static function getChoices($options){
+        if(isset($options['options'])){ // 直接用它的值
+            $choices = $options['options'];
+        }elseif(isset($options['options_fun'])){ // 通过回调获得选项值
+            try {
+                $choices = call_user_func($options['options_fun']);
+            }catch(\Exception $e){
+                $choices = ['你配置的函数无法正常返回'];
+            }
+        }elseif(isset($options['options_url'])){
+            try {
+                $choices = json_decode(file_get_contents($options['options_url']), 1);
+            }catch(\Exception $e){
+                $choices = ['你配置的URL无法获取内容'];
+            }
+        }else{
+            $choices = ['你还没有配置相应的值'];
+        }
+
+        $fixed_choices = [];
+        foreach($choices as $key=>$item){
+            if(is_array($item)){
+                $fixed_choices[] = $item;
+            }else{
+                $fixed_choices[] = ['value'=>is_int($key)?$item:$key,'text'=>$item];
+            }
+        }
+        return $fixed_choices;
     }
 }

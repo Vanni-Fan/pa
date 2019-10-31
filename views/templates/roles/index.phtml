@@ -230,7 +230,7 @@
                     <?php } ?>
                 </td>
                 <?php if($menu['router']){ for($i=7; $i>=0; $i--){ ?>
-                <?php $checked = ((1<<$i) & ($menus[$menu['menu_id']]??0)) === (1<<$i) ? ' checked' : ''; ?>
+                <?php $checked = ((1<<$i) & ($permissions['menu'][$menu['menu_id']]??0)) === (1<<$i) ? ' checked' : ''; ?>
                 <td class="<?=$class?>">
                     <label class="role-label" style="height: 18px;"><input value="1" name="menu_id[<?=$menu['menu_id']?>][<?=$i?>]" type="checkbox"<?=$checked?>><i class="fa fa-check-square"></i></label>
                 </td>
