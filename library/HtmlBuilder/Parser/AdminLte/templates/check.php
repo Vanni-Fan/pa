@@ -1,6 +1,6 @@
 <div id="<?=$id?>" class="form-group htmlbuild-form <?=$attributes['class']??''?>" style="<?=$visible?'':'display:none;'?>">
     <?php include(__DIR__.'/_label.php'); ?>
-    <div class="form-group" style="display:flex;flex-wrap: wrap;">
+    <div class="form-group" style="display:flex;flex-wrap: wrap;min-height: 35px;margin-bottom: 0 !important">
     <?php
     foreach($choices as $item) {
         $checked = (array_search($item['value'], $value)===false) ? '' : 'checked';

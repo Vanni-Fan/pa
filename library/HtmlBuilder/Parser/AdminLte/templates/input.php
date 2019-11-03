@@ -26,7 +26,7 @@ if($subtype === 'color'){
     <?php include(__DIR__.'/_label.php'); ?>
     <div class="<?=($inputAfterIcon||$inputBeforeIcon)?'input-group':''?> <?=$labelWidth?('col-sm-'.(12-$labelWidth)):''?>" style="<?=($inputAfterIcon||$inputBeforeIcon)?'':'padding:0'?>">
         <?php if($inputBeforeIcon) { ?><span class="input-group-addon"><i class="<?=$inputBeforeIcon?>"></i></span><?php } ?>
-        <input <?=$inputMask?('data-inputmask="'.$inputMask.'"'):''?> id="<?=$id?>-input" name="<?=$name?>" type="<?=$subtype?>" value="<?=$value?>" class="form-control" placeholder="<?=$placeHolder?>" <?=$enabled?'':'disabled'?>>
+        <input data-validator="HB_input_verify('<?=$id?>',$('#<?=$id?>-input'))" <?=$inputMask?('data-inputmask="'.$inputMask.'"'):''?> id="<?=$id?>-input" name="<?=$name?>" type="<?=$subtype?>" value="<?=$value?>" class="form-control" placeholder="<?=$placeHolder?>" <?=$enabled?'':'disabled'?>>
         <?php if($inputAfterIcon) { ?><span class="input-group-addon"><i class="<?=$inputAfterIcon?>"></i></span><?php } ?>
     </div>
     <?php if($description){?>
@@ -38,50 +38,69 @@ if($subtype === 'color'){
 </div>
 
 <?php
-$script     = '';
-$required   = (int)$required;
-$statistics = (int)$statistics;
-if($statistics || $required){
-    $script .= "$('#$id-input').keyup(function(e){var v = $(e.target).val();\n";
-    if($statistics) $script .= "$('#$id-message').text('长度:'+v.length+',词汇:'+v.split(/\b/).filter(function(i){ return i.trim() }).length);\n";
-    if($required){ // 如果不能为空，添加警报
-        $script .= "if(v.trim().length==0){ $('#$id').addClass('has-warning'); $('#$id-message').text('此字段为必填字段！') }\n";
-        $script .= "else{ $('#$id').removeClass('has-warning'); }\n";
-    }
-    $script .= "});\n";
-}
+$this->script('window["'.$id.'"] = '.$element.';');
 
-if($validators){
-    $script .= "$('#$id-input').blur(function(e){var v=$(e.target).val();\n";
-    foreach($validators as $v){
-        $cond = '';
-        switch($v->type){
-            case 'number':
-                $cond .= 'v>'.$v->rule->minValue.' && v<'.$v->rule->maxValue;
-                break;
-            case 'text':
-                $cond .= 'v.length>'.$v->rule->minLength.' && v.length<'.$v->rule->maxLength;
-                break;
-            case 'regex':
-                $cond .= '(new RegExp("'.$v->rule->regex.'")).test(v)';
-                break;
-            case 'mail':
-                $cond .= '/^[^@ ]+@[^\.]+\.[a-z]{2,}$/i.test(v)';
-                break;
-        }
-        if($cond){
-            $script .= "if(!($cond)){ $('#$id').addClass('has-error'); $('#$id-message').text('{$v->text}'); return; }\n";
-            $script .= "else{ $('#$id').removeClass('has-error').addClass('has-success'); $('#$id-message').text(''); }\n";
+$this->script(/** @lang JavaScript */<<<'Out'
+function HB_input_check(id,obj){
+    $('#'+id+'-input').blur(function(e){ // 失去焦点判断
+        HB_input_verify(id, $(e.currentTarget));    
+    }).keyup(function (e){
+        HB_input_verify(id, $(e.currentTarget));
+    });
+}
+function HB_input_verify(id,obj){
+    var value = obj.val().trim();
+    var valid = true;
+    if(!window[id].required && !value) return true; // 如果不是必须，并且值为空，则不检查
+    if(window[id].validators.length>0){ // 验证器判断
+        for(var i in window[id].validators){
+            var validator = window[id].validators[i];
+            switch(validator.type){
+                case 'number':
+                    if(value < validator.rule.minValue || value > validator.rule.maxValue){
+                        valid = false;
+                    }
+                    break;
+                case 'text':
+                    if(value.length < validator.rule.minLength || value.length > validator.rule.maxLength ){
+                        valid = false;
+                    }
+                    break;
+                case 'regex':
+                    if(!(new RegExp(validator.rule.regex)).test(value)){
+                        valid = false;
+                    }
+                    break;
+                case 'mail':
+                    if(!/^[^@ ]+@[^\.]+\.[a-z]{2,}$/i.test(value)){
+                        valid = false;
+                    }
+                    break;
+                case 'expression':
+                    if(validator.rule.callback)   valid = validator.rule.callback();
+                    if(validator.rule.expression) valid = eval(validator.rule.expression);
+                    break;
+            }
+            if(valid){
+                $('#'+id).removeClass('has-error').addClass('has-success'); 
+                $('#'+id+'-message').text('');
+            }else{
+                $('#'+id).addClass('has-error'); 
+                $('#'+id+'-message').text(validator.text);
+            }
         }
     }
-    $script .= "});\n";
+    return valid;
 }
+Out
+);
+
+$this->script('HB_input_check("'.$id.'")');
+
 if($inputMask){
     $this->js('/dist/plugins/input-mask/jquery.inputmask.js');
     $this->js('/dist/plugins/input-mask/jquery.inputmask.date.extensions.js');
     $this->js('/dist/plugins/input-mask/jquery.inputmask.extensions.js');
-    $script .= "$('#$id-input').inputmask();\n";
+    $this->script("$('#$id-input').inputmask();\n");
 }
 ?>
-
-<?php if($script){ $this->script('$(function(){'.$script.'});'); }?>

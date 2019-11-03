@@ -128,15 +128,6 @@ class AdminBaseController extends Controller{
         $this->userinfo = Users::getInfo($this->tokeninfo['user_id']);
         if(!$this->userinfo) return header('Location: '.PA_URL_PATH.'login');
     
-        (new Logs())->create(
-            [
-                'user_id' => $this->tokeninfo['user_id'],
-                'url'     => $_SERVER['REQUEST_URI'],
-                'name'    => $this->getParam('Rule')['name'] .'['. $this->dispatcher->getActionName() .']',
-                'request' => json_encode($_REQUEST,JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-                'server'  => json_encode($_SERVER, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
-            ]
-        );
         # 设置基本信息
         $this->menus   = $this->userinfo['menus'];
         $this->layout  = POWER_VIEW_DIR . 'layouts/index';
@@ -152,7 +143,19 @@ class AdminBaseController extends Controller{
         $this->item_id = $this->getParam('item_id');
         if(strpos($this->item_id,',')) $this->item_id = explode(',',$this->item_id);
         $this->current_page = $this->getParam('page','int',1);
-        
+
+        # 记录一条日志
+        (new Logs())->create(
+            [
+                'menu_id' => $this->menu_id,
+                'user_id' => $this->tokeninfo['user_id'],
+                'url'     => $_SERVER['REQUEST_URI'],
+                'name'    => $this->getParam('Rule')['name'] .'['. $this->dispatcher->getActionName() .']',
+                'request' => json_encode($_REQUEST,JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                'server'  => json_encode($_SERVER, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            ]
+        );
+
         # 扩展权限
         list('rule'=>$this->rules,'attribute'=>$this->attributes) = Configs::getConfigsByUser($this->tokeninfo['user_id']);
         # 扩展属性

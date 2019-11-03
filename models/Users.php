@@ -97,6 +97,7 @@ class Users extends PMB{
         if($find_handler) $find_handler::afterSave($this);
     }
     public function beforeSave(){
+        parent::beforeSave();
         $find_handler = PA::$config->path('user_handler');
         if($find_handler) $find_handler::beforeSave($this);
     }

@@ -130,7 +130,7 @@ $this->html(/** @lang HTML */<<<'OUT'
         <div class="dataTables_wrapper form-inline dt-bootstrap">
             <div class="row">
                 <div class="col-sm-12">
-                    <table class="table table-bordered table-striped dataTable" style="margin-bottom:0">
+                    <table class="table table-bordered table-striped dataTable" style="margin-bottom:0" table-layout="fixed">
                         <thead><tr class="htmlbuild-table-header"></tr></thead>
                         <tbody class="htmlbuild-table-body"></tbody>
                     </table>

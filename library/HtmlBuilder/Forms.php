@@ -30,7 +30,7 @@ class Forms extends Element {
      * @return Input
      */
     public static function input(string $name, string $label='', $value='', string $subtype='text'):Input{
-        return new Input($name, $subtype, $value, $label);
+        return new Input($name, $label, $value, $subtype);
     }
     
     /**
@@ -38,8 +38,8 @@ class Forms extends Element {
      * @param string $label
      * @return Button
      */
-    public static function button(string $label=''):Button{
-        return new Button($label);
+    public static function button(string $name, string $label='', $value='', string $subtype='default'):Button{
+        return new Button($name, $label, $value, $subtype);
     }
     
     /**
@@ -72,8 +72,8 @@ class Forms extends Element {
      * @param $value
      * @return Check
      */
-    public static function radio($label, $name, $value):Check{
-        return new Check($label, $name, $value,'radio');
+    public static function radio($name, $label, $value):Check{
+        return new Check($name, $label, $value,'radio');
     }
     
     /**
@@ -90,9 +90,13 @@ class Forms extends Element {
     
     /**
      * 创建一个 File 文件对象
+     * @param $name
+     * @param $label
+     * @param $value
+     * @param $subtype
      * @return File
      */
-    public static function file($name):File{
-        return new File($name);
+    public static function file(string $name, string $label='', $value='', string $subtype='single'):File{
+        return new File($name,$label,$value,$subtype);
     }
 }

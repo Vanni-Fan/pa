@@ -51,16 +51,16 @@ class Input extends Element{
                 $this->validate(Validate::mail('请输入正确的邮件地址'));
                 break;
             case 'url':
-                $this->validate(Validate::regex('请输入正确的URL地址','#^https?://.+#i'))->placeHolder('http[s]://');
+                $this->validate(Validate::regex('请输入正确的URL地址','^https?://.+i'))->placeHolder('http[s]://');
                 break;
             case 'tel':
-                $this->inputMask("'mask':'(9999)-(99999999)'");
+                $this->inputMask("'mask':'(9999)-(99999999)'")->validate(Validate::regex('请输入正确的电话号码','^[0-9]{3,4}-[0-9]{6,8}$'));
                 break;
             case 'mobile':
-                $this->inputMask("'mask':'(1)9999999999'")->subtype('number');
+                $this->inputMask("'mask':'199 9999 9999'")->subtype('text')->validate(Validate::regex('请输入正确的手机号码','^1[0-9]{2} [0-9]{4} [0-9]{4}$'));
                 break;
             case 'currency':
-                $this->inputBeforeIcon('fa fa-yen')->validate(Validate::regex('请输入正确的金额','#^\d+(\.\d{1,})$#'));
+                $this->inputBeforeIcon('fa fa-yen')->validate(Validate::regex('请输入正确的金额','^[0-9]+(\.[0-9]{1,})$'));
                 break;
             case 'number':
                 $this->subtype('number');
@@ -72,7 +72,7 @@ class Input extends Element{
                 $this->subtype('password');
                 break;
             case 'time':
-                $this->subtype('time')->validate(Validate::regex('时间格式不对','#^\d\d:\d\d$'));
+                $this->subtype('time')->validate(Validate::regex('时间格式不对','^[0-9][0-9]:[0-9][0-9]$'));
                 break;
             case 'date':
                 $this->subtype('date');

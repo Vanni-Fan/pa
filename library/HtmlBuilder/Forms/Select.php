@@ -88,7 +88,7 @@ class Select extends Element
      */
     public function value($value){
         $value = is_array($value) ? $value : [$value];
-        $is_number_key = empty(array_filter($value, function($v){return !is_int($v);}));
+        $is_number_key = empty(array_filter(array_keys($value), function($v){return !is_int($v);}));
         $this->value = $is_number_key ? $value : array_keys($value);
         return $this;
     }

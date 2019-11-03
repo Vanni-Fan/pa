@@ -124,7 +124,7 @@ function initFileUpload(id, isSingle, canCorp, corpOptions){
     }
 }
 // 如果有剪裁，修改默认的提交事件，改用Ajax提交
-function handForm(form){
+function handForm(form, returnUrl){
     form.submit(function(){
         var form_id = form.attr('id')
         if(window.hasCorp[form_id]){
@@ -145,6 +145,14 @@ function handForm(form){
                 processData:false,
                 contentType : false
             }).then(function(d){
+                if(returnUrl){
+                    window.location.href = returnUrl;
+                }else{
+                    showDialogs({
+                        body:'表单提交完成',
+                        delay:2000
+                    });
+                }
                 //console.log(d);
             });
             return false;
@@ -389,7 +397,7 @@ if($canCorp) {
         </div>'
     );
     $this->script('$(".cropperWarpDiv").remove().appendTo($("body"));');
-    $this->script("handForm($('#$id').parents('form'));\n");
+    $this->script("handForm($('#$id').parents('form'),'$returnUrl');\n");
 }
 
 # 初始化JS，不缓存
@@ -419,7 +427,9 @@ $this->script("$(function(){
     <?php include(__DIR__.'/_label.php'); ?>
     <input accept="<?=$accept?>" id="<?=$id?>-file" name="<?=$name?>" type="file" style="display: none">
     <div class="input-group <?=$labelWidth?('col-sm-'.(12-$labelWidth)):''?>">
-        <span class="input-group-addon view-icon"><i id="<?=$id?>-icon" class="fa fa-file-o"></i></span>
+        <span class="input-group-addon view-icon" style="<?=$value?('padding:0;width:35px;background-image:url('.$value.');background-size:cover'):""?>">
+            <i id="<?=$id?>-icon" class="<?=$value?'':'fa fa-file-o'?>"></i>
+        </span>
         <input id="<?=$id?>-text" type="text" class="form-control" placeholder="<?=$placeHolder?>" readonly="true">
         <span class="input-group-addon" id="<?=$id?>-folder-btn"><i class="fa fa-folder-open"></i></span>
     </div>

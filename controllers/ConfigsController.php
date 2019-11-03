@@ -96,22 +96,6 @@ class ConfigsController extends AdminBaseController {
         );
         $parser->setResources($this);
         return $this->render(null);
-
-        $extends = Configs::find(['type=?0','bind'=>[$this->type],'order'=>'menu_id'])->toArray();
-        $global  = $menus = [];
-        foreach($extends as $extend){
-            if($extend['menu_id']){
-                $rule_info = [];
-                Menus::getParentIds($extend['menu_id'], $rule_info);
-                $extend['rule_names'] = implode('>', array_map(function($v){ return $v['name']; }, $rule_info));
-                $menus[]  = $extend;
-            }else{
-                $global[] = $extend;
-            }
-        }
-        $this->view->menus  = $menus;
-        $this->view->global = $global;
-        $this->render();
     }
     
     # 展示

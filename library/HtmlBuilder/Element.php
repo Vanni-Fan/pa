@@ -198,6 +198,9 @@ class Element{
      * @return self
      */
     public function required(bool $required=true){
+        $this->validate(
+            Validate::text('【'.($this->label ?: $this->name ).'】字段必须填写','1','99999999')
+        );
         $this->required = $required;
         return $this;
     }

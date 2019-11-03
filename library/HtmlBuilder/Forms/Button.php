@@ -54,7 +54,7 @@ class Button extends Element
      * @param null $value
      * @param string $subtype
      */
-    public function __construct(string $name='', string $label='', $value=null, string $subtype='button')
+    public function __construct(string $name='', string $label='', $value=null, string $subtype='default')
     {
         parent::__construct('button', $name);
         $this->label = $label;

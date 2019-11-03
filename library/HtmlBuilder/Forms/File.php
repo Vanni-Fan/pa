@@ -11,7 +11,7 @@ class File extends Element
     public $accept = '*/*';//image/*';
     public $corpWidth  = null;  // 裁剪最大宽
     public $corpHeight = null;  // 裁剪最大高
-    public $uploadUrl  = null;  // 上传图片的URL，Ajax使用，如果有剪切，这个是必须的，否则使用 form 的 action
+    public $returnUrl  = null;  // Ajax上传图片后，的跳转地址
 
     /**
      * File constructor.
