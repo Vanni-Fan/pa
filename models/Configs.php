@@ -71,17 +71,18 @@ class Configs extends PMB{
         }
 
         // 获得用户配置的属性
-        $user_attributes = self::query()->createBuilder()->from(['c' => Configs::class])
-            ->LeftJoin(UserConfigs::class, 'uc.config_id=c.config_id and c.is_enabled=1 and uc.is_enabled=1', 'uc')
-            ->LeftJoin(Users::class, 'uc.user_id=u.user_id and u.is_enabled=1', 'u')
-            ->columns('c.var_name, c.var_default, uc.value, c.menu_id')
-            ->where('c.type=?0 and (u.user_id is null or u.user_id=?1)', ['attribute', $user_id])
-            ->getQuery()->execute();
-        foreach($user_attributes as $config){
-            $return['attribute'][$config->menu_id??0][$config->var_name] = $config->value ?? $config->var_default;
+        $sys_attributes = self::find(['type="attribute" and is_enabled=1']);
+        foreach($sys_attributes as $config){
+            if($user_id){
+                $user_attribute = UserConfigs::findFirst(['config_id=?0 and user_id=?1 and is_enabled=1', 'bind'=>[$config->config_id, $user_id]]);
+                $value = $user_attribute ? $user_attribute->value : $config->var_default;
+            }else{
+                $value = $config->var_default;
+            }
+            if($config->var_type !== 'text') $value = json_decode($value,1);
+            $return['attribute'][$config->menu_id??0][$config->var_name] = $value;
         }
-//        echo '<pre>',print_r($return,1);
-//        exit;
+
         return $return;
     }
     

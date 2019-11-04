@@ -53,7 +53,6 @@ class Roles extends PMB{
         }
         // 查询配置中的默认权限，未分配给角色的权限
         foreach(Configs::getConfigs('rule') as $config){
-            print_r($config);
             $menu_id = $config['menu_id'] ?: 0;
             if(!isset($defined_config[$menu_id][$config['var_name']])){
                 $value = ($config['var_type'] === 'text') ? $config['var_default'] : json_decode($config['var_default'],1);

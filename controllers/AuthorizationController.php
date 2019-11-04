@@ -36,7 +36,8 @@ class AuthorizationController extends Controller{
         $user_info['login_ip']   = Utils::ip();
         $user_info['login_time'] = time();
         $token = PA::$config['cookie_maker']($user_info);
-        setcookie(PA::$config['cookie_name'], $token, 0, '/', '', !empty($_SERVER['HTTPS']), true);
+        # 设置有效期为2小时
+        setcookie(PA::$config['cookie_name'], $token, time()+7200, '/', '', !empty($_SERVER['HTTPS']), true);
         return $this->response->redirect(PA_URL_PATH, true);
     }
 }

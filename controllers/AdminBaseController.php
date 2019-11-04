@@ -127,7 +127,14 @@ class AdminBaseController extends Controller{
         # 获取用户信息
         $this->userinfo = Users::getInfo($this->tokeninfo['user_id']);
         if(!$this->userinfo) return header('Location: '.PA_URL_PATH.'login');
-    
+
+        $now = time();
+        if($this->tokeninfo['login_time']+3600 < $now){ // 一小时前的COOKIE自动续期
+            $this->tokeninfo['login_time'] = $now;
+            $token = PA::$config['cookie_maker']($this->tokeninfo);
+            setcookie(PA::$config['cookie_name'], $token, time()+7200, '/', '', !empty($_SERVER['HTTPS']), true);
+        }
+
         # 设置基本信息
         $this->menus   = $this->userinfo['menus'];
         $this->layout  = POWER_VIEW_DIR . 'layouts/index';

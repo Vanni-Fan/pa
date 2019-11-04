@@ -1,9 +1,13 @@
 <?php
 namespace Power\Controllers;
 use Exceptions\ParamException;
+use Power\Models\Configs;
+use Power\Models\Logs;
+use Power\Models\Permissions;
 use Power\Models\Roles;
 use Power\Models\menus;
 use PA;
+use Power\Models\UserConfigs;
 
 class MenusController extends AdminBaseController {
     protected $title = '权限管理';
@@ -56,6 +60,10 @@ class MenusController extends AdminBaseController {
     function deleteAction(){
         $this->modelsManager->executeQuery('UPDATE \Power\Models\Menus SET parent_id = null where parent_id=?0',[$this->item_id]);
         Menus::findFirst($this->item_id)->delete();
+        Configs::find(['menu_id=?0','bind'=>[$this->item_id]])->delete();
+        UserConfigs::find(['menu_id=?0','bind'=>[$this->item_id]])->delete();
+        Permissions::find(['menu_id=?0','bind'=>[$this->item_id]])->delete();
+        Logs::find(['menu_id=?0','bind'=>[$this->item_id]])->update(['menu_id'=>null]);
         $this->jsonOut(['code'=>'ok']);
     }
     

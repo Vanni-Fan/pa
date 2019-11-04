@@ -10,9 +10,6 @@ use HtmlBuilder\Validate;
 use http\Client\Response;
 
 class IndexController extends AdminBaseController{
-    public static function getItemOwner($ids=null):int{
-        return 1;
-    }
     public function indexAction(){
 //        phpinfo();
 //        exit;

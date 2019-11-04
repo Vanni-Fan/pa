@@ -90,11 +90,11 @@ class Menus extends PMB{
      */
     public static function getChildIds(array &$out, int $prent_id=0, array $include_ids=[]){
         $bind  = [];
-        $where = '';
+        $where = 'is_enabled=1 ';
         if(!$prent_id){
-            $where = 'parent_id is null';
+            $where .= 'and parent_id is null';
         }else{
-            $where = 'parent_id = ?0';
+            $where .= 'and parent_id = ?0';
             $bind[] = $prent_id;
         }
         $query = ['conditions'=>$where,'bind'=>$bind,'order'=>'index'];
