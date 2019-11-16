@@ -47,14 +47,14 @@ CREATE TABLE `configs`  (
 -- ----------------------------
 -- Records of configs
 -- ----------------------------
-INSERT INTO `configs` VALUES (1, 'attribute', NULL, 1, '权限管理', 'site_name', '权限管理', 'text', '{\"minLength\":0,\"maxLength\":255}', 'Input:text', 1, '', NULL, 1572399079, NULL, 1);
-INSERT INTO `configs` VALUES (2, 'attribute', NULL, 0, '网站子标题', 'site_subname', '通用后台系统', 'text', '{\"minLength\":0,\"maxLength\":255}', 'Input:text', 1, '', NULL, 1572399099, NULL, 1);
+INSERT INTO `configs` VALUES (1, 'attribute', NULL, 1, '权限管理', 'site_name', '权限管理', 'text', '{"minLength":0,"maxLength":255}', 'Input:text', 1, '', NULL, 1572399079, NULL, 1);
+INSERT INTO `configs` VALUES (2, 'attribute', NULL, 0, '网站子标题', 'site_subname', '通用后台系统', 'text', '{"minLength":0,"maxLength":255}', 'Input:text', 1, '', NULL, 1572399099, NULL, 1);
 INSERT INTO `configs` VALUES (3, 'attribute', NULL, 0, '网站收藏夹图标', 'site_icon', 'https://permissionadmin.com/logo.png', 'text', NULL, 'Input:url', 1, '', NULL, 1572399191, NULL, 1);
-INSERT INTO `configs` VALUES (4, 'attribute', NULL, 0, '网站域名', 'site_domain', 'permissionadmin.com', 'text', '{\"minLength\":0,\"maxLength\":255}', 'Input:text', 1, '', NULL, 1572399210, NULL, 1);
-INSERT INTO `configs` VALUES (5, 'attribute', NULL, 0, '公司名称', 'site_compan_name', 'Permission Admin', 'text', '{\"minLength\":0,\"maxLength\":255}', 'Input:text', 1, '', NULL, 1572399224, NULL, 1);
+INSERT INTO `configs` VALUES (4, 'attribute', NULL, 0, '网站域名', 'site_domain', 'permissionadmin.com', 'text', '{"minLength":0,"maxLength":255}', 'Input:text', 1, '', NULL, 1572399210, NULL, 1);
+INSERT INTO `configs` VALUES (5, 'attribute', NULL, 0, '公司名称', 'site_compan_name', 'Permission Admin', 'text', '{"minLength":0,"maxLength":255}', 'Input:text', 1, '', NULL, 1572399224, NULL, 1);
 INSERT INTO `configs` VALUES (6, 'attribute', NULL, 0, '公司URL', 'site_compan_url', '', 'text', NULL, 'Input:url', 1, '', NULL, 1572399232, NULL, 1);
-INSERT INTO `configs` VALUES (7, 'attribute', NULL, 0, '域名简写', 'site_logogram', 'PA', 'text', '{\"minLength\":0,\"maxLength\":255}', 'Input:text', 1, '', NULL, 1572399238, NULL, 1);
-INSERT INTO `configs` VALUES (8, 'attribute', NULL, 0, '版本', 'site_version', '1.0.0', 'text', '{\"minLength\":0,\"maxLength\":255}', 'Input:text', 1, '', NULL, 1572330934, NULL, 1);
+INSERT INTO `configs` VALUES (7, 'attribute', NULL, 0, '域名简写', 'site_logogram', 'PA', 'text', '{"minLength":0,"maxLength":255}', 'Input:text', 1, '', NULL, 1572399238, NULL, 1);
+INSERT INTO `configs` VALUES (8, 'attribute', NULL, 0, '版本', 'site_version', '1.0.0', 'text', '{"minLength":0,"maxLength":255}', 'Input:text', 1, '', NULL, 1572330934, NULL, 1);
 
 -- ----------------------------
 -- Table structure for logs
@@ -88,7 +88,7 @@ CREATE TABLE `menus`  (
   `router` json NULL COMMENT '路由信息',
   `params` json NULL COMMENT '额外路由参数',
   `icon` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '图标',
-  `parent_id` int(11) UNSIGNED NULL DEFAULT 0 COMMENT '父级菜单ID',
+  `parent_id` int(11) UNSIGNED NULL DEFAULT NULL COMMENT '父级菜单ID',
   `index` tinyint(255) UNSIGNED NULL DEFAULT 0 COMMENT '排序',
   `is_enabled` tinyint(255) UNSIGNED NULL DEFAULT 1 COMMENT '是否可用',
   `corner_mark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '角标回调函数',
@@ -105,15 +105,15 @@ CREATE TABLE `menus`  (
 -- ----------------------------
 -- Records of menus
 -- ----------------------------
-INSERT INTO `menus` VALUES (1, '欢迎页', NULL, NULL, '{\"priority\": 10, \"namespace\": \"Power\\\\Controllers\", \"controller\": \"Index\"}', '[]', 'fa fa-child', NULL, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `menus` VALUES (1, '欢迎页', NULL, NULL, '{"priority": 10, "namespace": "Power\\Controllers", "controller": "Index"}', '[]', 'fa fa-child', NULL, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `menus` VALUES (2, '系统管理', NULL, NULL, NULL, '[]', 'fa fa-wrench', NULL, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `menus` VALUES (3, '用户管理', NULL, NULL, '{\"priority\": 10, \"namespace\": \"Power\\\\Controllers\", \"controller\": \"Users\"}', '[]', 'fa fa-user', 2, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `menus` VALUES (4, '角色管理', NULL, NULL, '{\"priority\": 10, \"namespace\": \"Power\\\\Controllers\", \"controller\": \"Roles\"}', '{\"A\": 1, \"B\": 2}', 'fa fa-users', 2, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `menus` VALUES (5, '菜单管理', NULL, NULL, '{\"namespace\": \"Power\\\\Controllers\", \"controller\": \"Menus\"}', '[]', 'fa fa-legal', 2, 6, 1, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `menus` VALUES (6, '配置管理', NULL, NULL, '{\"namespace\": \"Power\\\\Controllers\", \"controller\": \"Configs\"}', '{\"type\": \"rule\"}', 'fa fa-cubes', 2, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `menus` VALUES (8, '插件管理', NULL, '/admin/plugins', '{\"namespace\": \"Power\\\\Controllers\", \"controller\": \"plugins\"}', '[]', 'fa fa-gears', 2, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `menus` VALUES (9, '系统日志', NULL, '/admin/logs', '{\"namespace\": \"Power\\\\Controllers\", \"controller\": \"logs\"}', '[]', 'fa fa-wpforms', 2, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `menus` VALUES (26, 'API测试', NULL, '/GraphApi', '{\"namespace\": \"plugins\\\\GraphQL\\\\Controllers\", \"controller\": \"graph-ql\"}', '[]', '', NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `menus` VALUES (3, '用户管理', NULL, NULL, '{"priority": 10, "namespace": "Power\\Controllers", "controller": "Users"}', '[]', 'fa fa-user', 2, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `menus` VALUES (4, '角色管理', NULL, NULL, '{"priority": 10, "namespace": "Power\\Controllers", "controller": "Roles"}', '[]', 'fa fa-users', 2, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `menus` VALUES (5, '菜单管理', NULL, NULL, '{"namespace": "Power\\Controllers", "controller": "Menus"}', '[]', 'fa fa-legal', 2, 6, 1, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `menus` VALUES (6, '配置管理', NULL, NULL, '{"namespace": "Power\\Controllers", "controller": "Configs"}', '[]', 'fa fa-cubes', 2, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `menus` VALUES (8, '插件管理', NULL, '/admin/plugins', '{"namespace": "Power\\Controllers", "controller": "plugins"}', '[]', 'fa fa-gears', 2, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `menus` VALUES (9, '系统日志', NULL, '/admin/logs', '{"namespace": "Power\\Controllers", "controller": "logs"}', '[]', 'fa fa-wpforms', 2, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `menus` VALUES (26, 'API测试', NULL, '/GraphApi', '{"namespace": "plugins\\GraphQL\\Controllers", "controller": "graph-ql"}', '[]', '', NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for permissions
@@ -253,18 +253,6 @@ CREATE TABLE `user_configs`  (
   CONSTRAINT `user_configs_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `user_configs_ibfk_3` FOREIGN KEY (`menu_id`) REFERENCES `menus` (`menu_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of user_configs
--- ----------------------------
-INSERT INTO `user_configs` VALUES (10, 5, 1, NULL, 'site_compan_name', 'Permission Admin', '1', NULL, 1572535122, 1572535122, 1, 1);
-INSERT INTO `user_configs` VALUES (11, 6, 1, NULL, 'site_compan_url', 'http://ab.com', '1', NULL, 1572535122, 1572535122, 1, 1);
-INSERT INTO `user_configs` VALUES (12, 4, 1, NULL, 'site_domain', 'permissionadmin.com', '1', NULL, 1572535122, 1572535122, 1, 1);
-INSERT INTO `user_configs` VALUES (13, 3, 1, NULL, 'site_icon', 'https://permissionadmin.com/logo.png', '1', NULL, 1572535122, 1572535122, 1, 1);
-INSERT INTO `user_configs` VALUES (14, 7, 1, NULL, 'site_logogram', 'PA', '1', NULL, 1572535122, 1572535122, 1, 1);
-INSERT INTO `user_configs` VALUES (15, 1, 1, NULL, 'site_name', '权限管理', '1', NULL, 1572535122, 1572535122, 1, 1);
-INSERT INTO `user_configs` VALUES (16, 2, 1, NULL, 'site_subname', '通用后台系统', '1', NULL, 1572535122, 1572535122, 1, 1);
-INSERT INTO `user_configs` VALUES (17, 8, 1, NULL, 'site_version', '1.0.0', '1', NULL, 1572535122, 1572535122, 1, 1);
 
 -- ----------------------------
 -- Table structure for users
