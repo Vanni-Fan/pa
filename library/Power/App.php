@@ -86,15 +86,9 @@ class App{
         }
         # 创建数据库连接
         PA::$db = DB::load(PA::$config['pa_db']);
-        
-        # 加载配置路由
-        $routers = include POWER_BASE_DIR.'data/routers.php'; // 加载路由
-        if(PA::$config['routers']){
-            foreach(PA::$config['routers'] as $_method => $_routers){
-                foreach($_routers as $_match=>$_router) $routers[$_method][$_match] = $_router->toArray();
-            }
-        }
+
         # 加载数据库路由
+        $routers = [];
         $db_router = \Power\Models\Menus::find(['url_suffix is not null','columns'=>'url_suffix,router']);
         foreach($db_router as $_router){
             $routers['*'][$_router->url_suffix] = json_decode($_router->router,1);
@@ -103,40 +97,68 @@ class App{
         # 合并数据库配置
         $db_config = array_column(PA::$db->fetchAll('SELECT var_name as name,var_default as value FROM '.PA::$config->path('pa_db.prefix').'configs'),'value','name');
         PA::$config->merge(new \Phalcon\Config($db_config));// 数据配置
-        
-        # 获得所有子模块名称
+
+
+        # 注册模块
+        $modules = [];
         if(PA::$config['modules']){
-            define('VIEW_DIR', BASE_DIR.'modules/');
-            $modules = [];
-            foreach(new \DirectoryIterator(PA::$config->modules) as $file){
+            foreach(new \DirectoryIterator(PA::$config['modules']) as $file){
                 if($file->isDot() || !$file->isDir()) continue;
                 $module = $file->getBasename();
-                $path   = $file->getPathname();
-                $prefix = '/'.$module.'/';
-                
-                #error_log("有模块: $module, $path, [$prefix] \n",3,'/tmp/vanni.log');
-                $dispatch = ['namespace'=>$module.'\\Controllers', 'module'=>$module, 'controller'=>1];
-                $routers['GET'][$prefix.'?([\w0-9\_\-]+)?/?']=$dispatch;
-                $routers['POST'][$prefix.'?([\w0-9\_\-]+)?/?']=$dispatch;
-                
-                $dispatch['action']=2;
-                $routers['GET'][$prefix.':controller/:action']=$dispatch;
-                $routers['POST'][$prefix.':controller/:action']=$dispatch;
-                
-                $dispatch['params']=3;
-                $routers['GET'][$prefix.':controller/:action/:params']=$dispatch;
-                $routers['POST'][$prefix.':controller/:action/:params']=$dispatch;
-                
+                $path = $file->getPathname();
                 $modules[$module] = function()use($module, $path){
                     return call_user_func([$this, 'registerModule'], $module, $path);
                 };
             }
-            $modules && PA::$app->registerModules($modules);
+        }
+        PA::$app->registerModules($modules);
+
+
+        # 设置路由
+        $need_admin_router = false;
+        if(PA::$config['modules'] && PA::$config['domain_bind']){ // 如果有绑定域名
+            define('VIEW_DIR', BASE_DIR.'modules/');
+            $domains = PA::$config['domain_bind']->toArray();
+            uksort($domains, function($a,$b){
+                return ($a==='*' ? 99 : strpos($a,'.')) > ($b==='*' ? 99 : strpos($b,'.'));
+            });
+            $domain_base = PA::$config['root_domain'] ?: (substr($_SERVER['SERVER_NAME'], strpos($_SERVER['SERVER_NAME'],'.')+1));
+            foreach($domains as $domain=>$module){
+                if($domain==='*' || "$domain.$domain_base"===$_SERVER['HTTP_HOST']) break;
+            }
+            if($module === 'admin') $need_admin_router = true;// 加载管理后台的路由配置
+
+            $dispatch = ['namespace'=>$module.'\\Controllers', 'controller'=>1, 'module'=>$module];
+            $routers['*']['#^/?([\w0-9\_\-]+)?$#u']=$dispatch;
+
+            $dispatch['action']=2;
+            $routers['*']['/:controller/:action']=$dispatch;
+
+            $dispatch['params']=3;
+            $routers['*']['/:controller/:action/:params']=$dispatch;
+        }elseif(PA::$config['modules']){
+            define('VIEW_DIR', BASE_DIR.'modules/');
+            foreach(new \DirectoryIterator(PA::$config->modules) as $file){
+                if($file->isDot() || !$file->isDir()) continue;
+                $module = $file->getBasename();
+                $prefix = '/'.$module.'/';
+                
+                #error_log("有模块: $module, $path, [$prefix] \n",3,'/tmp/vanni.log');
+                $dispatch = ['namespace'=>$module.'\\Controllers', 'module'=>$module, 'controller'=>1];
+                $routers['*'][$prefix.'?([\w0-9\_\-]+)?/?']=$dispatch;
+
+                $dispatch['action']=2;
+                $routers['*'][$prefix.':controller/:action']=$dispatch;
+
+                $dispatch['params']=3;
+                $routers['*'][$prefix.':controller/:action/:params']=$dispatch;
+            }
         }else{
             define('VIEW_DIR', BASE_DIR.'views/templates/');
             if(!SINGLE_POWER){
                 PA::$loader->registerNamespaces(
-                    ['Controllers' => BASE_DIR.'controllers',
+                    [
+                        'Controllers' => BASE_DIR.'controllers',
                         'Models'      => BASE_DIR.'models',
                         'Views'       => BASE_DIR.'views',
                     ],
@@ -144,13 +166,24 @@ class App{
                 );
             }
             $dispatch = ['namespace'=>'\\Controllers', 'controller'=>1];
-            $routers['GET']['/:controller']=$dispatch;
+            $routers['*']['/:controller']=$dispatch;
             
             $dispatch['action']=2;
-            $routers['GET']['/:controller/:action']=$dispatch;
+            $routers['*']['/:controller/:action']=$dispatch;
             
             $dispatch['params']=3;
-            $routers['GET']['/:controller/:action/:params']=$dispatch;
+            $routers['*']['/:controller/:action/:params']=$dispatch;
+            $need_admin_router = true;
+        }
+
+        if($need_admin_router){
+            # 加载配置路由
+            $routers = include POWER_BASE_DIR.'data/routers.php'; // 加载路由
+            if(PA::$config['routers']){
+                foreach(PA::$config['routers'] as $_method => $_routers){
+                    foreach($_routers as $_match=>$_router) $routers[$_method][$_match] = $_router->toArray();
+                }
+            }
         }
         PA::$loader->register();
     
@@ -188,7 +221,7 @@ class App{
             }
         }
         PA::$config['routers'] = $routers;
-        
+
         # 设置路由
         PA::$di->setShared('router', PA::$router);
 
