@@ -30,7 +30,7 @@ class MenusController extends AdminBaseController {
         $data = [
             'name' => $_POST['name'],
             'icon' => $this->request->getPost('icon','string',''),
-            'parent_id' => $this->request->getPost('parent_id','int') ?: 0,
+            'parent_id' => $this->request->getPost('parent_id','int') ?: null,
             'index' => $this->request->getPost('index','int') ?: 0,
             'params' => json_encode($params, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             'router' => $is_dir ? null : json_encode($router,JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
