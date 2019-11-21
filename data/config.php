@@ -19,6 +19,16 @@ return [
     'user_handler'=>null, // 如果有用户的配置，在PA登录时，会回调此方法，必须是 \Power\HandlerPAUserAbs 的子类
 
     # 额外的路由配置
+    'routers'=>[
+        '*'=>[
+            '/dist/:params'  => [
+                'namespace'  => 'Power\Controllers',
+                'controller' => 'resource',
+                'action'     => 'render',
+                'priority'   => 10,
+            ], # 显示资源文件
+        ],
+    ],
 //    'routers'=>[
 //        '*'=>[ // 可以指定 POST, GET, DELETE, PATCH 请求方法，也可使用 * 表示通配所有方法
 //            '正则表达式'=>[ // 可以是一个具体的URL，也可以是一个正则表达式

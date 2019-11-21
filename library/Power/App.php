@@ -88,7 +88,7 @@ class App{
         PA::$db = DB::load(PA::$config['pa_db']);
 
         # 加载数据库路由
-        $routers = [];
+        $routers = PA::$config['routers'] ? PA::$config['routers']->toArray() : [];
         $db_router = \Power\Models\Menus::find(['url_suffix is not null','columns'=>'url_suffix,router']);
         foreach($db_router as $_router){
             $routers['*'][$_router->url_suffix] = json_decode($_router->router,1);
@@ -178,11 +178,9 @@ class App{
 
         if($need_admin_router){
             # 加载配置路由
-            $routers = include POWER_BASE_DIR.'data/routers.php'; // 加载路由
-            if(PA::$config['routers']){
-                foreach(PA::$config['routers'] as $_method => $_routers){
-                    foreach($_routers as $_match=>$_router) $routers[$_method][$_match] = $_router->toArray();
-                }
+            $admin_routers = include POWER_BASE_DIR.'data/routers.php'; // 加载路由
+            foreach($admin_routers as $_method => $_routers){
+                foreach($_routers as $_match=>$_router) $routers[$_method][$_match] = $_router;
             }
         }
         PA::$loader->register();
@@ -220,6 +218,9 @@ class App{
                 }
             }
         }
+//        print_r(PA::$router);
+//        print_r($routers);
+//        exit;
         PA::$config['routers'] = $routers;
 
         # 设置路由

@@ -4,7 +4,13 @@ use Phalcon\Mvc\Controller;
 use PA;
 
 class ResourceController extends Controller{
-    private function setResponseHeader($file, $time){
+    /**
+     * 如果需要输出内容，$need_out_contents 会被设置为正，否则设置成 false
+     * @param string $file
+     * @param int $time
+     * @param bool $need_out_contents
+     */
+    private function setResponseHeader($file, $time, &$need_out_contents=true):void{
         $extends = explode('.', $file);
         $extend  = end($extends);
         $meats = [
@@ -124,25 +130,29 @@ class ResourceController extends Controller{
         if($if_modified){
             $if_modified = strtotime($if_modified);
         }
-        
+
+        $need_out_contents = true;
         $content_type = $meats[$extend] ?? (function_exists('mime_content_type') ? mime_content_type($file) : ('application/'.$extend));
         $headers = [
-            'ETag: '.$md5,
-            'Expires: '.date(DATE_RFC1123, time() + $time),
-            'Cache-Control: public, max-age='.$time,
-            'Last-Modified: '.date(DATE_RFC1123, $mtime),
-            'Content-Type: '.$content_type,
-            #'DEBUG-Source-File: '.$file,
-            #'DEBUG-Modified: '.' [$if_modified vs $mtime]',
-            #'DEBUG-ETag: '.'[$none_match vs $md5]',
-            'x-powered-by: '.PA::$config['site.domain.logogram'].'/'.PA::$config['site.version']
+            'x-powered-by: '.PA::$config['site.domain.logogram'].'/'.PA::$config['site.version'],
+            'Content-Type: '.$content_type
         ];
+        if(PA::$config['debug']) {
+            $headers[] = 'DEBUG-Source-File: ' . $file;
+            $headers[] = 'DEBUG-Modified: ' . " [$if_modified vs $mtime]";
+            $headers[] = 'DEBUG-ETag: ' . "[$none_match vs $md5]";
+        }else{
+//            $headers[] = 'Expires: '.date(DATE_RFC1123, time() + $time);
+//            $headers[] = 'Cache-Control: public, max-age='.$time;
+            $headers[] = 'ETag: '.$md5;
+            $headers[] = 'Last-Modified: '.date(DATE_RFC1123, $mtime);
+        }
         foreach($headers as $header) header($header);
         
-        if( $if_modified || $none_match ){
+        if(!PA::$config['debug'] && ($if_modified || $none_match)){
             if($if_modified === $mtime || $none_match === $md5){
                 header('HTTP/1.0 304 Not Modified.');
-                return;
+                $need_out_contents = false;
             }
         }
     }
@@ -185,8 +195,8 @@ class ResourceController extends Controller{
         foreach($dist_dirs as $dir){
 //            echo $dir.$file,'<br/>';
             if(file_exists($dir.$file)){
-                $this->setResponseHeader($dir.$file, 604800);
-                echo file_get_contents($dir.$file);
+                $this->setResponseHeader($dir.$file, 604800, $need_out_contents);
+                if($need_out_contents) echo file_get_contents($dir.$file);
                 return;
             }
         }
