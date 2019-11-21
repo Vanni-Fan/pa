@@ -26,6 +26,12 @@ class MenusController extends AdminBaseController {
         if(!empty($_POST['router']['namespace'])) $router['namespace'] = $this->filter->sanitize($_POST['router']['namespace'], 'string');
         if(!empty($_POST['router']['priority']))  $router['priority']  = (int)$this->filter->sanitize($_POST['router']['priority'], 'int');
         if(!empty($_POST['params'])) $params = json_decode($_POST['params'],1);
+        if($_POST['url_suffix'] && empty($router['priority'])){ // 如果设置了URL，但是没有设置权重，默认给10
+            $router['priority'] = 10;
+        }
+        if($_POST['url_suffix'] && substr($_POST['url_suffix'],0,1) !== '/'){
+            $_POST['url_suffix'] = '/'.$_POST['url_suffix'];
+        }
         $is_dir = $_POST['is_dir'] ? true : false;
         $data = [
             'name' => $_POST['name'],

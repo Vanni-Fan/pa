@@ -1,6 +1,6 @@
 <?php
 # 管理系统框架本身的路由配置
-$routers = [
+$__ROUTERS = [
     'POST' => [
         PA_URL_PATH.'login' => [
             'namespace'  => 'Power\Controllers',
@@ -133,7 +133,7 @@ $routers = [
 ];
 
 if(substr(PA_URL_PATH,-1) === '/') {
-    $routers['GET'][substr(PA_URL_PATH,0,-1)] = [
+    $__ROUTERS['GET'][substr(PA_URL_PATH,0,-1)] = [
         'namespace'  => 'Power\Controllers',
         'controller' => 'index',
         'action'     => 'index',
@@ -141,4 +141,4 @@ if(substr(PA_URL_PATH,-1) === '/') {
     ];
 }
 
-return $routers;
+return $__ROUTERS;
