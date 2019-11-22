@@ -172,7 +172,7 @@ class AdminBaseController extends Controller{
         if(!is_array($owner_id)) $owner_id = [$this->item_id=>$owner_id]; // 删除时可以传入多个ID，用逗号分隔
         foreach($owner_id as $owner){
             if(!Menus::isAllowed($this->dispatcher->getActionName(), $owner, $this->userinfo["user_id"],$this->menus[$this->menu_id])){
-                print_r($this->menus[$this->menu_id]);
+                #print_r($this->menus[$this->menu_id]);
                 throw new \Exception('Permission Denied.');
             }
         }

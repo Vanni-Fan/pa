@@ -50,69 +50,6 @@ class AdminHelper{
         echo '</ul>';
     }
     
-    public static function getConfigsHtml_new(array $all_extends, array $default, array $wrapper=['','']):array{
-        print_r($all_extends);
-        print_r($default);
-
-        exit;
-        return $out = []; // todo TODO
-        foreach($all_extends as $menu_id => $extends) {
-            $tmp = $wrapper[0];
-            print_r($extends);
-            foreach($extends as $extend) {
-                $tmp .= '<div class="form-group">';
-//                $tmp .= '<label for="" class="col-sm-4 control-label must-start">' . $extend['name'] . '【' . $extend['var_name'] . '】</label>';
-                $tmp .= '<label for="" class="col-sm-4 control-label must-start">' . $extend['name'] . '</label>';
-                
-                $no_items  = $extend['options_type'] === 'null';                                       # 是否没有备选值
-                $single    = $extend['var_type'] === 'text';                                       # 是否为单一值
-                $input     = '';                                                                            # 输入的组件
-                $form_name = 'extend['.$extend['menu_id'].']['.$extend['var_name'].']';                  # 表单名
-                $id        = strtr($form_name,['['=>'_',']'=>'_']);                                         # 表单ID
-                if(isset($default[$extend['menu_id']][$extend['var_name']])){
-                    $def_value = $default[$extend['menu_id']][$extend['var_name']];
-                }else{
-                    $def_value = json_decode($extend['var_default'],1);
-                }
-                
-                if($no_items){ # 没有备选值，那么直接让用户输入
-                    $input .= '<input name="'.$form_name.'" type="text" class="form-control" id="'.$id.'" value="'.$def_value.'">';
-                }else{ # 有备选值，则需要输出 select 或 checkbox 或 radio
-                    $items = $extend['options_type']==='callback' ? call_user_func($extend['options']) : json_decode($extend['options'],1);
-                    $start = $end = $template = $content = '';
-                    if(count($items)<5){ # 使用 checkbox or radio
-                        $template = '<label><input value="_KEY_" name="'.$form_name.($single?'':'[]').'" type="'.($single?'radio':'checkbox').'" _CHECKED_>_VAL_ 　</label>';
-                    }else{ # 使用 select
-                        $start = '<select class="form-control" name="'.$form_name.($single?'':'[]').'" id="'.$id.'" '.($single?'':' multiple="multiple" size="5"').' >';
-                        $end   = '</select>';
-                        $template   = '<option value="_KEY_" _SELECTED_>_VAL_</option>';
-                    }
-                    
-                    foreach($items as $key=>$val){
-                        $replace = ['_KEY_'=>$key, '_VAL_'=>$val];
-                        if($single){
-                            $matched = $def_value == $key;
-                            $replace['_CHECKED_']  = $matched ? 'checked' : '';
-                            $replace['_SELECTED_'] = $matched ? 'selected' : '';
-                        }else{
-                            $matched = in_array($key, $def_value);
-                            $replace['_CHECKED_']  = $matched ? 'checked' : '';
-                            $replace['_SELECTED_'] = $matched ? 'selected' : '';
-                        }
-                        $content .= strtr($template,$replace);
-                    }
-                    $input .= $start.$content.$end;
-                }
-                $tmp .= '<div class="col-sm-8">' . $input . '</div>';
-                $tmp .= '</div>';
-            }
-            $tmp .= $wrapper[1];
-
-            $out[$menu_id] = $tmp;
-        }
-        return $out;
-    }
-
     public static function getConfigsHtmlGroup(array $configs, array $default, Controller $controller):array{
         if(empty($configs)) return [];
         $parser = new Parser();

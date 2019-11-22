@@ -124,7 +124,8 @@ class App{
             });
             $domain_base = PA::$config['root_domain'] ?: (substr($_SERVER['SERVER_NAME'], strpos($_SERVER['SERVER_NAME'],'.')+1));
             foreach($domains as $domain=>$module){
-                if($domain==='*' || "$domain.$domain_base"===$_SERVER['HTTP_HOST']) break;
+                $domain = strpos($domain, '.')!==false ? $domain : "$domain.$domain_base";
+                if($domain==='*' || $domain===$_SERVER['HTTP_HOST']) break;
             }
             if($module === 'admin') $need_admin_router = true;// 加载管理后台的路由配置
 

@@ -78,7 +78,6 @@ class RolesController extends AdminBaseController {
         foreach($extend as $menu_id=>$configs){
             foreach($configs as $var_name=>$var_value){
                 $config = Configs::getConfig('rule', $menu_id, $var_name);
-                print_r($config);
                 (new Permissions)->create(
                     [
                         'role_id'   => $this->item_id,
