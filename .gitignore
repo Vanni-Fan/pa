@@ -4,3 +4,5 @@ pa.iml
 /public/docs
 /site
 /library/vendor
+data/docker
+docker/mysql/docker-entrypoint-initdb.d/pa.sql
