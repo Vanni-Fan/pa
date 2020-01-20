@@ -11,6 +11,11 @@ ARG PHALCON_BRANCH=master
 ENV PHALCON_BRANCH=${PHALCON_BRANCH}
 ENV PSR_BRANCH master
 
+#安装 PDO_MYSQL
+RUN docker-php-source extract \
+    && docker-php-ext-install pdo_mysql \
+    && docker-php-source delete
+
 #Installing PSR
 RUN curl -fsSL https://github.com/jbboehr/php-psr/archive/$PSR_BRANCH.tar.gz | tar xz \
     && cd php-psr-$PSR_BRANCH \

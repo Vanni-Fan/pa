@@ -1,7 +1,7 @@
 version: "3"
 services:
   phpfpm:
-    image: twistersfury/phalcon
+    image: mileschou/phalcon
     volumes:
       - ../:/var/www/html
     restart: always

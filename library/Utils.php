@@ -748,6 +748,8 @@ class Utils{
      * @return mixed
      *//*}}}*/
     static function cache(string $key, $val=null, int $expire=0){/*{{{*/
+        return func_num_args()===1 ? null : $val;
+        
         $front = new Phalcon\Cache\Frontend\Data(["lifetime" => 1 * 24 * 60 * 60]); // 1天
         $redis = PA::$config['redis'] ?: false;
         if($redis){

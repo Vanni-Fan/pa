@@ -8,7 +8,7 @@ use Phalcon\Config\Adapter\Php;
 use Phalcon\Di\FactoryDefault;
 use Phalcon\Mvc\Application;
 use Phalcon\Mvc\Dispatcher;
-use Phalcon\Db\Adapter\Pdo\Factory as DB;
+use Phalcon\Db\Adapter\PdoFactory as DB;
 use PA;
 use Power\Models\Plugins;
 
@@ -85,7 +85,8 @@ class App{
             if($exception_handler = PA::$config->path('error.exception')) set_exception_handler($exception_handler);
         }
         # 创建数据库连接
-        PA::$db = DB::load(PA::$config['pa_db']);
+        // PA::$db = DB::load(PA::$config['pa_db']);
+        PA::$db = (new DB())->newInstance(PA::$config['pa_db']['adapter'], PA::$config['pa_db']->toArray());
 
         # 加载数据库路由
         $routers = PA::$config['routers'] ? PA::$config['routers']->toArray() : [];
@@ -246,7 +247,7 @@ class App{
     }
     public function run($config_file=null){
         if($config_file) $this->init($config_file);
-        echo PA::$app->handle()->getContent();
+        echo PA::$app->handle($_SERVER["REQUEST_URI"])->getContent();
         
 //        $response = PA::$app->handle();
 //        echo "<pre>";
