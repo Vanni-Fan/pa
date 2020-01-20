@@ -1,7 +1,8 @@
 version: "3"
 services:
   phpfpm:
-    image: twistersfury/phalcon
+    #image: twistersfury/phalcon
+    image: registry.cn-hangzhou.aliyuncs.com/vanni/phalcon:7.4
     volumes:
       - ../:/var/www/html
     restart: always

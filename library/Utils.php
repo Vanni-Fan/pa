@@ -580,7 +580,7 @@ class Utils{
                             foreach($refval as $_){
                                 $next_key = implode('.',$params);
                                 if($next_key){
-                                    if($next_key{0} == '{' && substr($next_key,-1)=='}'){ // 是 a.*.{user_id, key:a.b.user_name} 这种格式
+                                    if(substr($next_key,0,1) == '{' && substr($next_key,-1)=='}'){ // 是 a.*.{user_id, key:a.b.user_name} 这种格式
                                         $tmps = [];
                                         foreach(explode(',', substr($next_key,1,-1)) as $key){
                                             $keys = explode(':',$key);
@@ -995,7 +995,7 @@ class Utils{
         $parts = ['0.125'=>1,'0.25'=>2,'0.375'=>3,'0.5'=>4,'0.625'=>5,'0.75'=>6,'0.875'=>7];
         $pending = []; // 后期需要处理的项目, 字段=>长度
         foreach($values as $field=>$value){
-            $type  = $field{0};
+            $type  = substr($field,0,1);
             if($type == '+'){ #位扩展
                 $bit_start = 0;
                 foreach($bit_fields[substr($field,1)] as $_f){

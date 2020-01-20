@@ -157,7 +157,7 @@ class AdminBaseController extends Controller{
                 'menu_id' => $this->menu_id,
                 'user_id' => $this->tokeninfo['user_id'],
                 'url'     => $_SERVER['REQUEST_URI'],
-                'name'    => $this->getParam('Rule')['name'] .'['. $this->dispatcher->getActionName() .']',
+                'name'    => ($this->getParam('Rule')['name'] ?? '') .'['. $this->dispatcher->getActionName() .']',
                 'request' => json_encode($_REQUEST,JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                 'server'  => json_encode($_SERVER, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             ]
