@@ -1,0 +1,35 @@
+version: "3"
+services:
+  phpfpm:
+    image: twistersfury/phalcon
+    volumes:
+      - ../:/var/www/html
+    restart: always
+    links:
+      - mysql
+  nginx:
+    image: nginx
+    volumes:
+      - ../:/var/www/html
+      - ./nginx.conf.d:/etc/nginx/conf.d
+    ports:
+      - 886:80
+    restart: always
+    command: [nginx-debug, '-g', 'daemon off;']
+    links:
+      - phpfpm
+  mysql:
+    image: mysql
+    volumes:
+      - ../data/docker/volumes/mysql/data:/var/lib/mysql
+      - ../data/docker/volumes/mysql/log:/var/log/mysql
+      - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./mysql/docker-entrypoint-patch.sh:/docker-entrypoint-patch.sh
+    entrypoint: /docker-entrypoint-patch.sh
+    command: mysqld --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - PA_PREFIX=pa_
+    ports:
+      - 13306:3306
+    restart: always
