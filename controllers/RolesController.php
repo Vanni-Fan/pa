@@ -56,7 +56,7 @@ class RolesController extends AdminBaseController {
         // 不存在则创建，然后先删除权限，再创建权限
         if(!$this->item_id){
             $role = new Roles;
-            $role->create(['name'=>$_POST['role_name'],'is_enabled'=>1]);
+            $role->assign(['name'=>$_POST['role_name'],'is_enabled'=>1])->create();
             $this->item_id = $role->role_id;
         }else{
             Permissions::find(['role_id=?0','bind'=>[$this->item_id]])->delete(); // 删除所有权限
@@ -64,7 +64,7 @@ class RolesController extends AdminBaseController {
 
         // 添加菜单权限
         foreach($menus as $menu_id=>$menu_value) {
-            (new Permissions)->create(
+            (new Permissions)->assign(
                 [
                     'role_id'   => $this->item_id,
                     'type'      => 'menu',
@@ -72,13 +72,13 @@ class RolesController extends AdminBaseController {
                     'config_id' => null,
                     'value'     => $menu_value
                 ]
-            );
+            )->create();
         }
         // 添加附件权限
         foreach($extend as $menu_id=>$configs){
             foreach($configs as $var_name=>$var_value){
                 $config = Configs::getConfig('rule', $menu_id, $var_name);
-                (new Permissions)->create(
+                (new Permissions)->assign(
                     [
                         'role_id'   => $this->item_id,
                         'type'      => 'config',
@@ -86,7 +86,7 @@ class RolesController extends AdminBaseController {
                         'config_id' => $config['config_id'] ?: null,
                         'value'     => $config['var_type'] === 'text' ? $var_value : json_encode($var_value)
                     ]
-                );
+                )->create();
             }
         }
         $this->indexAction();

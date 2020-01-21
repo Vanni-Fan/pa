@@ -80,7 +80,7 @@ class ManagerController extends AdminBaseController
                     );
                 }
                 file_put_contents($target_file, $tmp_content);
-                PluginsTableMenus::find($menu_id)->update(['model_file'=>realpath($target_file)]);
+                PluginsTableMenus::find($menu_id)->assign(['model_file'=>realpath($target_file)])->update();
             }
             
 //            print_r($menu_info->toArray());
@@ -126,7 +126,7 @@ class ManagerController extends AdminBaseController
                 $parent_id = $parent['menu_id'];
             }else{
                 $p_rule = new menus;
-                $p_rule->create(
+                $p_rule->assign(
                     [
                         'name'         => '[' . $menu_info->name . ']库',
                         'params'       => '[' . $menu_info->source_id.']',
@@ -136,11 +136,11 @@ class ManagerController extends AdminBaseController
                         'created_time' => time(),
                         'created_user' => $this->getUserId(),
                     ]
-                );
+                )->create();
                 $parent_id = $p_rule->menu_id;
             }
             $rule = Menus::getInstance();
-            $rule->create(
+            $rule->assign(
                 [
                     'name'         => '[' . $menu_info->table_name . ']表',
                     'router'       => '{"controller":"tables","action":"index","namespace":"plugins\\\\Tables\\\\Controllers","priority":10}',
@@ -151,7 +151,7 @@ class ManagerController extends AdminBaseController
                     'created_time' => time(),
                     'created_user' => $this->getUserId(),
                 ]
-            );
+            )->create();
             # 更新管理员权限
             $role = Roles::findFirstByRoleId(1);
             $role_menus = json_decode($role->menus,1);
@@ -200,7 +200,7 @@ class ManagerController extends AdminBaseController
                 if($source_info->is_system){
                     $model_file = realpath(POWER_BASE_DIR . 'models/'.Text::camelize($table).'.php');
                 }
-                (new PluginsTableMenus)->create(['menu_id'=>null,'source_id'=>$source_id,'table_name'=>$table,'model_file'=>$model_file]);
+                (new PluginsTableMenus)->assign(['menu_id'=>null,'source_id'=>$source_id,'table_name'=>$table,'model_file'=>$model_file])->create();
             }
         }
         $this->response->redirect($this->url('display',['item_id'=>$this->item_id,'action'=>'set','event'=>'setting']));
@@ -454,10 +454,10 @@ OUT
         if($this->params['type'] == 'menu'){
             if($this->params['sub_command']=='new'){
                 $model = new PluginsTableMenus();
-                $model->create($_POST);
+                $model->assign($_POST)->create();
                 # 插入一个菜单
                 $rule = new menus;
-                $id = $rule->create([
+                $id = $rule->assign([
                     'name'      => $_POST['name'],
                     'router'    => '{"controller":"tables","action":"index","namespace":"plugins\\\\Tables\\\\Controllers","priority":10}',
                     'params'    => '{"source_id":' . $_POST['source_id'] . ',"table":"' . $_POST['table_name'] . '"}',
@@ -467,7 +467,7 @@ OUT
                     'icon'      => 'fa fa-table',
                     'created_time' => time(),
                     'created_user' => $this->getUserId(),
-                ]);
+                ])->create();
                 # 更新管理员权限
                 $role = Roles::findFirstByRoleId(1);
                 $role_menus = json_decode($role->menus,1);
@@ -481,10 +481,10 @@ OUT
             if($this->params['sub_command']=='new'){
                 $model = new PluginsTableSources();
                 $_POST['status'] = 1;
-                $model->create($_POST);
+                $model->assign($_POST)->create();
             }else{
                 $data = PluginsTableSources::find($this->getParam('id'));
-                $data->update($_POST);
+                $data->assign($_POST)->update();
             }
         }
 

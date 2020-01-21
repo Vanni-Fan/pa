@@ -125,10 +125,10 @@ class ConfigsController extends AdminBaseController {
         $_POST['is_action_name'] = $this->request->getPost('is_action_name','int',0);
         if($this->item_id){
             $extend = Configs::findFirst($this->item_id);
-            $extend->update($_POST);
+            $extend->assign($_POST)->update();
         }else{
             $extend = new Configs();
-            $extend->create($_POST);
+            $extend->assign($_POST)->create();
         }
         $this->response->redirect($this->url(),true);
     }

@@ -44,10 +44,10 @@ class MenusController extends AdminBaseController {
         ];
         if($this->item_id){
             $obj = Menus::findFirst($this->item_id);
-            $obj->update($data);
+            $obj->assign($data)->update();
         }else{
             $obj = new menus();
-            $obj->create($data);
+            $obj->assign($data)->create();
         }
         $this->response->redirect($this->url('index'),true);
     }
@@ -69,7 +69,7 @@ class MenusController extends AdminBaseController {
         Configs::find(['menu_id=?0','bind'=>[$this->item_id]])->delete();
         UserConfigs::find(['menu_id=?0','bind'=>[$this->item_id]])->delete();
         Permissions::find(['menu_id=?0','bind'=>[$this->item_id]])->delete();
-        Logs::find(['menu_id=?0','bind'=>[$this->item_id]])->update(['menu_id'=>null]);
+        Logs::find(['menu_id=?0','bind'=>[$this->item_id]])->assign(['menu_id'=>null])->update();
         $this->jsonOut(['code'=>'ok']);
     }
     

@@ -152,7 +152,7 @@ class AdminBaseController extends Controller{
         $this->current_page = $this->getParam('page','int',1);
 
         # 记录一条日志
-        (new Logs())->create(
+        (new Logs())->assign(
             [
                 'menu_id' => $this->menu_id,
                 'user_id' => $this->tokeninfo['user_id'],
@@ -161,8 +161,7 @@ class AdminBaseController extends Controller{
                 'request' => json_encode($_REQUEST,JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                 'server'  => json_encode($_SERVER, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             ]
-        );
-
+        )->create();
         # 扩展权限
         list('rule'=>$this->rules,'attribute'=>$this->attributes) = Configs::getConfigsByUser($this->tokeninfo['user_id']);
         # 扩展属性
@@ -321,17 +320,17 @@ class AdminBaseController extends Controller{
         $value = is_string($value) ? $value : json_encode($value,JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $config = UserConfigs::findFirst(['user_id=?0 and menu_id=?1','bind'=>[$this->getUserId(), $this->menu_id]]);
         if($config){
-            $config->update(['value'=>$value]);
+            $config->assign(['value'=>$value])->update();
         }else{
             $config = new UserConfigs();
-            $config->create(
+            $config->assign(
                 [
                     'user_id'=>$this->getUserId(),
                     'menu_id'=>$this->menu_id,
                     'name'=>$name,
                     'value'=>$value,
                 ]
-            );
+            )->create();
         }
         return true;
     }
@@ -357,15 +356,15 @@ class AdminBaseController extends Controller{
                     $config_id = $config->config_id;
                     # 创建或更新配置
                     $has_config = UserConfigs::findFirst(['user_id=?0 and config_id=?1', 'bind'=>[$this->getUserId(), $config_id]]);
-                    if($has_config) $has_config->update(['value'=>$val]);
-                    else (new UserConfigs())->create([
+                    if($has_config) $has_config->assign(['value'=>$val])->update();
+                    else (new UserConfigs())->assign([
                         'config_id'  => $config_id,
                         'user_id'    => $this->getUserId(),
                         'menu_id'    => $menu_id ?: null,
                         'name'       => $key,
                         'value'      => $config->var_type==='text' ? $val : json_decode($val),
                         'is_enabled' => 1,
-                    ]);
+                    ])->create();
                 }
             }
         }

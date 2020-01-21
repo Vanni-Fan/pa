@@ -138,7 +138,7 @@ class TablesController extends AdminBaseController
     }
     
     public function appendAction(){
-        $this->model->create($this->request->get());
+        $this->model->assign($this->request->get())->create();
         $this->response->redirect($this->url(),true);
     }
     
