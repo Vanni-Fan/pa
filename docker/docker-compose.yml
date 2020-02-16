@@ -3,31 +3,39 @@ services:
   phpfpm:
     #image: twistersfury/phalcon
     image: registry.cn-hangzhou.aliyuncs.com/vanni/phalcon:7.4
+    # 当以VirtualBox共享目录启动容器时，需要有目录的权限，请用 php-root.sh 替换 docker-php-entrypoint 启动，否则可以注释下面行
+    entrypoint: /php-root.sh
     volumes:
+      - ./php-root.sh:/php-root.sh:ro
       - ../:/var/www/html
     restart: always
-    links:
-      - mysql
+    depends_on: [mysql]
+    links: [mysql]
   nginx:
     image: nginx
     volumes:
       - ../:/var/www/html
       - ./nginx.conf.d:/etc/nginx/conf.d
+      - ./nginx-root.sh:/nginx-root.sh:ro
     ports:
       - 886:80
     restart: always
-    command: [nginx-debug, '-g', 'daemon off;']
-    links:
-      - phpfpm
+    # 当以VirtualBox共享目录启动容器时，需要有目录的权限，请 root 启动，否则使用： command: [nginx-debug, '-g', 'daemon off;'] 启动
+    entrypoint: /nginx-root.sh
+    #command: [nginx-debug, '-g', 'daemon off;']
+    depends_on: [phpfpm]
+    links: [phpfpm]
   mysql:
-    image: mysql
+    #image: mysql
+    image: percona/percona-server
     volumes:
-      - ../data/docker/volumes/mysql/data:/var/lib/mysql
-      - ../data/docker/volumes/mysql/log:/var/log/mysql
-      - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-      - ./mysql/docker-entrypoint-patch.sh:/docker-entrypoint-patch.sh
-    entrypoint: /docker-entrypoint-patch.sh
-    command: mysqld --default-authentication-plugin=mysql_native_password
+      #- ./../data/docker/mysql/data:/var/lib/mysql
+      #- ./../data/docker/mysql/log:/var/log/mysql
+      - ./mysql:/docker-entrypoint-initdb.d
+      - ./mysql-patch.sh:/mysql-patch.sh
+    entrypoint: /mysql-patch.sh
+    user: root
+    command: [mysqld, --user=root, --default-authentication-plugin=mysql_native_password]
     environment:
       - MYSQL_ROOT_PASSWORD=123456
       - PA_PREFIX=pa_

@@ -57,7 +57,8 @@ return [
         'dbname'  => 'pa',
         'username'=> 'root',
         'password'=> '123456',
-//        'prefix'  => 'pa_'
+        'host'=>'mysql',
+        'prefix'  => 'pa_'
     ],
 
     # Power Admin 的Cookie加密Key

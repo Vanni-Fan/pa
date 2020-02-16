@@ -36,5 +36,7 @@ sed "s/_PA_DATABASE_NAME_/${PA_DATABASE_NAME}/g" -i /docker-entrypoint-initdb.d/
 sed 's#_PA_ADMIN_PASSWORD_#'$PA_ADMIN_PASSWORD'#g' -i /docker-entrypoint-initdb.d/$PA_DATABASE_NAME.sql
 
 #source /usr/local/bin/docker-entrypoint.sh
-source docker-entrypoint.sh "$@"
-_main "$@"
+echo "############################################################"
+echo /docker-entrypoint.sh "$@"
+source /docker-entrypoint.sh "$@"
+#_main "$@"
