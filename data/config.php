@@ -12,8 +12,27 @@ return [
     'modules' => null, // 指向一个目录，目录下的子目录会被认为是模块，每一个模块下面应该有完整mvc（controllers：必须，models：可选，views:可选）
 
     # 模块的域名绑定
-    'root_domain'=>null, // 根域名，用于子域名的拼接，如果没有，子域名则使用去掉第一段的 $_SERVER['SERVER_NAME']
-    'domain_bind'=>[],   // [ 域名|子域名|* => 模块名 ], 比如 ['www'=>'web','www.aa.com'=>'web','*'=>'web'] 等
+    /**
+     * 子模块的域名配置，当你需要不同的模块分开部署的时候，会比较用于
+     *
+     * root_domain:根域名，用于子域名的拼接，如果没有，子域名则使用去掉第一段的 $_SERVER['SERVER_NAME']
+     * domain_bind: 数组，格式如下，默认为空数组，相当于全模块开放，等于 ['*'=>'*']
+     *   [
+     *       域名1|子域名|* => 模块名,模块名2,模块名3,
+     *       域名2|子域名|* => 模块名,模块名2,模块名3,
+     *   ]
+     *   比如:
+     *   [
+     *       'www'          => 'web,gzh_api', // 简短的www子域名配置，此配置需要有 root_domain 的配置。 web,gzh_api 表示，对外开放：网页模块、公众号API模块
+     *       'www.aa.com'   => 'web',  // 设置具体的域名，并只开放 web 模块
+     *       '*'            => 'web' // 不限制域名，只开放 web 模块
+     *       'admin'        => '*', // 管理员域名，开放全部模块
+     *       '*'            => '*', // 全部模块开放
+     *   ]
+     */
+    //
+    'root_domain'=>null,
+    'domain_bind'=>[],
 
     # 用户的同步方法
     'user_handler'=>null, // 如果有用户的配置，在PA登录时，会回调此方法，必须是 \Power\HandlerPAUserAbs 的子类

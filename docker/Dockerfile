@@ -36,3 +36,5 @@ RUN curl -fsSL https://github.com/phalcon/cphalcon/archive/$PHALCON_BRANCH.tar.g
     && cd ../../ \
     && docker-php-ext-enable phalcon \
     && rm -rf cphalcon-$PHALCON_BRANCH
+
+RUN curl -fsSL http://pecl.php.net/get/redis-5.2.1.tgz | tar xz; cd redis-5.2.1; phpize; ./configure; make; make install; docker-php-ext-enable redis; cd ../; rm -rf redis-5.2.1
