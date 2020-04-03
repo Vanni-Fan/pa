@@ -33,4 +33,8 @@ final class PA{
      * @var Phalcon\Events\Manager
      */
     static public $em;
+    /**
+     * @var Phalcon\Mvc\View;
+     */
+    static public $view;
 }

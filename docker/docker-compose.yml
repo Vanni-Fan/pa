@@ -8,6 +8,7 @@ services:
     volumes:
       - ./php-root.sh:/php-root.sh:ro
       - ../:/var/www/html
+      - ../../zx:/var/www/zx
     restart: always
     depends_on: [mysql]
     links: [mysql]
@@ -15,6 +16,7 @@ services:
     image: nginx
     volumes:
       - ../:/var/www/html
+      - ../../zx:/var/www/zx
       - ./nginx.conf.d:/etc/nginx/conf.d
       - ./nginx-root.sh:/nginx-root.sh:ro
     ports:

@@ -28,6 +28,10 @@ class Logger implements iLoggerManager{
         }, self::$loggers);
     }
 
+    public static function logs(...$data){
+        self::log('info', $data);
+    }
+
     public static function setLevel($level){
         self::$level = $level;
     }

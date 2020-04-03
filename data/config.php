@@ -3,7 +3,9 @@
 return [
     # 调试开关
     'debug'       => 1,
-    'trace'       => 0,
+
+    # 是否开启 Phalcon 的跟踪调试
+    'trace'       => 1,
 
     # 应用的基础目录
     'application' => POWER_BASE_DIR,
@@ -34,41 +36,31 @@ return [
     'root_domain'=>null,
     'domain_bind'=>[],
 
-    # 用户的同步方法
+    # 用户的同步方法， PA管理系统中的用户修改，会调用此方法
     'user_handler'=>null, // 如果有用户的配置，在PA登录时，会回调此方法，必须是 \Power\HandlerPAUserAbs 的子类
 
-    # 额外的路由配置
-    'routers'=>[
-        '*'=>[
-            '/dist/:params'  => [
-                'namespace'  => 'Power\Controllers',
-                'controller' => 'resource',
-                'action'     => 'render',
-                'priority'   => 10,
-            ], # 显示资源文件
-        ],
-    ],
-//    'routers'=>[
-//        '*'=>[ // 可以指定 POST, GET, DELETE, PATCH 请求方法，也可使用 * 表示通配所有方法
-//            '正则表达式'=>[ // 可以是一个具体的URL，也可以是一个正则表达式
-//                'module'     => 'web', // 默认为空
-//                'namespace'  => 'web\Controllers', // 默认 \
-//                'controller' => 'activities', // 默认 index
-//                'action'     => 'index', // 默认 index
-//                'params'     => 1, // 默认无
-//                'priority'   => 10, // 默认0，优先级，Phalcon的路由为后加入的优先，所以为了避免替换，可以设置一个比较到的优先级
-//            ]
-//        ]
-//    ];
+    # 额外的路由配置，格式如下
+    # 'routers'=>[
+    #     '*'=>[ // 可以指定 POST, GET, DELETE, PATCH 请求方法，也可使用 * 表示通配所有方法
+    #         '正则表达式'=>[ // 可以是一个具体的URL，也可以是一个正则表达式
+    #             'module'     => 'web', // 默认为空
+    #             'namespace'  => 'web\Controllers', // 默认 \
+    #             'controller' => 'activities', // 默认 index
+    #             'action'     => 'index', // 默认 index
+    #             'params'     => 1, // 默认无
+    #             'priority'   => 10, // 默认0，优先级，Phalcon的路由为后加入的优先，所以为了避免替换，可以设置一个比较到的优先级
+    #         ]
+    #     ]
+    # ];
+    'routers' => [],
 
-    # Power Admin 的基础URL配置
+    # PA 的基础URL配置
     'pa_url_path' => '/admin/',
 
-    # Power Admin 的数据库配置
+    # PA 的数据库配置，如果不需要 PA 的数据库，请将 pa_db 设置成 null
     'pa_db'       => [
         'adapter' => 'sqlite',
         'dbname'  => POWER_DATA . '/powerdb.sql3.db',
-//        'prefix'  => 'pa_'
     ],
 
     'pa_db'       => [
@@ -76,11 +68,11 @@ return [
         'dbname'  => 'pa',
         'username'=> 'root',
         'password'=> '123456',
-        'host'=>'mysql',
+        'host'    => 'mysql',
         'prefix'  => 'pa_'
     ],
 
-    # Power Admin 的Cookie加密Key
+    # PA 的Cookie加密Key
     'cookie_key'    => file_get_contents(POWER_DATA .'/cookie.key'),
     'cookie_cipher' => 'aes-192-cbc',
     'cookie_name'   => 'admin_token',
@@ -93,5 +85,30 @@ return [
         'handler'   => 'Power\\Controllers\\ErrorController::handlerError',
         'exception' => 'Power\\Controllers\\ErrorController::handlerException',
         'controller'=> 'Power\\Controllers\\ErrorController',
-    ]
+    ],
+
+    # 插件的激活，将插件放到 pa 的 plugins 目录下，并在此配置名称
+    # 比如： 'plugins'=>['GraphQL','Proxy','Tables']
+    'plugins' => [],
+
+    # 是否加载数据库的配置，如果开启的话，将加载PA数据库中，配置的路由、和其他配置
+    # 数据库中的配置，在配置文件加载后加载，所以会覆盖 config.php 中的配置值
+    'load_db_config' => false,
+
+    # 数据库是否抛异常
+    'exception_on_failed_save' => true,
+
+    # 事件监听，能配置的类型在 https://docs.phalcon.io/4.0/en/events#list-of-events 里面
+    # 比如:
+    # 'event' => [
+    #     'handler' => 'Logger::logs',
+    #     'events'=>['db:afterQuery'],
+    # ],
+    'event' => [],
+    # 视图配置
+    'view' => [
+        'class' => 'Phalcon\Mvc\View',
+        'disable_layout' => false,
+        'disable_main_layout' => false,
+    ],
 ];
