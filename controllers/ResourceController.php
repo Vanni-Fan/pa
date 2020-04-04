@@ -168,8 +168,8 @@ class ResourceController extends Controller{
             POWER_BASE_DIR . 'public',
         ];
         
-        if(PA::$config['modules']){ # 添加模块下的文件
-            $dists = glob(PA::$config['modules'].'*/views',GLOB_ONLYDIR );
+        if(PA::$config['module_path']){ # 添加模块下的文件
+            $dists = glob(PA::$config['module_path'].'*/views',GLOB_ONLYDIR );
             if($dists) {
                 array_unshift($dists, null);
                 $dists[0] = &$dist_dirs;

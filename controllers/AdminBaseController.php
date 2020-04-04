@@ -419,7 +419,7 @@ class AdminBaseController extends Controller{
             }elseif(preg_match('#^plugins\\\\.+\\\\Controllers#', $caller['class'])){
                 $dir = explode('\\Controllers\\',$caller_file)[0].'/views/templates/';
             }else{
-                if(!empty(\PA::$config['modules'])){
+                if(!empty(\PA::$config['module_path'])){
                     $dir = VIEW_DIR . explode('\\',$caller['class'])[0] . '/views/templates/';
                 }else{
                     $dir = VIEW_DIR;
@@ -456,7 +456,7 @@ class AdminBaseController extends Controller{
         }elseif(preg_match('#^plugins\\\\.+\\\\Controllers#', $caller['class'])){
             $dir = explode('\\Controllers\\',$caller_file)[0].'/views/templates/';
         }else{
-            if(!empty(\PA::$config['modules'])){
+            if(!empty(\PA::$config['module_path'])){
                 $dir = VIEW_DIR . explode('\\',$caller['class'])[0] . '/views/templates/';
             }else{
                 $dir = VIEW_DIR;

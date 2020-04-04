@@ -5,13 +5,13 @@ return [
     'debug'       => 1,
 
     # 是否开启 Phalcon 的跟踪调试
-    'trace'       => 1,
+    'trace'       => 0,
 
     # 应用的基础目录
     'application' => POWER_BASE_DIR,
 
     # 多模块设置
-    'modules' => null, // 指向一个目录，目录下的子目录会被认为是模块，每一个模块下面应该有完整mvc（controllers：必须，models：可选，views:可选）
+    'module_path' => null, // 指向一个目录，目录下的子目录会被认为是模块，每一个模块下面应该有完整mvc（controllers：必须，models：可选，views:可选）
 
     # 模块的域名绑定
     /**
@@ -34,7 +34,7 @@ return [
      */
     //
     'root_domain'=>null,
-    'domain_bind'=>[],
+    'domain_bind'=>null,
 
     # 用户的同步方法， PA管理系统中的用户修改，会调用此方法
     'user_handler'=>null, // 如果有用户的配置，在PA登录时，会回调此方法，必须是 \Power\HandlerPAUserAbs 的子类
@@ -104,7 +104,7 @@ return [
     #     'handler' => 'Logger::logs',
     #     'events'=>['db:afterQuery'],
     # ],
-    'event' => [],
+//    'event' => [],
     # 视图配置
     'view' => [
         'class' => 'Phalcon\Mvc\View',
