@@ -140,17 +140,21 @@ class App{
         Model::setup(['exceptionOnFailedSave' => PA::$config->exception_on_failed_save]);
         # 设置视图
         if(PA::$config->view){
-            PA::$di->setShared('view', function () {
-                $class = '\\'.PA::$config->view->class;
-                $view = new $class();
-                $view->disableLevel(
-                    [
-                        View::LEVEL_LAYOUT      => PA::$config->view->disable_layout,
-                        View::LEVEL_MAIN_LAYOUT => PA::$config->view->disable_main_layout,
-                    ]
-                );
-                return $view;
-            });
+            $class = '\\'.PA::$config->view->class;
+            PA::$view = new $class();
+            PA::$di->setShared('view', PA::$view);
+
+//            PA::$di->setShared('view', function () {
+//                $class = '\\'.PA::$config->view->class;
+//                $view = new $class();
+//                $view->disableLevel(
+//                    [
+//                        View::LEVEL_LAYOUT      => PA::$config->view->disable_layout,
+//                        View::LEVEL_MAIN_LAYOUT => PA::$config->view->disable_main_layout,
+//                    ]
+//                );
+//                return $view;
+//            });
         }
 
         # 设置事件监听
