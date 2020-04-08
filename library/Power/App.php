@@ -263,6 +263,12 @@ class App{
             $dispatch['params']=3;
             $routers[$module]['*'][$prefix.':controller/:action/:params']=$dispatch;
             // 添加名字空间
+            if(PA::$config->application != POWER_BASE_DIR){ # 加载项目的
+                PA::$loader->registerDirs([PA::$config->application.'/library'],true);
+            }
+//            if(PA::$config->module_path){
+//                PA::$loader->registerDirs([PA::$config->module_path.'/'.$module.'/library'],true);
+//            }
             PA::$loader->registerNamespaces([
                 $module.'\\Controllers' => $path.'/controllers',
                 $module.'\\Models'      => $path.'/models',

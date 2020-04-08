@@ -22,6 +22,7 @@ $app = include '/var/www/html/public/index.php'; // 引入 PA 的 index.php 文�
 $app->run(
     [
         'trace' => 1, // 打开调试
+        'application' => __DIR__.'/..',
         'module_path' => __DIR__ .'/../modules',
         'domain_bind' => [
             'h5'=>'api,web',
