@@ -86,6 +86,7 @@ DROP TABLE IF EXISTS `pa_menus`;
 CREATE TABLE `pa_menus`  (
   `menu_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '菜单ID',
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '菜单名称',
+  `modules` varchar(255) DEFAULT '*' COMMENT '所属哪个模块，逗号分隔多个模块名称，*表示所有模块',
   `is_displayable` tinyint(255) UNSIGNED NULL DEFAULT NULL COMMENT '是否需要显示',
   `url_suffix` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'URL后缀',
   `router` json NULL COMMENT '路由信息',
@@ -108,15 +109,15 @@ CREATE TABLE `pa_menus`  (
 -- ----------------------------
 -- Records of menus
 -- ----------------------------
-INSERT INTO `pa_menus` VALUES (1, '欢迎页', NULL, NULL, '{"priority": 10, "namespace": "Power\\\\Controllers", "controller": "Index"}', '[]', 'fa fa-child', NULL, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `pa_menus` VALUES (2, '系统管理', NULL, NULL, NULL, '[]', 'fa fa-wrench', NULL, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `pa_menus` VALUES (3, '用户管理', NULL, NULL, '{"priority": 10, "namespace": "Power\\\\Controllers", "controller": "Users"}', '[]', 'fa fa-user', 2, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `pa_menus` VALUES (4, '角色管理', NULL, NULL, '{"priority": 10, "namespace": "Power\\\\Controllers", "controller": "Roles"}', '[]', 'fa fa-users', 2, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `pa_menus` VALUES (5, '菜单管理', NULL, NULL, '{"namespace": "Power\\\\Controllers", "controller": "Menus"}', '[]', 'fa fa-legal', 2, 6, 1, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `pa_menus` VALUES (6, '配置管理', NULL, NULL, '{"namespace": "Power\\\\Controllers", "controller": "Configs"}', '[]', 'fa fa-cubes', 2, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `pa_menus` VALUES (8, '插件管理', NULL, '/admin/plugins', '{"namespace": "Power\\\\Controllers", "controller": "plugins"}', '[]', 'fa fa-gears', 2, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `pa_menus` VALUES (9, '系统日志', NULL, '/admin/logs', '{"namespace": "Power\\\\Controllers", "controller": "logs"}', '[]', 'fa fa-wpforms', 2, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
-INSERT INTO `pa_menus` VALUES (26, 'API测试', NULL, '/GraphApi', '{"namespace": "plugins\\\\GraphQL\\\\Controllers", "controller": "graph-ql"}', '[]', '', NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `pa_menus` VALUES (1, '欢迎页', '*', NULL, NULL, '{"priority": 10, "namespace": "Power\\\\Controllers", "controller": "Index"}', '[]', 'fa fa-child', NULL, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `pa_menus` VALUES (2, '系统管理', '*', NULL, NULL, NULL, '[]', 'fa fa-wrench', NULL, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `pa_menus` VALUES (3, '用户管理', '*', NULL, NULL, '{"priority": 10, "namespace": "Power\\\\Controllers", "controller": "Users"}', '[]', 'fa fa-user', 2, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `pa_menus` VALUES (4, '角色管理', '*', NULL, NULL, '{"priority": 10, "namespace": "Power\\\\Controllers", "controller": "Roles"}', '[]', 'fa fa-users', 2, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `pa_menus` VALUES (5, '菜单管理', '*', NULL, NULL, '{"namespace": "Power\\\\Controllers", "controller": "Menus"}', '[]', 'fa fa-legal', 2, 6, 1, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `pa_menus` VALUES (6, '配置管理', '*', NULL, NULL, '{"namespace": "Power\\\\Controllers", "controller": "Configs"}', '[]', 'fa fa-cubes', 2, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `pa_menus` VALUES (8, '插件管理', '*', NULL, '/admin/plugins', '{"namespace": "Power\\\\Controllers", "controller": "plugins"}', '[]', 'fa fa-gears', 2, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `pa_menus` VALUES (9, '系统日志', '*', NULL, '/admin/logs', '{"namespace": "Power\\\\Controllers", "controller": "logs"}', '[]', 'fa fa-wpforms', 2, 0, 1, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `pa_menus` VALUES (26, 'API测试', '*', NULL, '/GraphApi', '{"namespace": "plugins\\\\GraphQL\\\\Controllers", "controller": "graph-ql"}', '[]', '', NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for permissions
