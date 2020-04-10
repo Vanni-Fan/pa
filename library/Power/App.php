@@ -42,7 +42,6 @@ class App{
             [
                 'Power\\Controllers' => POWER_BASE_DIR.'controllers',
                 'Power\\Models'      => POWER_BASE_DIR.'models',
-                'Power\\Views'       => POWER_BASE_DIR.'views',
             ],
             true
         );
@@ -96,6 +95,9 @@ class App{
 
         # 6、分析匹配的子模块并加载
         $modules = []; # 所有的模块和路由
+        if(PA::$config['module_path']) {
+            PA::$loader->registerDirs([PA::$config['module_path']],true);
+        }
         if(!PA::$config['domain_bind']){ # 没有子模块域名绑定
             if(PA::$config['module_path']){
                 # 返回添加成功的模块 todo
@@ -273,11 +275,10 @@ class App{
 //            if(PA::$config->module_path){
 //                PA::$loader->registerDirs([PA::$config->module_path.'/'.$module.'/library'],true);
 //            }
-            PA::$loader->registerNamespaces([
-                $module.'\\Controllers' => $path.'/controllers',
-                $module.'\\Models'      => $path.'/models',
-                $module.'\\Views'       => $path.'/views',
-            ], true);
+//            PA::$loader->registerNamespaces([
+//                $module.'\\Controllers' => $path.'/controllers',
+//                $module.'\\Models'      => $path.'/models',
+//            ], true);
         }
 
         return $registered_modules;

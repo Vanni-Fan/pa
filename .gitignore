@@ -6,3 +6,4 @@ pa.iml
 /library/vendor
 data/docker
 docker/mysql/pa.sql
+docker/docker-compose.yml

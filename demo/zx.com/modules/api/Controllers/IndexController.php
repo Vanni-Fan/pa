@@ -9,7 +9,8 @@ class IndexController extends \Phalcon\Mvc\Controller{
         \MyLib\MyServer::log();
 
         $model = new MyTable();
-        $model->find();
+        $rs = $model->find();
+        print_r($rs->toArray());
         return "Hello World";
     }
 }
