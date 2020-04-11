@@ -1,0 +1,20 @@
+version: "3.7"
+services:
+  php:
+    env_file:
+      - ./config.env
+    build:
+      context: ../
+      dockerfile: ./docker/apache-dockerfile
+      # dockerfile: ./docker/test-dockerfile
+      args: 
+        PA_PASSWORD: ${PA_PASSWORD}
+        WITH_MYSQL: ${WITH_MYSQL:-1}
+        WITH_REDIS: ${WITH_REDIS:-1}
+        WITH_PA_PASSWORD: ${WITH_PA_PASSWORD:-0}
+    volumes:
+      - ../src/:/var/www/html
+      - ./sites-enabled:/etc/apache2/sites-enabled
+    ports:
+      - ${PORT}:80
+    restart: always

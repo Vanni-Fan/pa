@@ -1,0 +1,93 @@
+FROM php:7.4-apache
+
+ARG WITH_MYSQL
+ARG WITH_REDIS
+ARG WITH_PA_PASSWORD
+ARG PA_PASSWORD
+
+# 更新国内源，如果不需要请注释掉
+COPY ./docker/sources.list /etc/apt/sources.list
+
+# 安装一些基础组件
+RUN apt-get update && apt-get install -y \
+       unzip curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# 复制源文件
+COPY ./src/ /var/www/html/
+
+# 复制配置文件
+COPY ./docker/sites-enabled/ /etc/apache2/sites-enabled
+
+# 激活扩展
+RUN ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
+
+
+# 安装PHP扩展
+## 解压源码
+RUN docker-php-source extract
+## Install PDO_MYSQL
+RUN [ "$WITH_MYSQL" = 1 ] && docker-php-ext-install pdo_mysql
+
+
+## Install Phalcon
+RUN curl -fsSL https://github.com/phalcon/cphalcon/archive/master.tar.gz | tar xz \
+    && cd cphalcon-$PHALCON_BRANCH \
+    && cd build \
+    && ./install \
+    && cd ../.. \
+    && docker-php-ext-enable phalcon \
+    && rm -rf cphalcon-$PHALCON_BRANCH
+
+
+## Install Redis
+RUN [ "$WITH_REDIS" = 1 ] \
+   && curl -fsSL https://github.com/phpredis/phpredis/archive/master.tar.gz | tar xz \
+   && cd phpredis-master \
+   && phpize \
+   && ./configure \
+   && make \
+   && make install \
+   && docker-php-ext-enable redis \
+   && cd .. \
+   && rm -rf phpredis-master
+
+
+## Install Password plugins
+### Install Zephir parser
+RUN [ "$WITH_PA_PASSWORD" = 1 ] \
+    && if [ -z "$PA_PASSWORD" ]; then export PA_PASSWORD=`date +%s`; fi \
+    && curl -fsSL https://github.com/phalcon/php-zephir-parser/archive/master.tar.gz | tar xz \
+    && cd php-zephir-parser-master \
+    && phpize \
+    && ./configure \
+    && make \
+    && make install \
+    && docker-php-ext-enable zephir_parser \
+    && cd .. \
+    && rm -rf php-zephir-parser-master
+
+### Install zephir.phar
+RUN [ "$WITH_PA_PASSWORD" = 1 ] \
+    && ZEPHIR_VERSION=`curl -fsSL 'https://api.github.com/repos/phalcon/zephir/releases?page=1&per_page=1'|grep '"tag_name":'|awk -F '"' '{print $4}'` \
+    && curl -fsSL https://github.com/phalcon/zephir/releases/download/${ZEPHIR_VERSION}/zephir.phar > /usr/local/bin/zephir \
+    && chmod +x /usr/local/bin/zephir
+
+### Install Password plugins
+RUN [ "$WITH_PA_PASSWORD" = 1 ] \
+    && curl -fsSL https://github.com/Vanni-Fan/password/archive/master.zip > pa.zip \
+    && unzip pa.zip \
+    && cd password-master \
+    && php install.php ${PA_PASSWORD} \
+    && cp ./ext/modules/hp.so `php -i|grep extension_dir|head -n 1|awk -F ' => ' '{print $2}'` \
+    && docker-php-ext-enable hp \
+    && cd .. \
+    && rm -rf password-master pa.zip
+
+
+
+
+
+
+## 清除缓存
+RUN docker-php-source delete
