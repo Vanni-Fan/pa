@@ -1,17 +1,18 @@
-version: "3.7"
+version: "3"
 services:
   php:
     env_file:
       - ./config.env
     build:
       context: ../
-      dockerfile: ./docker/apache-dockerfile
-      # dockerfile: ./docker/test-dockerfile
+      dockerfile: ./docker/build-phalcon-dockerfile
+      #dockerfile: ./docker/test-dockerfile
       args: 
-        PA_PASSWORD: ${PA_PASSWORD}
-        WITH_MYSQL: ${WITH_MYSQL:-1}
-        WITH_REDIS: ${WITH_REDIS:-1}
-        WITH_PA_PASSWORD: ${WITH_PA_PASSWORD:-0}
+        WITH_MYSQL: ${WITH_MYSQL:-yes}
+        WITH_REDIS: ${WITH_REDIS:-yes}
+        WITH_ALI_SOURCE: ${WITH_ALI_SOURCE:-no}
+        WITH_PA_PASSWORD: ${WITH_PA_PASSWORD:-no}
+        PA_PASSWORD: ${PA_PASSWORD:-no}
     volumes:
       - ../src/:/var/www/html
       - ./sites-enabled:/etc/apache2/sites-enabled

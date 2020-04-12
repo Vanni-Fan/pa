@@ -1,23 +1,21 @@
 FROM php:7.4-apache
 
-ARG WITH_MYSQL
-ARG WITH_REDIS
-ARG WITH_PA_PASSWORD
-ARG PA_PASSWORD
+ARG WITH_MYSQL=yes
+ARG WITH_REDIS=no
+ARG WITH_PA_PASSWORD=no
+ARG PA_PASSWORD=no
+ARG WITH_ALI_SOURCE=no
 
-# 更新国内源，如果不需要请注释掉
-COPY ./docker/sources.list /etc/apt/sources.list
+# 复制加速文件
+COPY ./docker/sources.list ./docker/github.hosts ./docker/cache/* /tmp/
+
+# 加速选项
+RUN if [ "$WITH_ALI_SOURCE" = yes ]; then \
+    cp /tmp/sources.list /etc/apt/sources.list && cat /tmp/github.hosts >> /etc/hosts; \
+fi
 
 # 安装一些基础组件
-RUN apt-get update && apt-get install -y \
-       unzip curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# 复制源文件
-COPY ./src/ /var/www/html/
-
-# 复制配置文件
-COPY ./docker/sites-enabled/ /etc/apache2/sites-enabled
+RUN apt-get update && apt-get install -y unzip wget && rm -rf /var/lib/apt/lists/*
 
 # 激活扩展
 RUN ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
@@ -25,24 +23,46 @@ RUN ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rew
 
 # 安装PHP扩展
 ## 解压源码
-RUN docker-php-source extract
-## Install PDO_MYSQL
-RUN [ "$WITH_MYSQL" = 1 ] && docker-php-ext-install pdo_mysql
+RUN docker-php-source extract \
+    && if [ "$WITH_MYSQL" = yes ];then docker-php-ext-install pdo_mysql; fi \
+    && docker-php-source delete
 
+## Install PSR
+RUN ( \
+      if [ -f /tmp/php-psr-master.tar.gz ]; then tar xzf /tmp/php-psr-master.tar.gz; \
+      else wget -t 5 --dns-timeout=3 --connect-timeout=3 -q https://github.com/jbboehr/php-psr/archive/master.tar.gz -O | tar xz; \
+      fi \
+    ) \
+    && cd php-psr-master \
+    && phpize \
+    && ./configure \
+    && make \
+    && make install \
+    && cd ../ \
+    && docker-php-ext-enable --ini-name 0-psr.ini psr \
+    && rm -rf php-psr-master /tmp/php-psr-master.tar.gz
 
 ## Install Phalcon
-RUN curl -fsSL https://github.com/phalcon/cphalcon/archive/master.tar.gz | tar xz \
-    && cd cphalcon-$PHALCON_BRANCH \
+RUN ( \
+      if [ -f /tmp/cphalcon-master.tar.gz ]; then tar xzf /tmp/cphalcon-master.tar.gz; \
+      else wget -t 5 --dns-timeout=3 --connect-timeout=3 -q https://github.com/phalcon/cphalcon/archive/master.tar.gz -O - | tar xz; \
+      fi \
+    ) \
+    && cd cphalcon-master \
     && cd build \
     && ./install \
     && cd ../.. \
     && docker-php-ext-enable phalcon \
-    && rm -rf cphalcon-$PHALCON_BRANCH
+    && rm -rf cphalcon-master /tmp/cphalcon-master.tar.gz
 
 
 ## Install Redis
-RUN [ "$WITH_REDIS" = 1 ] \
-   && curl -fsSL https://github.com/phpredis/phpredis/archive/master.tar.gz | tar xz \
+RUN if [ "$WITH_REDIS" = "yes" ]; then ( \
+   ( \
+      if [ -f /tmp/phpredis-master.tar.gz ]; then tar xzf /tmp/phpredis-master.tar.gz; \
+      else wget -t 5 --dns-timeout=3 --connect-timeout=3 -q https://github.com/phpredis/phpredis/archive/master.tar.gz -O - | tar xz;\
+      fi \
+   ) \
    && cd phpredis-master \
    && phpize \
    && ./configure \
@@ -50,14 +70,18 @@ RUN [ "$WITH_REDIS" = 1 ] \
    && make install \
    && docker-php-ext-enable redis \
    && cd .. \
-   && rm -rf phpredis-master
+   && rm -rf phpredis-master /tmp/phpredis-master.tar.gz \
+) fi
 
 
 ## Install Password plugins
 ### Install Zephir parser
-RUN [ "$WITH_PA_PASSWORD" = 1 ] \
-    && if [ -z "$PA_PASSWORD" ]; then export PA_PASSWORD=`date +%s`; fi \
-    && curl -fsSL https://github.com/phalcon/php-zephir-parser/archive/master.tar.gz | tar xz \
+RUN if [ "$WITH_PA_PASSWORD" = "yes" ]; then ( \
+    ( \
+       if [ -f /tmp/php-zephir-parser-master.tar.gz ]; then tar xzf /tmp/php-zephir-parser-master.tar.gz; \
+       else wget -t 5 --dns-timeout=3 --connect-timeout=3 -q https://github.com/phalcon/php-zephir-parser/archive/master.tar.gz -O - | tar xz; \
+       fi \
+    ) \
     && cd php-zephir-parser-master \
     && phpize \
     && ./configure \
@@ -65,29 +89,47 @@ RUN [ "$WITH_PA_PASSWORD" = 1 ] \
     && make install \
     && docker-php-ext-enable zephir_parser \
     && cd .. \
-    && rm -rf php-zephir-parser-master
+    && rm -rf php-zephir-parser-master /tmp/php-zephir-parser-master.tar.gz \
+) fi
 
 ### Install zephir.phar
-RUN [ "$WITH_PA_PASSWORD" = 1 ] \
-    && ZEPHIR_VERSION=`curl -fsSL 'https://api.github.com/repos/phalcon/zephir/releases?page=1&per_page=1'|grep '"tag_name":'|awk -F '"' '{print $4}'` \
-    && curl -fsSL https://github.com/phalcon/zephir/releases/download/${ZEPHIR_VERSION}/zephir.phar > /usr/local/bin/zephir \
-    && chmod +x /usr/local/bin/zephir
+RUN if [ "$WITH_PA_PASSWORD" = "yes" ]; then ( \
+    if [ -f /tmp/zephir ]; then cp /tmp/zephir /usr/local/bin/zephir; \
+    else ( \
+      ZEPHIR_VERSION=`wget -t 5 --dns-timeout=3 --connect-timeout=3 -q 'https://api.github.com/repos/phalcon/zephir/releases?page=1&per_page=1' -O -|grep '"tag_name":'|awk -F '"' '{print $4}'` \
+      && wget -t 5 --dns-timeout=3 --connect-timeout=3 -q https://github.com/phalcon/zephir/releases/download/${ZEPHIR_VERSION}/zephir.phar -O /usr/local/bin/zephir \
+    ) fi \
+    && chmod +x /usr/local/bin/zephir && rm -rf /tmp/zephir \
+) fi
 
 ### Install Password plugins
-RUN [ "$WITH_PA_PASSWORD" = 1 ] \
-    && curl -fsSL https://github.com/Vanni-Fan/password/archive/master.zip > pa.zip \
+RUN if [ "$WITH_PA_PASSWORD" = "yes" ]; then ( \
+    ( \
+       if [ -f /tmp/pa.zip ]; then cp /tmp/pa.zip .; \
+       else wget -t 5 --dns-timeout=3 --connect-timeout=3 -q https://github.com/Vanni-Fan/password/archive/master.zip -O pa.zip; \
+       fi \
+    ) \
     && unzip pa.zip \
     && cd password-master \
-    && php install.php ${PA_PASSWORD} \
-    && cp ./ext/modules/hp.so `php -i|grep extension_dir|head -n 1|awk -F ' => ' '{print $2}'` \
+    && if [ "$PA_PASSWORD" = "no" ]; then export PA_PASSWORD=`date +%l%M%S%H`; fi \
+    && php install.php $PA_PASSWORD \
+    && cp ./ext/modules/hp.so `php -i|grep extension_dir|head -n 1|awk '{print $3}'` \
     && docker-php-ext-enable hp \
     && cd .. \
-    && rm -rf password-master pa.zip
+    && rm -rf password-master pa.zip /tmp/pa.zip \
+) fi
 
 
 
 
+# 复制源文件
+COPY ./controllers /var/www/pa/controllers
+COPY --chown=www-data:www-data ./data /var/www/pa/data
+COPY ./library /var/www/pa/library
+COPY ./models /var/www/pa/models
+COPY --chown=www-data:www-data ./plugins /var/www/pa/plugins
+COPY --chown=www-data:www-data ./public /var/www/pa/public
+COPY ./views /var/www/pa/views
 
-
-## 清除缓存
-RUN docker-php-source delete
+# 复制配置文件
+COPY ./docker/sites-enabled/* /etc/apache2/sites-enabled

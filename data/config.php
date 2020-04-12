@@ -63,14 +63,14 @@ return [
         'dbname'  => POWER_DATA . '/powerdb.sql3.db',
     ],
 
-    'pa_db'       => [
-        'adapter' => 'mysql',
-        'dbname'  => 'pa',
-        'username'=> 'root',
-        'password'=> '123456',
-        'host'    => 'mysql',
-        'prefix'  => 'pa_'
-    ],
+#    'pa_db'       => [
+#        'adapter' => 'mysql',
+#        'dbname'  => 'pa',
+#        'username'=> 'root',
+#        'password'=> '123456',
+#        'host'    => 'mysql',
+#        'prefix'  => 'pa_'
+#    ],
 
     # PA 的Cookie加密Key
     'cookie_key'    => file_get_contents(POWER_DATA .'/cookie.key'),
