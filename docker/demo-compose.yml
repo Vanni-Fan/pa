@@ -1,0 +1,11 @@
+version: "3"
+services:
+  zxpt:
+    image: registry.cn-hangzhou.aliyuncs.com/vanni/phalcon:7.4-apache
+    #image: 05c1aa489edc
+    volumes:
+      - ../demo/zx.com:/var/www/zx
+      - ./sites-enabled/1-default.conf:/etc/apache2/sites-enabled/1-default.conf
+    ports:
+      - 888:80
+    restart: always

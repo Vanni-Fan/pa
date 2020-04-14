@@ -1,5 +1,5 @@
 FROM php:7.4-apache
-
+ENV DOCUMENT_ROOT=/var/www/pa
 ARG WITH_MYSQL=yes
 ARG WITH_REDIS=no
 ARG WITH_PA_PASSWORD=no
@@ -30,7 +30,7 @@ RUN docker-php-source extract \
 ## Install PSR
 RUN ( \
       if [ -f /tmp/php-psr-master.tar.gz ]; then tar xzf /tmp/php-psr-master.tar.gz; \
-      else wget -t 5 --dns-timeout=3 --connect-timeout=3 -q https://github.com/jbboehr/php-psr/archive/master.tar.gz -O | tar xz; \
+      else wget -t 5 --dns-timeout=3 --connect-timeout=3 -q https://github.com/jbboehr/php-psr/archive/master.tar.gz -O - | tar xz; \
       fi \
     ) \
     && cd php-psr-master \
@@ -111,7 +111,7 @@ RUN if [ "$WITH_PA_PASSWORD" = "yes" ]; then ( \
     ) \
     && unzip pa.zip \
     && cd password-master \
-    && if [ "$PA_PASSWORD" = "no" ]; then export PA_PASSWORD=`date +%l%M%S%H`; fi \
+    && if [ "$PA_PASSWORD" = "no" ]; then PA_PASSWORD=`date +%l%M%S%H`; fi \
     && php install.php $PA_PASSWORD \
     && cp ./ext/modules/hp.so `php -i|grep extension_dir|head -n 1|awk '{print $3}'` \
     && docker-php-ext-enable hp \
@@ -132,4 +132,4 @@ COPY --chown=www-data:www-data ./public /var/www/pa/public
 COPY ./views /var/www/pa/views
 
 # 复制配置文件
-COPY ./docker/sites-enabled/* /etc/apache2/sites-enabled
+COPY ./docker/sites-enabled/0-default.conf /etc/apache2/sites-enabled/0-default.conf

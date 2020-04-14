@@ -17,7 +17,7 @@
 //    }
 //}
 
-$app = include '/var/www/html/public/index.php'; // 引入 PA 的 index.php 文件
+$app = include '/var/www/pa/public/index.php'; // 引入 PA 的 index.php 文件
 
 $app->run(
     [
