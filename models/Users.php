@@ -11,7 +11,7 @@ class Users extends PMB{
     public static function makeToke(array $user){
         $cookie_field = PA::$config['cookie_fields']->toArray();
         $cookie_value = array_intersect_key($user, $cookie_field);
-        if(count($cookie_value) != count($cookie_field)) throw \Exception("Token加密的字段未提供完整");
+        if(count($cookie_value) != count($cookie_field)) throw new \Exception("Token加密的字段未提供完整");
         if(!empty($cookie_value['login_ip'])){
             $cookie_value['login_ip'] = ip2long($cookie_value['login_ip']);
         }
