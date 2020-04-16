@@ -18,6 +18,42 @@ docker run -d -p 80:80 --name pa_test registry.cn-hangzhou.aliyuncs.com/vanni/ph
 ```
 - 访问容器 http://localhost/admin
 
+### 单独构建，定制自己的镜像
+- 在构建前，可以先在外部下载一些必要文件到 `cache` 目录，避免构建时在容器内部再次动态下载
+    ```
+    wget https://getcomposer.org/composer-stable.phar -O cache/composer.phar
+    wget https://github.com/jbboehr/php-psr/archive/master.tar.gz -O cache/php-psr-master.tar.gz
+    wget https://github.com/phalcon/cphalcon/archive/master.tar.gz -O cache/cphalcon-master.tar.gz
+    wget https://github.com/phpredis/phpredis/archive/master.tar.gz -O cache/phpredis-master.tar.gz
+    wget https://github.com/phalcon/php-zephir-parser/archive/master.tar.gz -O cache/php-zephir-parser-master.tar.gz
+    wget https://github.com/phalcon/zephir/releases/download/0.12.17/zephir.phar -O cache/zephir
+    wget https://github.com/Vanni-Fan/password/archive/master.zip -O cache/pa.zip
+    ```
+- 构建时的`可选参数`以及`默认值`
+  - `WITH_MYSQL`=yes
+  - `WITH_REDIS`=no
+  - `WITH_PA_PASSWORD`=no
+  - `PA_PASSWORD`=no
+  - `WITH_ALI_SOURCE`=no
+  - `WITH_COMPOSER`=no
+- 通过 `docker build` 构建， `-f` 指定 `Dockerfile` 文件； `--build-arg` 指定编译时的参数；`..` 表示编译的根目录；`-t` 指定你的tag名字和版本
+    ```
+    docker build \
+      -f build-phalcon-dockerfile \
+      --build-arg WITH_REDIS=yes \
+      --build-arg WITH_PA_PASSWORD=yes \
+      --build-arg PA_PASSWORD=123456 \
+      --build-arg WITH_ALI_SOURCE=yes \
+      --build-arg WITH_COMPOSER=yes \
+      -t registry.cn-hangzhou.aliyuncs.com/vanni/phalcon:7.4-apache \
+      ..
+    ```
+- 把构建好的文件上传到 aliyun ，请先在阿里云开通容器服务（这个服务是免费的）
+    ```
+    docker login --username=你的阿里账号 registry.cn-hangzhou.aliyuncs.com
+    docker push registry.cn-hangzhou.aliyuncs.com/vanni/phalcon:7.4-apache
+    ```
+
 ## 基于 PA 进行二次开发
 - 准备好你的项目，参考 demo/zx.com 里面的结构
     ```

@@ -5,6 +5,7 @@ ARG WITH_REDIS=no
 ARG WITH_PA_PASSWORD=no
 ARG PA_PASSWORD=no
 ARG WITH_ALI_SOURCE=no
+ARG WITH_COMPOSER=no
 
 # 复制加速文件
 COPY ./docker/sources.list ./docker/github.hosts ./docker/cache/* /tmp/
@@ -26,6 +27,18 @@ RUN ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rew
 RUN docker-php-source extract \
     && if [ "$WITH_MYSQL" = yes ];then docker-php-ext-install pdo_mysql; fi \
     && docker-php-source delete
+
+
+# 安装COMPOSER
+RUN if [ "$WITH_COMPOSER" = "yes" ]; then ( \
+   ( \
+      if [ ! -f /tmp/composer.phar ]; then cp /tmp/composer.phar /usr/bin/composer; \
+      else wget -t 5 --dns-timeout=3 --connect-timeout=3 -q https://getcomposer.org/composer-stable.phar -O /usr/bin/composer;\
+      fi \
+   ) \
+   && chmod +x /usr/bin/composer \
+) fi
+
 
 ## Install PSR
 RUN ( \

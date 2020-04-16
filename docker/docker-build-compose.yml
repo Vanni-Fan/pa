@@ -13,6 +13,7 @@ services:
         WITH_ALI_SOURCE: ${WITH_ALI_SOURCE:-no}
         WITH_PA_PASSWORD: ${WITH_PA_PASSWORD:-no}
         PA_PASSWORD: ${PA_PASSWORD:-no}
+        WITH_COMPOSER: ${WITH_COMPOSER:-no}
     volumes:
       - ../src/:/var/www/html
       - ./sites-enabled:/etc/apache2/sites-enabled
