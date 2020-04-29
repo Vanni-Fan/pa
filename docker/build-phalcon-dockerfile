@@ -1,11 +1,14 @@
+# docker build -f build-phalcon-dockerfile -t registry.cn-hangzhou.aliyuncs.com/vanni/phalcon:7.4-apache ..
+
 FROM php:7.4-apache
 ENV DOCUMENT_ROOT=/var/www/pa
 ARG WITH_MYSQL=yes
-ARG WITH_REDIS=no
-ARG WITH_PA_PASSWORD=no
+ARG WITH_REDIS=yes
+ARG WITH_PA_PASSWORD=yes
 ARG PA_PASSWORD=no
-ARG WITH_ALI_SOURCE=no
-ARG WITH_COMPOSER=no
+ARG WITH_ALI_SOURCE=yes
+ARG WITH_COMPOSER=yes
+ARG WITH_GD=yes
 
 # 复制加速文件
 COPY ./docker/sources.list ./docker/github.hosts ./docker/cache/* /tmp/
@@ -16,23 +19,33 @@ RUN if [ "$WITH_ALI_SOURCE" = yes ]; then \
 fi
 
 # 安装一些基础组件
-RUN apt-get update && apt-get install -y unzip wget && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y unzip wget
 
 # 激活扩展
 RUN ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
 
 
-# 安装PHP扩展
+# 安装PHP扩
 ## 解压源码
 RUN docker-php-source extract \
     && if [ "$WITH_MYSQL" = yes ];then docker-php-ext-install pdo_mysql; fi \
-    && docker-php-source delete
+    && if [ "$WITH_GD" = yes ]; then( \
+        if [ ! -f /tmp/zlib-1.2.11.tar.xz ];then (\
+            wget -t 5 --dns-timeout=3 --connect-timeout=3 -q https://nchc.dl.sourceforge.net/project/libpng/zlib/1.2.11/zlib-1.2.11.tar.xz -O /tmp/zlib-1.2.11.tar.xz \
+        )fi\
+        && tar xf /tmp/zlib-1.2.11.tar.xz -C /tmp && /tmp/zlib-1.2.11/configure && make && make install \
+        && apt-get install -y libpng-dev libjpeg-dev libxpm-dev libfreetype6-dev \
+        && docker-php-ext-configure gd --with-jpeg --with-freetype --with-xpm --enable-gd-jis-conv \
+        && docker-php-ext-install gd && docker-php-ext-enable gd \
+    ) fi \
+    && docker-php-source delete \
+    && rm -rf /var/lib/apt/lists/*
 
 
 # 安装COMPOSER
 RUN if [ "$WITH_COMPOSER" = "yes" ]; then ( \
    ( \
-      if [ ! -f /tmp/composer.phar ]; then cp /tmp/composer.phar /usr/bin/composer; \
+      if [ -f /tmp/composer.phar ]; then cp /tmp/composer.phar /usr/bin/composer; \
       else wget -t 5 --dns-timeout=3 --connect-timeout=3 -q https://getcomposer.org/composer-stable.phar -O /usr/bin/composer;\
       fi \
    ) \
@@ -125,6 +138,8 @@ RUN if [ "$WITH_PA_PASSWORD" = "yes" ]; then ( \
     && unzip pa.zip \
     && cd password-master \
     && if [ "$PA_PASSWORD" = "no" ]; then PA_PASSWORD=`date +%l%M%S%H`; fi \
+    && echo $PA_PASSWORD > /tmp/pa_password \
+    && echo YOUR PA_PASSWORD IS [$PA_PASSWORD], YOU CAN VIEW IT IN /tmp/pa_password FILE. >&2 \
     && php install.php $PA_PASSWORD \
     && cp ./ext/modules/hp.so `php -i|grep extension_dir|head -n 1|awk '{print $3}'` \
     && docker-php-ext-enable hp \
