@@ -1,0 +1,14 @@
+version: "3"
+services:
+  redis:
+    image: redis
+    container_name: redis
+    volumes:
+      - redis-data:/data
+      - ./redis.conf:/etc/redis.conf
+    command: redis-server /etc/redis.conf
+    ports:
+      - 6379:6379
+    restart: always
+volumes:
+  redis-data:

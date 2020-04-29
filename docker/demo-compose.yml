@@ -1,9 +1,19 @@
+# 使用 PA 进行开发：
+# 1、 映射一个目录
+# 2、 映射一个Apache的配置文件
+#
+# 注意：您不能通过反向映射提取 PA 源码，请使用下面的方式：
+# 1、docker run -d --name tmp registry.cn-hangzhou.aliyuncs.com/vanni/phalcon:7.4-apache 
+# 2、docker cp tmp:/var/www/pa/* ..
+# 3、docker rm -f tmp
+
 version: "3"
 services:
   zxpt:
     image: registry.cn-hangzhou.aliyuncs.com/vanni/phalcon:7.4-apache
-    #image: 05c1aa489edc
+    container_name: phalcon
     volumes:
+      - ../../pa:/var/www/pa
       - ../demo/zx.com:/var/www/zx
       - ./sites-enabled/1-default.conf:/etc/apache2/sites-enabled/1-default.conf
     ports:

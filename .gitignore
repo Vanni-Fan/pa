@@ -7,3 +7,6 @@ pa.iml
 data/docker
 docker/mysql/pa.sql
 docker/docker-compose.yml
+*.gz
+docker/cache
+public/dist
