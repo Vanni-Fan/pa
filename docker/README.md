@@ -37,7 +37,13 @@ docker run -d -p 80:80 --name pa_test registry.cn-hangzhou.aliyuncs.com/vanni/ph
   - `WITH_ALI_SOURCE`=no
   - `WITH_COMPOSER`=no
 - 通过 `docker build` 构建， `-f` 指定 `Dockerfile` 文件； `--build-arg` 指定编译时的参数；`..` 表示编译的根目录；`-t` 指定你的tag名字和版本
+  - composer 更新一下，确保依赖文件打入镜像
+    - cd library; composer update
+  - bower 更新一下，确保前端文件打入镜像
+    - cd public/dist; bower update
+  - docker 构建
     ```
+    cd docker
     docker build \
       -f build-phalcon-dockerfile \
       --build-arg WITH_REDIS=yes \

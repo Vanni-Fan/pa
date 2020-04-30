@@ -100,15 +100,37 @@ return [
 
     # 事件监听，能配置的类型在 https://docs.phalcon.io/4.0/en/events#list-of-events 里面
     # 比如:
-    # 'event' => [
-    #     'handler' => 'Logger::logs',
-    #     'events'=>['db:afterQuery'],
+    # 'events' => [
+    #       '事件类型@监听对象名称1,监听对象名称2'=>'处理函数', 比如下面的格式
+    #       'db:beforeQuery@my_db' => function($a, $b){ echo $b->getSQLStatement();  }, # 匿名函数可以成功回调
+    #       'db:beforeQuery@my_db' => ['\Txt', 'log'], # no 
+    #       'db:beforeQuery@my_db' => [$class, 'log'], # no
+    #       'db:beforeQuery@my_db,db' => 'Txt::log', # ok
+    #       'db:beforeQuery' => 'Txt::log', # 静态类的静态方法，必须要全名字空间指定，比如 \NamespaceA\SubnamespaceB\ClassC::FunctionD
+    #       # @ 后面的监听对象名称，为可选，如果不设置，那么监听对象名称为 : 号前面的值
+    #       # 监听对象优先在PA类静态成员中查找，其次在 PA::$di 中查询，即 PA::${监听对象名称} ?? PA::$di->get(监听对象名称)，因此需要在加载配置时存在监听对象
     # ],
-//    'event' => [],
     # 视图配置
     'view' => [
         'class' => 'Phalcon\Mvc\View',
         'disable_layout' => false,
         'disable_main_layout' => false,
     ],
+
+    # 缓存配置
+    #'cache' => [
+    #    'type' => 'memory', # stream：文件形式，最慢, redis, memory：本机内存，请求后释放
+    #    'stream' => [
+    #        'prefix'=>'PA',
+    #        'storageDir'=> __DIR__ . '/cache/cache',
+    #    ],
+    #    'redis'=>[
+    #        'prefix'=>'PA:',
+    #        'host'=>'192.168.9.223',
+    #        'port'=>6379,
+    #        'index'=>1,
+    #        'persistent'=>true,
+    #        'auth'=>'123456'
+    #    ],
+    #]
 ];

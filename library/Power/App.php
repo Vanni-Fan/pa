@@ -9,6 +9,7 @@ use Phalcon\Di\FactoryDefault;
 use Phalcon\Mvc\Application;
 use Phalcon\Mvc\Dispatcher;
 use Phalcon\Db\Adapter\PdoFactory as DB;
+use Phalcon\Events\Manager as EM;
 use PA;
 use Power\Models\Plugins;
 
@@ -16,6 +17,7 @@ class App{
     public function __construct()
     {
         PA::$di       = new FactoryDefault();
+        PA::$em       = new EM();
         PA::$app      = new Application(PA::$di);
         PA::$config   = new Php(POWER_BASE_DIR.'data/config.php');
         PA::$router   = new Router(false); # 不添加默认路由
@@ -160,15 +162,30 @@ class App{
         }
 
         # 设置事件监听
-        if(PA::$config->event && $config->event->handler??null){
-            PA::$em = new \Phalcon\Events\Manager();
-            foreach(PA::$config->event->events ?? [] as $type){
-                $function = (new \ReflectionMethod('\\'.trim($config->event->handler,'\\')))->getClosure();
+        if(PA::$config->events){
+            foreach(PA::$config->events ?? [] as $type => $class){
+                $objects  = explode('@', $type);
+                if(isset($objects[1])){
+                    $type    = $objects[0];
+                    $objects = explode(',', $objects[1]);
+                }else{
+                    $objects = [ substr($objects[0], 0, strpos($objects[0],':')) ];
+                }
+                if(is_string($class)){
+                    $function = (new \ReflectionMethod('\\'.trim($class,'\\')))->getClosure();
+                }elseif($class instanceof \Closure){ # 闭包
+                    $function = $class;
+                }else{
+                    throw new \Exception('监听事件的回调函数必须是一个闭包或者静态方法');
+                }
                 PA::$em->attach($type, $function);
-                $obj_name = explode(':',$type)[0];
-                $obj_name = $obj_name == 'application' ? 'app' : $obj_name;
-                if(isset(PA::$$obj_name)){
-                    PA::${$obj_name}->setEventsManager(PA::$em);
+                foreach($objects as $obj_name){
+                    $obj_name = $obj_name == 'application' ? 'app' : $obj_name;
+                    if(isset(PA::${$obj_name})){
+                        PA::${$obj_name}->setEventsManager(PA::$em);
+                    }else{
+                        PA::$di->get($obj_name)->setEventsManager(PA::$em);
+                    }
                 }
             }
         }

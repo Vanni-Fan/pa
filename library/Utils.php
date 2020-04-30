@@ -58,7 +58,7 @@ class Utils{
      *
      */
     public static function ip(){
-        return $_SERVER['REMOTE_ADDR'];
+        return $_SERVER['HTTP_CLIENT_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
     }/*}}}*/
 
     /*{{{*/ /** 分析绑定的字符模板，ext：parseBind('3.aa.bb.cc|dd|ee=_,2', $data)
@@ -741,25 +741,20 @@ class Utils{
     }/*}}}*/
 
     /*{{{*//** 设置缓存内容 或 读取缓存内容，ext：cache('key','value')
-     * 一个参数为获取，多个参数为设置
+     * 无参数为获得缓存对象，一个参数为获取缓存值，多个参数为设置缓存值
      * @param string $key 缓存的Key
      * @param mixed $val 需要被缓存的值
-     * @param int $expire 缓存时间，如果为0表示不超时
+     * @param int $expire 缓存时间，默认1周
      * @return mixed
      *//*}}}*/
-    static function cache(string $key, $val=null, int $expire=0){/*{{{*/
-        return func_num_args()===1 ? null : $val;
-        
-        $front = new Phalcon\Cache\Frontend\Data(["lifetime" => 1 * 24 * 60 * 60]); // 1天
-        $redis = PA::$config['redis'] ?: false;
-        if($redis){
-            $cache = new Phalcon\Cache\Backend\Redis($front,$redis->toArray());
-        }else{
-            $dir   = realpath(POWER_DATA).'/cache/';
-            if(!file_exists($dir)) mkdir($dir,'0777');
-            $cache = new Phalcon\Cache\Backend\File($front,['cacheDir'=>$dir]);
-        }
-        return func_num_args()===1 ? $cache->get($key) : $cache->save($key, $val, $expire);
+    static function cache(string $key=null, $val=null, int $expire=604800){/*{{{*/
+        $af = new Phalcon\Cache\AdapterFactory(new Phalcon\Storage\SerializerFactory());
+        $type = PA::$config->cache->type ?? 'memory';
+        $opt  = isset(PA::$config->cache->$type) ? PA::$config->cache->$type->toArray() : [];
+        $opt['lifetime'] = $expire;
+        $cache = $af->newInstance($type, $opt);
+        if(func_num_args()===0) return $cache;
+        return func_num_args()===1 ? $cache->get($key) : $cache->set($key, $val);
     }/*}}}*/
 
     /*{{{*//** 解密
