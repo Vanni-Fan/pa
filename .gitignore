@@ -10,3 +10,4 @@ docker/docker-compose.yml
 *.gz
 docker/cache
 public/dist
+data/cache

@@ -16,6 +16,7 @@ use Power\Models\Plugins;
 class App{
     public function __construct()
     {
+        // echo "<pre>";
         PA::$di       = new FactoryDefault();
         PA::$em       = new EM();
         PA::$app      = new Application(PA::$di);
@@ -28,6 +29,7 @@ class App{
     }
 
     public function setErrorHandler($config){
+        // print_r($config->toArray());
         if($error_handler = $config->path('error.handler')) set_error_handler($error_handler);
         if($config->trace){
             (new \Phalcon\Debug())->listen();
@@ -61,6 +63,9 @@ class App{
             if(!($config instanceof \Phalcon\Config)){
                 $config = is_array($config) ? (new \Phalcon\Config($config)) : (new Php($config));
             }
+            // 添加名字空间，加载项目的
+            if($config->application != POWER_BASE_DIR) PA::$loader->registerDirs([$config->application.'/library'],true);
+
             # 用项目的错误处理来替代PA的错误处理
             if($config->error) $this->setErrorHandler($config);
             # 加载项目的 vendors
@@ -285,10 +290,6 @@ class App{
 
             $dispatch['params']=3;
             $routers[$module]['*'][$prefix.':controller/:action/:params']=$dispatch;
-            // 添加名字空间
-            if(PA::$config->application != POWER_BASE_DIR){ # 加载项目的
-                PA::$loader->registerDirs([PA::$config->application.'/library'],true);
-            }
 //            if(PA::$config->module_path){
 //                PA::$loader->registerDirs([PA::$config->module_path.'/'.$module.'/library'],true);
 //            }

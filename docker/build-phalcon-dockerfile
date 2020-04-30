@@ -49,7 +49,12 @@ RUN if [ "$WITH_COMPOSER" = "yes" ]; then ( \
       else wget -t 5 --dns-timeout=3 --connect-timeout=3 -q https://getcomposer.org/composer-stable.phar -O /usr/bin/composer;\
       fi \
    ) \
+   && apt-get install -y git \
    && chmod +x /usr/bin/composer \
+   && composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/ \
+   && composer global require slince/composer-registry-manager \
+   && composer repo:use aliyun \
+   && composer self-update \
 ) fi
 
 
