@@ -6,8 +6,6 @@ pa.iml
 /library/vendor
 data/docker
 docker/mysql/pa.sql
-docker/docker-compose.yml
-*.gz
 docker/cache
-public/dist
+public/dist/bower_components
 data/cache
