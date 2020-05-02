@@ -38,8 +38,7 @@ RUN docker-php-source extract \
         && docker-php-ext-configure gd --with-jpeg --with-freetype --with-xpm --enable-gd-jis-conv \
         && docker-php-ext-install gd && docker-php-ext-enable gd \
     ) fi \
-    && docker-php-source delete \
-    && rm -rf /var/lib/apt/lists/*
+    && docker-php-source delete 
 
 
 # 安装COMPOSER
@@ -152,7 +151,7 @@ RUN if [ "$WITH_PA_PASSWORD" = "yes" ]; then ( \
     && rm -rf password-master pa.zip /tmp/pa.zip \
 ) fi
 
-
+RUN rm -rf /var/lib/apt/lists/* /tmp/*
 
 
 # 复制源文件

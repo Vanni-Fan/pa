@@ -26,7 +26,7 @@ docker run -d -p 80:80 --name pa_test registry.cn-hangzhou.aliyuncs.com/vanni/ph
     wget https://github.com/phalcon/cphalcon/archive/master.tar.gz -O cache/cphalcon-master.tar.gz
     wget https://github.com/phpredis/phpredis/archive/master.tar.gz -O cache/phpredis-master.tar.gz
     wget https://github.com/phalcon/php-zephir-parser/archive/master.tar.gz -O cache/php-zephir-parser-master.tar.gz
-    wget https://github.com/phalcon/zephir/releases/download/0.12.17/zephir.phar -O cache/zephir
+    wget https://github.com/phalcon/zephir/releases/download/0.12.18/zephir.phar -O cache/zephir
     wget https://github.com/Vanni-Fan/password/archive/master.zip -O cache/pa.zip
     ```
 - 构建时的`可选参数`以及`默认值`

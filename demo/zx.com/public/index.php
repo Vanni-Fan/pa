@@ -26,10 +26,10 @@ $app = include '/var/www/pa/public/index.php'; // 引入 PA 的 index.php 文件
 
 # 如果您需要 events 中配置监听对象，那么需要实现将对象注入到 $di 中
 PA::$di->set('my_db',(new \Phalcon\Db\Adapter\PdoFactory())->newInstance('mysql',[
-    'dbname'  => 'wy_db',
+    'dbname'  => 'test',
     'username'=> 'root',
     'password'=> '123456',
-    'host'    => '192.168.9.223',
+    'host'    => '192.168.2.202',
 ]));
 
 $app->run(
@@ -54,6 +54,11 @@ $app->run(
             // 'application:boot' => 'Txt::log',
             // 'loader:beforeCheckClass' => 'Txt::log',
             // 'router:matchedRoute' => 'Txt::log',
+        ],
+        'error' => [
+            'handler'   => 'Power\\Controllers\\ErrorController::handlerError',
+            'exception' => 'Power\\Controllers\\ErrorController::handlerException',
+            'controller'=> 'Power\\Controllers\\ErrorController',
         ],
     ]
 );
