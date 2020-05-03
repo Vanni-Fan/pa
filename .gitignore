@@ -1,9 +1,10 @@
 
 .idea
 pa.iml
-/public/docs
-/site
-/library/vendor
+public/docs
+site
+library/vendor
+library/composer.lock
 data/docker
 docker/mysql/pa.sql
 docker/cache
