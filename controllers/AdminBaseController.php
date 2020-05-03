@@ -165,7 +165,7 @@ class AdminBaseController extends Controller{
         # 扩展权限
         list('rule'=>$this->rules,'attribute'=>$this->attributes) = Configs::getConfigsByUser($this->tokeninfo['user_id']);
         # 扩展属性
-        if(!array_key_exists($this->menu_id, $this->menus)) throw new \Exception('Permission Denied(rule not exists).');
+        if(!array_key_exists($this->menu_id, $this->menus)) throw new \Exception('Permission Denied(menu not exists).');
         
         $owner_id = static::getItemOwner($this->item_id);
         if(!is_array($owner_id)) $owner_id = [$this->item_id=>$owner_id]; // 删除时可以传入多个ID，用逗号分隔

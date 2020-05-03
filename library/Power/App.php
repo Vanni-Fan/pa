@@ -268,7 +268,7 @@ class App{
         $need_module_url_prefix = count($include) !== 1;
         $have_admin_module = array_search('admin', $include);
         if($have_admin_module !== false){
-            unset($include[$have_admin_module]);
+//            unset($include[$have_admin_module]);
             self::loadAdminRouter($routers);
         }
 
