@@ -41,6 +41,7 @@ class MenusController extends AdminBaseController {
             'params' => json_encode($params, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             'router' => $is_dir ? null : json_encode($router,JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             'url_suffix'=>$_POST['url_suffix'] ?: null,
+            'is_enabled' => 1
         ];
         if($this->item_id){
             $obj = Menus::findFirst($this->item_id);
