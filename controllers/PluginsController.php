@@ -37,8 +37,9 @@ class PluginsController extends AdminBaseController {
                 break;
             case 'install':
             case 'uninstall':
+                $plugin->is_installed = ['install'=>1,'uninstall'=>0][$event];
+                $plugin->save();
                 break;
-            
         }
         if($redirect) $this->response->redirect($this->url(),true);
     }

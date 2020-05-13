@@ -122,7 +122,7 @@
             <div class="col-sm-6">
                 <label class="col-sm-4" for="router_module">功能模块</label>
                 <div class="col-sm-8">
-                    <select name="router[module]" value="<?=$rule['router']['module']??''?>" id="router_module" data-placeholders="选择或者输入模块名，默认不分模块" class="form-control" style="width: 100%">
+                    <select data-editable="true" name="router[module]" value="<?=$rule['router']['module']??''?>" id="router_module" data-placeholders="选择或者输入模块名，默认不分模块" class="form-control" style="width: 100%">
                         <option></option>
                         <?php foreach($modules as $name=>$module){ ?>
                         <option value="<?=$name?>"<?=$name==($rule['router']['module']??'') ? ' selected' : ''?>><?=$name?></option>

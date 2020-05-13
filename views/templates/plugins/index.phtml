@@ -20,16 +20,19 @@
                 <td>
                     <input type="checkbox"> <strong><?=$p->name?></strong>
                     <div>
-                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'setting'])?>">设置</a> |
-                        <?php if($p->is_enabled) { ?>
-                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'disable'])?>">停用</a> |
-                        <?php } else { ?>
-                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'enable'])?>">启用</a> |
-                        <?php } ?>
-                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'delete'])?>">删除</a> |
-                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'upgrade'])?>">更新</a> |
-                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'install'])?>">安装</a> |
-                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'uninstall'])?>">卸载</a>
+                    <?php if($p->is_installed){ ?>
+                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'setting'])?>">设置</a> 　
+                    <?php if($p->is_enabled) { ?>
+                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'disable'])?>">停用</a> 　
+                    <?php } else { ?>
+                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'enable'])?>">启用</a> 　
+                    <?php } ?>
+                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'uninstall'])?>">卸载</a>　
+                    <?php }else{ ?>
+                        <a href="<?=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'install'])?>">安装</a> 　
+                    <?php } ?>
+<!--                        <a href="--><?//=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'delete'])?><!--">删除</a> 　-->
+<!--                        <a href="--><?//=$c->url('update',['item_id'=>$p->plugin_id,'action'=>'set','event'=>'upgrade'])?><!--">更新</a> 　-->
                     </div>
                 </td>
                 <td>
@@ -37,8 +40,8 @@
                         <?=$p->description?>
                     </div>
                     <div>
-                        <?=$p->version?>版本 |
-                        由<a href="<?=$p->author_url?>"><?=$p->author?></a> |
+                        <?=$p->version?>版本 　
+                        由<a href="<?=$p->author_url?>"><?=$p->author?></a> 　
                         <a href="<?=$p->official_url?>">官网首页</a>
                     </div>
                 </td>

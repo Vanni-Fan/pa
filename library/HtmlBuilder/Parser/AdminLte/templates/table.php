@@ -210,17 +210,17 @@ function HtmlBuilder_table_selectAll(id,event){
     if(obj.hasClass('fa-square-o')){
         status = true;
         obj.removeClass('fa-square-o').addClass('fa-check-square-o');
-        $('#' + id + ' .htmlbuild-table-body tr').addClass('htmlbuild-table-selected-row');
+        $('#' + id + ' .htmlbuild-table-body tr[onclick]').addClass('htmlbuild-table-selected-row');
     }else{
         status = false;
         obj.removeClass('fa-check-square-o').addClass('fa-square-o');
-        $('#' + id + ' .htmlbuild-table-body tr').removeClass('htmlbuild-table-selected-row');
+        $('#' + id + ' .htmlbuild-table-body tr[onclick]').removeClass('htmlbuild-table-selected-row');
     }
 }
 
 // 反选
 function HtmlBuilder_table_inverse(id) {
-    $('#' + id + ' .htmlbuild-table-body tr').each(function(index,dom){
+    $('#' + id + ' .htmlbuild-table-body tr[onclick]').each(function(index,dom){
         $(dom).toggleClass('htmlbuild-table-selected-row');
     });
 }
@@ -417,6 +417,7 @@ function HtmlBuilder_table_setFilter(id, field) {
     
     var fields = {};
     for(var i=0;i<window[id].fields.length;i++){
+        if(window[id].fields[i].hasOwnProperty('filter') && !window[id].fields[i].filter) continue;
         fields[window[id].fields[i].name] = window[id].fields[i].text;
     }
     var filters = $.isEmptyObject(window[id].query.filters) ? [] : window[id].query.filters.sub;
@@ -481,7 +482,8 @@ function HtmlBuilder_table_setData(data, id) {
     for(var row in data.list){
         var tr_class = row % 2 ? 'odd' : 'even';
         var primary = data.list[row][options.primary || 'id'];
-        var canSelect = options.selectMode ? 'onclick="HtmlBuilder_table_selectRow($(this))"' : '';
+        var canSelect = (options.selectMode && (!data.list[row].hasOwnProperty('_CAN_SELECT_') || data.list[row]._CAN_SELECT_))
+                        ? 'onclick="HtmlBuilder_table_selectRow($(this))"' : '';
         var tr = '<tr data-id="' + primary + '" ' + canSelect + ' class="' + tr_class + '">';
         
         for(var i in options.fields){
@@ -494,8 +496,13 @@ function HtmlBuilder_table_setData(data, id) {
         }
         if(options.canEdit){
             var updateApi = options.updateApi.replace('_ID_', primary);
-            var edit_str = '<a title="编辑" href="' + updateApi + '"><i class="fa fa-edit" style="font-size:18px"></i></a>&nbsp; '+
-                           '<a title="删除" href="#" onclick="HtmlBuilder_table_delItems(\'' + id + '\',\'' + primary + '\');return false;"><i class="fa fa-trash-o" style="font-size:18px"></i></a>';
+            var edit_str = '&nbsp;';
+            if(!data.list[row].hasOwnProperty('_CAN_UPDATE_') || data.list[row]._CAN_UPDATE_){
+                edit_str += '<a title="编辑" href="' + updateApi + '"><i class="fa fa-edit" style="font-size:18px"></i></a>&nbsp; ';
+            }
+            if(!data.list[row].hasOwnProperty('_CAN_DELETE_') || data.list[row]._CAN_DELETE_){
+                edit_str += '<a title="删除" href="#" onclick="HtmlBuilder_table_delItems(\'' + id + '\',\'' + primary + '\');return false;"><i class="fa fa-trash-o" style="font-size:18px"></i></a>';
+            }
             if(options.editCallback){
                 edit_str = eval(options.editCallback)(data.list[row], edit_str);
             }
@@ -507,6 +514,9 @@ function HtmlBuilder_table_setData(data, id) {
     options.fixedTop && HtmlBuilder_table_fixedColumnWidth(id);
     
     // 分页设置
+    data.page = parseInt(data.page);
+    data.size = parseInt(data.size);
+    data.total = parseInt(data.total);
     var offset = (data.page - 1 ) * data.size + 1;
     var end = offset + parseInt((data.list.length < data.size ? data.list.length : data.size)) - 1;
     obj.find('.page-status').text(offset + '-' + end + ' of ' + data.total);
@@ -520,7 +530,7 @@ function HtmlBuilder_table_setData(data, id) {
         startPage: startPage,
         onPageClick: function (event, page) {
             var tmp = Object.assign({}, window[id].query.limit);
-            if($.isEmptyObject(tmp) || tmp.page === page) return;
+            if($.isEmptyObject(tmp) || parseInt(tmp.page) === page) return;
             options.query.limit.page = page;
             window[id] = options;
             HtmlBuilder_table_query(id);

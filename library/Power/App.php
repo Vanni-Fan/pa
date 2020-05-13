@@ -1,7 +1,6 @@
 <?php
 namespace Power;
 use Phalcon\Loader;
-use Phalcon\Mvc\View;
 use Phalcon\Mvc\Router;
 use Phalcon\Mvc\Model;
 use Phalcon\Config\Adapter\Php;
@@ -11,7 +10,6 @@ use Phalcon\Mvc\Dispatcher;
 use Phalcon\Db\Adapter\PdoFactory as DB;
 use Phalcon\Events\Manager as EM;
 use PA;
-use Power\Models\Plugins;
 
 class App{
     public function __construct()

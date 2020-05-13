@@ -57,7 +57,8 @@ abstract class PowerModelBase extends Model{
      */
     public static function parseWhere(array $conditions, array &$params, $op='AND', bool $checkFields=true):void {
 //        print_r($conditions);
-        if(!isset($conditions['where']) && !isset($conditions['key'], $conditions['val'])) return;
+//        if(!isset($conditions['where']) && !isset($conditions['key'], $conditions['val'])) return;
+        if(empty($conditions['where']) && empty($conditions['key']) && empty($conditions['val'])) return;
         if(isset($params['conditions'])){
             $where_str = $params['conditions'];
             $where_index = 'conditions';
