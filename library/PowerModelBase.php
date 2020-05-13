@@ -59,10 +59,12 @@ abstract class PowerModelBase extends Model{
 //        print_r($conditions);
         if(!isset($conditions['where']) && !isset($conditions['key'], $conditions['val'])) return;
         if(isset($params['conditions'])){
-            $where_str = &$params['conditions'];
+            $where_str = $params['conditions'];
+            $where_index = 'conditions';
         }else{
             $params[0] = $params[0]??'';
-            $where_str = &$params[0];
+            $where_str = $params[0];
+            $where_index = 0;
         }
         
         if(isset($conditions['key'], $conditions['val'])){
@@ -74,10 +76,9 @@ abstract class PowerModelBase extends Model{
             }
         }
         if($conditions['where']) $params['bind'] = $params['bind'] ?? [];
-//        print_r($conditions['where']);
-//        return;
         $sub_where_str = self::getParseWhereSql($conditions['where'],$params, $checkFields);
         $where_str = $where_str ? "$where_str $op $sub_where_str" : $sub_where_str;
+        $params[$where_index] = $where_str;
     }
     
     /**
@@ -116,6 +117,10 @@ abstract class PowerModelBase extends Model{
         $bind_index = count($params['bind']);
         $params['bind'][$bind_index] = $conditions['val'];
 //        $params['bindTypes'][$bind_index] = $fields[$conditions['key']];
+        if($conditions['op']==='%') {
+            $params['bind'][$bind_index] = '%'.$conditions['val'].'%';
+            return $conditions['key'] . ' like ' . '?'.$bind_index;
+        }
         return $conditions['key'] . ' ' . ($conditions['op']??'=') . ' ?'.$bind_index;
     }
 

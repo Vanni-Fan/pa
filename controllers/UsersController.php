@@ -139,6 +139,7 @@ class UsersController extends AdminBaseController {
 //        print_r($data);
 //        print_r($_FILES);
 //        print_r($_SERVER);
+
         if(!empty($_FILES['image'])){
             $file = $_FILES['image'];
             $file_suufix = '/uploads/users/'.uniqid().'.png';
@@ -163,11 +164,11 @@ class UsersController extends AdminBaseController {
                     unlink($_SERVER['DOCUMENT_ROOT'].$user->image);
                 }
             }
-            $user->save($data);
+            $user->assign($data)->save();
         }else{
             $user = new Users();
             $data['password'] = password_hash($data['password'],PASSWORD_DEFAULT);
-            $user->save($data);
+            $user->assign($data)->save();
         }
         $this->response->redirect($this->url('index'),true);
     }

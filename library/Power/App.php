@@ -189,7 +189,7 @@ class App{
                     if(isset(PA::${$obj_name})){
                         PA::${$obj_name}->setEventsManager(PA::$em);
                     }else{
-                        PA::$di->get($obj_name)->setEventsManager(PA::$em);
+                        if(PA::$di->has($obj_name)) PA::$di->get($obj_name)->setEventsManager(PA::$em);
                     }
                 }
             }

@@ -1016,4 +1016,47 @@ class Utils{
         foreach($pending as $field=>$size) $result[$field] = $size>8 ? ltrim($result[$field],"\x00") : hexdec($result[$field]);
         return $result;
     }/*}}}*/
+
+    /**
+     * 生成Token字符串
+     * @param array  $data   Token的数据来源
+     * @param array  $fields 哪些字段用于Token的加密
+     * @param string $key 用于Token加密的秘钥
+     * @return string
+     */
+    public static function makeToke(array $data, array $fields, string $key):string {
+        $cookie_field = $fields;
+        $cookie_value = array_intersect_key($data, $cookie_field);
+        if(count($cookie_value) != count($cookie_field)) throw new \Exception("Token加密的字段未提供完整");
+        if(!empty($cookie_value['login_ip'])){
+            $cookie_value['login_ip'] = ip2long($cookie_value['login_ip'] ?? self::ip());
+        }
+        return base64_encode(
+            self::encrypt(
+                self::pack($cookie_field, $cookie_value),
+                $key
+            )
+        );
+    }
+
+    /**
+     * 分析Token字符串，返回Token信息
+     * @param string $token 要解码的Token字符串
+     * @param array  $fields 哪些字段用于Token的加密
+     * @param string $key 用于Token加密的秘钥
+     * @return array
+     */
+    public static function parseToken(string $token, array $fields, string $key):array{
+        $token = self::unpack(
+            $fields,
+            self::decrypt(
+                base64_decode($token),
+                $key
+            )
+        );
+        if(!empty($token['login_ip'])){
+            $token['login_ip'] = long2ip($token['login_ip']);
+        }
+        return $token;
+    }
 }

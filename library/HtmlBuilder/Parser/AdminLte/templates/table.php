@@ -487,7 +487,7 @@ function HtmlBuilder_table_setData(data, id) {
         for(var i in options.fields){
             var def = options.fields[i]; // defined
             var val = data.list[row][def.name] || ''; // 当前字段值，不存在则为空
-            val = def.render ? eval(def.render)(val, def) : val; // 使用 render 函数处理内容
+            val = def.render ? eval(def.render)(val, data.list[row], def) : val; // 使用 render 函数处理内容
             var cls = def.hasOwnProperty('class') ? def.class : '';
             cls += (def.hasOwnProperty('show') && def.show == 0) ? ' hidden' : '';
             tr += '<td data-field="' + def.name + '" class="' + cls + '">' + val + '</td>';

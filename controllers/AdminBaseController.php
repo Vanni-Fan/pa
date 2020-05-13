@@ -209,7 +209,7 @@ class AdminBaseController extends Controller{
         foreach($params as $k=>$v){
             $url .= '/'.$k.'/'.$v;
         }
-        $url_query  = $this->request->isGet() ? $this->request->get() : []; // URL 中问号中的参数
+        $url_query  = $this->request->isGet() ? $this->request->getQuery() : []; // URL 中问号中的参数
         unset($url_query['_url']);
         $url .= $url_query ? ('?'.http_build_query($url_query)) : '';
         return $url;
@@ -318,7 +318,7 @@ class AdminBaseController extends Controller{
         if(!$extends || $extends->type!=='attribute') throw new \Exception("没有找到{$name}相关属性的配置");
         if($extends->var_type !== 'text' && is_string($value)) throw  new \Exception("{$name}属性的值类型应该是{$extends->var_type},但是当前给到是一个字符串");
         $value = is_string($value) ? $value : json_encode($value,JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        $config = UserConfigs::findFirst(['user_id=?0 and menu_id=?1','bind'=>[$this->getUserId(), $this->menu_id]]);
+        $config = UserConfigs::findFirst(['user_id=?0 and menu_id=?1 and name=?2','bind'=>[$this->getUserId(), $this->menu_id, $name]]);
         if($config){
             $config->assign(['value'=>$value])->update();
         }else{
@@ -329,6 +329,8 @@ class AdminBaseController extends Controller{
                     'menu_id'=>$this->menu_id,
                     'name'=>$name,
                     'value'=>$value,
+                    'config_id' => $extends->config_id,
+                    'is_enabled'=>1
                 ]
             )->create();
         }
