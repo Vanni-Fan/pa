@@ -11,7 +11,6 @@ class DataSources extends PMB{
 
     public static function getSources(array $filter=[]){
         # 配置中的数据源
-        $data = [];
         foreach(\PA::$config as $key=>$value){
             if(is_object($value) && $value->has('adapter')){
                 $v = $value->toArray();
@@ -19,16 +18,17 @@ class DataSources extends PMB{
                 $v['name'] = 'system';
                 $v['injection_name'] = $key;
                 $v['bind_events_manager'] = 1;
+                $v['status'] = 1;
+                $v['created_user'] = 1;
+                $v['updated_user'] = 1;
                 $v['_CAN_SELECT_'] = 0;
-                $data[] = $v;
+                yield $v;
             }
         }
 
         # 数据库中的数据源
         $where = [];
         self::parseWhere(['where'=>$filter], $where);
-        foreach(self::find($where) as $row) $data[] = $row->toArray();
-
-        return $data;
+        foreach(self::find($where) as $row) yield $row->toArray();
     }
 }

@@ -37,4 +37,9 @@ final class PA{
      * @var Phalcon\Mvc\View;
      */
     static public $view;
+    /**
+     * 登录的用户信息
+     * @var array
+     */
+    static public array $user = [];
 }

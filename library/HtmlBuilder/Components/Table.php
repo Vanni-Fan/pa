@@ -31,7 +31,8 @@ class Table extends Element
     public $canEdit        = false; // 编辑栏的标题，如果有表示可以编辑
     public $editColWidth   = 90;    // 编辑栏宽
     public $editCallback   = '';    // 编辑的回调函数
-    
+
+    public $canAppend      = true; // 是否显示添加按钮
     public $canDelete      = false; // 数据是否可删除
     public $selectMode     = 'single'; // 选择模式, null:不可选择，single:单选，multi:多选
 

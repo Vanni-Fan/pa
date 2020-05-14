@@ -126,27 +126,33 @@ abstract class PowerModelBase extends Model{
     }
 
     public function beforeSave(){
+        static $filled = false;
+        if($filled) return;
+        $filled = true;
+
         $fields = self::fields();
+        $time = time();
+        $date = date('Y-m-d H:i:s', $time);
         if(array_key_exists('updated_time', $fields)){
-            if(empty($this->updated_time)) $this->updated_time = $fields['updated_time'] === \Phalcon\Db\Column::TYPE_INTEGER ? time() : date('Y-m-d H:i:s');
+            if(empty($this->updated_time)) $this->updated_time = ($fields['updated_time'] === \Phalcon\Db\Column::TYPE_INTEGER ? $time: $date);
         }
-        // if(array_key_exists('updated_user', $fields)) {
-        //     if (empty($this->updated_user)) {
-        //         $tokeninfo = PA::$config['cookie_parser']($_COOKIE[PA::$config['cookie_name']]);
-        //         $this->updated_user = $tokeninfo['user_id'] ?? null;
-        //     }
-        // }
+        if(array_key_exists('created_time', $fields)){
+            if(empty($this->created_time)) $this->created_time = ($fields['created_time'] === \Phalcon\Db\Column::TYPE_INTEGER ? $time : $date);
+        }
+        if(array_key_exists('updated_user', $fields)) {
+            if (empty($this->updated_user)) $this->updated_user = PA::$user['user_id'] ?? null;
+        }
+        if(array_key_exists('created_user', $fields)) {
+            if (empty($this->created_user)) $this->created_user = PA::$user['user_id'] ?? null;
+        }
     }
     public function beforeCreate(){
-        $fields = self::fields();
-        if(array_key_exists('created_time', $fields)) {
-            if (empty($this->created_time)) $this->created_time = $fields['created_time'] === \Phalcon\Db\Column::TYPE_INTEGER ? time() : date('Y-m-d H:i:s');
-        }
-        // if(array_key_exists('created_user', $fields)) {
-        //     if (empty($this->created_user)) {
-        //         $tokeninfo = PA::$config['cookie_parser']($_COOKIE[PA::$config['cookie_name']]);
-        //         $this->created_user = $tokeninfo['user_id'] ?? null;
-        //     }
-        // }
+        $this->beforeSave();
+    }
+    public function beforeUpdate(){
+        $this->beforeSave();
+    }
+    public function prepareSave(){
+        $this->beforeSave();
     }
 }

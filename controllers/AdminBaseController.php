@@ -1,7 +1,6 @@
 <?php
 namespace Power\Controllers;
-use HtmlBuilder\Forms;
-use HtmlBuilder\Parser\AdminLte\Parser;
+
 use Power\Models\UserConfigs;
 use Power\Models\Configs;
 use Power\Models\Logs;
@@ -175,6 +174,7 @@ class AdminBaseController extends Controller{
                 throw new \Exception('Permission Denied.');
             }
         }
+        PA::$user = $this->userinfo;
     }
     
     /**

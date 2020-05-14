@@ -8,6 +8,7 @@ use HtmlBuilder\Layouts;
 use HtmlBuilder\Parser\AdminLte\Parser;
 use plugins\DataSource\Models\DataSources;
 use Power\Controllers\AdminBaseController;
+use Power\Models\Users;
 
 class ManagerController extends AdminBaseController
 {
@@ -33,21 +34,27 @@ class ManagerController extends AdminBaseController
         $this->view->contents = $parser->parse(
             Components::table('数据源列表')->description('系统数据源不可删除')
                 ->fields([
-                    ['name'=>'source_id','text'=>'编号'],
+                    ['name'=>'source_id','text'=>'编号','width'=>60,'class'=>'text-center'],
                     ['name'=>'name','text'=>'名称'],
-                    ['name'=>'adapter','text'=>'类型'],
+                    ['name'=>'adapter','text'=>'类型','class'=>'text-center'],
                     ['name'=>'dbname','text'=>'库名'],
                     ['name'=>'host','text'=>'主机'],
-                    ['name'=>'port','text'=>'端口'],
+                    ['name'=>'port','text'=>'端口','class'=>'text-center'],
                     ['name'=>'username','text'=>'用户名'],
                     ['name'=>'password','text'=>'密码'],
                     ['name'=>'injection_name','text'=>'注入名'],
                     ['name'=>'prefix','text'=>'表前缀'],
-                    ['name'=>'bind_events_manager','text'=>'事件绑定','render'=>'v=>v?"绑定":"未绑定"','filter'=>0],
-                    ['name'=>'created_time','text'=>'创建时间','show'=>0],
-                    ['name'=>'updated_time','text'=>'更新时间','show'=>0],
-                    ['name'=>'created_user','text'=>'创建者','show'=>0,'filter'=>0],
-                    ['name'=>'updated_user','text'=>'更新者','show'=>0,'filter'=>0],
+                    ['name'=>'bind_events_manager','text'=>'事件绑定','render'=>'v=>v?"绑定":"未绑定"','filter'=>0,'class'=>'text-center'],
+                    ['name'=>'created_time','text'=>'创建时间(本地化)','render'=>'t=>new Date(t*1000).toLocaleString()','show'=>0],
+                    ['name'=>'created_time','text'=>'创建时间(时间戳)','show'=>0],
+                    ['name'=>'updated_time','text'=>'更新时间(本地化)','render'=>'t=>new Date(t*1000).toLocaleString()','show'=>0],
+                    ['name'=>'updated_time','text'=>'更新时间(时间戳)','show'=>0],
+                    ['name'=>'status','text'=>'状态','render'=>'s=>parseInt(s)?"启用":"禁用"','class'=>'text-center','width'=>60],
+                    ['name'=>'remark','text'=>'备注','width'=>350,'show'=>0],
+                    ['name'=>'created_user','text'=>'创建者ID','show'=>0],
+                    ['name'=>'creator','text'=>'创建者','show'=>0,'filter'=>0],
+                    ['name'=>'updated_user','text'=>'更新者ID','show'=>0],
+                    ['name'=>'updater','text'=>'更新者','show'=>0,'filter'=>0],
                 ])
             ->primary('source_id')
             ->queryApi($this->getUrl(['command'=>'getList']))
@@ -80,7 +87,25 @@ class ManagerController extends AdminBaseController
      * ajax获取数据
      */
     function getList(){
-        $data = DataSources::getSources($_POST['filters']??[]);
+        # 查出所有的用户，并整理出用户数组为 [user_id=>user_name,....]
+        [$users, $_user] = [[], Users::find(['columns'=>'user_id, name'])];
+        iterator_apply($_user, function(&$users, $iterator){
+            $item = $iterator->current();
+            $users[$item['user_id']] = $item['name'];
+            return true;
+        },[&$users, $_user]);
+
+        # 查出所有数据源，并替换用户名
+        [$data, $_data] = [[], DataSources::getSources($_POST['filters']??[])];
+        iterator_apply($_data, function(&$data, $users, $iterator){
+            $item = $iterator->current();
+            $item['creator'] = $users[$item['created_user']];
+            $item['updater'] = $users[$item['updated_user']];
+            $data[] = $item;
+            return true;
+        },[&$data, $users, $_data]);
+
+        # 输出
         $this->jsonOut([
             'list'  => $data,
             'total' => count($data),
@@ -94,12 +119,15 @@ class ManagerController extends AdminBaseController
      * @throws \Exception
      */
     function update(){
+        $_POST['status'] = 1;
+        $_POST['remark'] = '';
         if($this->params['sid']){
             $obj = DataSources::findFirst($this->params['sid']+0);
+            $obj->assign($_POST)->update();
         }else{
             $obj = new DataSources;
+            $obj->assign($_POST)->create();
         }
-        $obj->assign($_POST)->save();
         $url = $this->url('update', ['action'=>'set','event'=>'setting','item'=>$this->params['item_id']]);
         $this->response->redirect($url);
     }
@@ -118,7 +146,7 @@ class ManagerController extends AdminBaseController
                     // 消息框主体
                     Element::create('div')->style('display: block;')->add(
                         Layouts::columns()->column(
-                            Forms::input('name','数据源名称',$data['name']??'')->labelWidth(3)->labelPosition('left-right'),6
+                            Forms::input('name','数据源名称',$data['name']??'')->required()->labelWidth(3)->labelPosition('left-right'),6
                         )->column(
                             Forms::input('injection_name','注入到PA::$di',$data['injection_name']??'')->labelWidth(3)->labelPosition('left-right'),6
                         ),
@@ -136,7 +164,7 @@ class ManagerController extends AdminBaseController
                         ),
 
                         Layouts::columns()->column(
-                            Forms::input('dbname','数据库名',$data['dbname']??'')->labelWidth(3)->labelPosition('left-right'),6
+                            Forms::input('dbname','数据库名',$data['dbname']??'')->required()->labelWidth(3)->labelPosition('left-right'),6
                         )->column(
                             Forms::input('prefix','表前缀',$data['prefix']??'')->labelWidth(3)->labelPosition('left-right'),6
                         ),

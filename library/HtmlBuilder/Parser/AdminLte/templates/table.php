@@ -289,8 +289,12 @@ function HtmlBuilder_table_init(id){
     }else{
         obj.find('.del-el,.add-el').remove();
     }
+    if(!options.canAppend){
+        obj.find('.add-el').remove();
+    }
     if(!options.selectMode){ // 去掉选择模块
         obj.find('.select-el').remove();
+        obj.find('.del-el').remove();
     }
     if(options.description){ // 去掉表头描述
         obj.find('.table-description').text(options.description);
