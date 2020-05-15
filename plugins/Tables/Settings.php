@@ -1,6 +1,7 @@
 <?php
 namespace plugins\Tables;
 use PA;
+use Phalcon\Db\Column;
 use Power\Models\Plugins;
 
 class Settings {
@@ -15,52 +16,49 @@ class Settings {
         return false;
     }
     public static function install($controller, $plugin){
-        // todo 需要调整到 premissionadmin.com 上去进行安装
-        // 1、 创建表
-        $sql1 = 'CREATE TABLE IF NOT EXISTS "plugins_table_sources" (
-          "id" INTEGER NOT NULL,
-          "name" TEXT,
-          "dbname" TEXT,
-          "type" TEXT,
-          "host" TEXT,
-          "port" TEXT,
-          "user" TEXT,
-          "password" TEXT,
-          "path" TEXT,
-          "is_system" INTEGER,
-          "status" INTEGER,
-          PRIMARY KEY ("id")
-        );';
-        $sql2 = 'CREATE TABLE IF NOT EXISTS "plugins_table_menus" (
-          "id" INTEGER NOT NULL,
-          "menu_id" INTEGER,
-          "source_id" integer,
-          "model_file" TEXT,
-          "table_name" TEXT,
-          PRIMARY KEY ("id")
-        );';
-        $now = date('Y-m-d H:i:s');
-        PA::$db->execute(
-            'INSERT INTO "plugins"("name", "class_name", "is_enabled", "icon_url", "images", "description", "permission", "official_url", "author", "author_url", "version", "match_version", "license", "status_time", "publish_date", "inserted_time", "created_time", "updated_time", "created_user", "updated_user")' .
-            'VALUES ("Tables", NULL, 1, NULL, NULL, "对MySQL表进行增删改查的简易操作", NULL, "http://pa.com", "Vanni Fan", "http://vanni.fan", "1.0", "^1.0", "BSD", ?1, ?1, ?1, NULL, NULL, NULL, NULL)'
-        ,[$now]);
-        PA::$db->execute($sql1);
-        # 系统的数据源默认插入，但是不可编辑
-        $sys_ds = [
-            'name'     => PA::$config['pa_db']['dbname'],
-            'type'     => PA::$config['pa_db']['adapter'],
-            'host'     => PA::$config['pa_db']['host']??'',
-            'port'     => PA::$config['pa_db']['port'],
-            'user'     => PA::$config['pa_db']['username']??'',
-            'password' => PA::$config['ps_db']['password']??'',
-            'path'     => POWER_BASE_DIR . 'models/'
-        ];
-        PA::$db->execute(
-            'INSERT INTO "plugins_table_sources"("name","dbname","type","host","port","user","password","path","is_system","status")
-              VALUES("系统",:name,:type,:host,:port,:user,:password,:path,1,0)',
-            $sys_ds
+        PA::$db->createTable(
+            PA::$config->pa_db->prefix.'tables_menus',
+            '',
+            ['columns' => [
+                new Column('id'       , ['type' => Column::TYPE_INTEGER    , 'size'=>10     , 'unsigned'=>1 , 'notNull'=>1   , 'autoIncrement'=>1, 'primary'=>1]),
+                new Column('menu_id'  , ['type' => Column::TYPE_INTEGER    , 'unsigned'=>1]),
+                new Column('menu_name', ['type' => Column::TYPE_VARCHAR    , 'size' => 10]),
+                new Column('title'    , ['type' => Column::TYPE_VARCHAR    , 'size' => 50]),
+                new Column('subtitle' , ['type' => Column::TYPE_VARCHAR    , 'size' => 50   , 'notNull'=>0]),
+                new Column('filters'  , ['type' => Column::TYPE_TEXT       , 'notNull'=>0]),
+                new Column('canMin'   , ['type' => Column::TYPE_TINYINTEGER, 'size'=>1      , 'default'=>1  , 'unsigned'=>1]),
+                new Column('canClose' , ['type' => Column::TYPE_TINYINTEGER, 'size'=>1      , 'default'=>1  , 'unsigned'=>1]),
+                new Column('canSelect', ['type' => Column::TYPE_TINYINTEGER, 'size'=>1      , 'default'=>1  , 'unsigned'=>1]),
+                new Column('canEdit'  , ['type' => Column::TYPE_TINYINTEGER, 'size'=>1      , 'default'=>1  , 'unsigned'=>1]),
+                new Column('canAppend', ['type' => Column::TYPE_TINYINTEGER, 'size'=>1      , 'default'=>1  , 'unsigned'=>1]),
+                new Column('canDelete', ['type' => Column::TYPE_TINYINTEGER, 'size'=>1      , 'default'=>1  , 'unsigned'=>1]),
+                new Column('canFilter', ['type' => Column::TYPE_TINYINTEGER, 'size'=>1      , 'default'=>1  , 'unsigned'=>1]),
+            ]]
         );
-        PA::$db->execute($sql2);
+
+        PA::$db->createTable(
+            PA::$config->pa_db->prefix.'tables_fields',
+            '',
+            ['columns' => [
+                new Column('id',['type' => Column::TYPE_INTEGER,'size'=>10,'unsigned'=>1,'notNull'=>1,'autoIncrement'=>1,'primary'=>1]),
+                new Column('table_id',['type' => Column::TYPE_INTEGER,'unsigned'=>1]),
+                new Column('field',['type' => Column::TYPE_VARCHAR,'size' => 50]),
+                new Column('name',['type' => Column::TYPE_VARCHAR,'size' => 255]),
+                new Column('text',['type' => Column::TYPE_VARCHAR,'size' => 255]),
+                new Column('tooltip',['type' => Column::TYPE_VARCHAR,'size' => 255,'notNull'=> 0]),
+                new Column('width',['type' => Column::TYPE_TINYINTEGER,'notNull'=> 0,'unsigned'=>1]),
+                new Column('sort',['type' => Column::TYPE_TINYINTEGER,'size'=>1,'default'=>1,'unsigned'=>1]),
+                new Column('filter',['type' => Column::TYPE_TINYINTEGER,'size'=>1,'default'=>1,'unsigned'=>1]),
+                new Column('show',['type' => Column::TYPE_TINYINTEGER,'size'=>1,'default'=>1,'unsigned'=>1]),
+                new Column('render',['type' => Column::TYPE_TEXT,'size' => 50,'notNull'=> 0]),
+                new Column('type',['type' => Column::TYPE_VARCHAR,'notNull'=> 50]),
+                new Column('params',   ['type'=>Column::TYPE_TEXT,'notNull'=> 0]),
+                new Column('icon', ['type'=>Column::TYPE_VARCHAR,'size' => 255,'notNull'=> 0]),
+                new Column('class',['type'=>Column::TYPE_VARCHAR,'size' => 255,'notNull'=> 0]),
+            ]]
+        );
+        return true;
+
         // 2、 创建 model
         $db_name = 'System';
         $template = file_get_contents(__DIR__ .'/ModelTemplate.php');
@@ -80,21 +78,17 @@ class Settings {
         return true;
     }
     public static function uninstall($controller, $plugin){
-        $plugin->delete();
-        PA::$db->execute('drop table if exists "plugins_table_sources"');
-        PA::$db->execute('drop table if exists "plugins_table_menus"');
-        $dir = POWER_DATA . 'TablesPlugins/Tables/System/';
-        if(file_exists($dir . 'PluginsTableSources.php')) unlink($dir . 'PluginsTableSources.php');
-        if(file_exists($dir . 'PluginsTableMenus.php'))   unlink($dir . 'PluginsTableMenus.php');
+        PA::$db->dropTable(PA::$config->pa_db->prefix.'tables_fields');
+        PA::$db->dropTable(PA::$config->pa_db->prefix.'tables_menus');
         return true;
     }
     public static function autoload(){ // 自动加载
-        static $is_loaded = false;
-        if($is_loaded) return;
-        $dirs = PA::$loader->getDirs();
-        $dirs[] = POWER_DATA.'TablesPlugins';
-        PA::$loader->registerDirs($dirs);
-        PA::$loader->register();
-        $is_loaded = true;
+//        static $is_loaded = false;
+//        if($is_loaded) return;
+//        $dirs = PA::$loader->getDirs();
+//        $dirs[] = POWER_DATA.'TablesPlugins';
+//        PA::$loader->registerDirs($dirs);
+//        PA::$loader->register();
+//        $is_loaded = true;
     }
 }

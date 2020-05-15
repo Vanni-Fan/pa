@@ -34,6 +34,12 @@ class Select extends Element
      * @var string|Element 是否允许输入其他选项
      */
     public $other = ''; // 允许输入其他项目
+
+    /**
+     * 默认值
+     * @var array
+     */
+    public $value = [];
     
     /**
      * Select constructor.

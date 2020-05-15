@@ -18,10 +18,8 @@ $this->style(/** @lang CSS */'
 
 '
 );
-if(empty($style)){
-    $style = $visible ? "display:flex;$style;" : 'display:none;';
-}
 
+$style = $visible ? "display:flex;$style;" : 'display:none;';
 
 ?>
 <div id="<?=$id?>" class="<?=$attributes['class']??'form-group htmlbuild-form'?>" style="<?=$style?>">
@@ -34,7 +32,10 @@ if(empty($style)){
                 data-placeholder="<?=$placeHolder?>"
                 style="width:100%;height: auto;"
         >
-        <?php foreach($choices as $item){ $selected = (array_search($item['value'], $value)===false) ? '' : ' selected'; ?>
+        <?php foreach($choices as $item){
+            $item = is_array($item) ? $item : ['value'=>$item,'text'=>$item];
+            $selected = (array_search($item['value'], $value)===false) ? '' : ' selected';
+        ?>
             <option <?=$selected?> value="<?=$item['value']?>"><?=$item['text']?></option>
         <?php } ?>
         </select>

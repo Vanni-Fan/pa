@@ -32,8 +32,9 @@ class Table extends Element
     public $editColWidth   = 90;    // 编辑栏宽
     public $editCallback   = '';    // 编辑的回调函数
 
-    public $canAppend      = true; // 是否显示添加按钮
+    public $canAppend      = true;  // 是否显示添加按钮
     public $canDelete      = false; // 数据是否可删除
+    public $canFilter      = true;  // 是否可以筛选过滤
     public $selectMode     = 'single'; // 选择模式, null:不可选择，single:单选，multi:多选
 
     public $query          = null; // 当前查询条件，filter[ [field,operation,value],... ], sort[ [field,asc|desc],... ], limit[start, end]

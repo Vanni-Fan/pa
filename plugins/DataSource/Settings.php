@@ -19,7 +19,7 @@ class Settings {
     }
     public static function install($controller, $plugin){
         return PA::$db->createTable(
-            'pa_datasources',
+            PA::$config->pa_db->prefix.'datasources',
             '',
             ['columns' => [
                 new Column('source_id',['type' => Column::TYPE_INTEGER,'size'=> 10,'notNull'=> true,'autoIncrement' => true,'primary' => true,]),
@@ -43,7 +43,7 @@ class Settings {
         );
     }
     public static function uninstall($controller, $plugin){
-        return PA::$db->dropTable('pa_datasources');
+        return PA::$db->dropTable(PA::$config->pa_db->prefix.'datasources');
     }
     public static function autoload(){ // 自动加载
         static $is_loaded = false;

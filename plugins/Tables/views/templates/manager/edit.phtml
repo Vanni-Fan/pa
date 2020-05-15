@@ -1,0 +1,246 @@
+<style>
+    .header_select{
+        width: 100%;
+        display: flex !important;
+    }
+    .header_select div,.header_select button{
+        flex-basis: 140px;
+        display: inline;
+        margin-right:10px;
+    }
+    .table_base{
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .table_base .close{
+        margin-right:-10px;
+        margin-top:-5px;
+    }
+    .table_base .callout{
+        cursor:pointer;
+    }
+    .table_base>div{
+        flex-basis: 450px;
+        margin:10px;
+    }
+    .table_row .row{
+        margin-bottom: 20px;
+    }
+    .table_row label{
+        line-height: 30px;
+        margin: 0;
+        padding: 0;
+    }
+</style>
+<script>
+/**
+ * 显示一个模态框，可选参数：
+ *  title: 标题(html)
+ *  body: 内容(html)
+ *  close.text: 关闭按钮(html)
+ *  close.click: 关闭按钮的回调(function)
+ *  ok.text: 确认按钮(html)
+ *  ok.click: 确认按钮的回调(function)
+ *  delay: 延迟多久自动关闭,0表示不会自动关闭(int)
+ *  width: 宽，默认auto
+ *  height： 高，默认auto
+ * @param params
+ */
+$(function() {
+    let a = $('#base').clone();
+    a.css('display','block');
+    showDialogs({
+        title: "<b>添加数据表菜单</b>",
+        body: a,
+        close: {
+            text: "取消",
+            click: t => t.close()
+        },
+        ok: {
+            text: "确定",
+            click: t => t.close()
+        }
+    });
+
+    let b = $('#fil').clone();
+    b.css('display','block');
+    showDialogs({
+        title: "<b>添加查询条件</b>",
+        body: b,
+        close: {
+            text: "取消",
+            click: t => t.close()
+        },
+        ok: {
+            text: "确定",
+            click: t => t.close()
+        }
+    },'a');
+});
+
+</script>
+
+
+
+
+
+
+
+<!--二级菜单-->
+<div class="box box-success">
+    <div class="box-header with-border">
+        <h3 class="box-title header_select">
+            <div class="">
+                <select name="" class="form-control">
+                    <option value="">数据源</option>
+                    <option value="BBB">aaa</option>
+                    <option value="BBB">我是超长的数据源名称能不能显示出来呢？</option>
+                </select>
+            </div>
+            <div class="">
+                <select name="" class="form-control  " data-placeholder="" style="width:100%;height: auto;">
+                    <option value="">数据表</option>
+                    <option value="BBB">aaa</option>
+                    <option value="BBB">ccc</option>
+                </select>
+            </div>
+            <button type="button" class="btn btn-info btn-flat">添加</button>
+        </h3>
+    </div>
+
+    <div class="box-body table_base">
+        <div class="callout bg-gray">
+            <button type="button" class="close">x</button>
+            <h5>首页 / 系统管理 / 插件管理</h5>
+            <h4 style="display: inline;">系统日志表</h4>
+            <h5 style="display: inline;padding-left: 10px;">副标题太长怎么办...</h5>
+            <div style="width: 150px;float: right;margin-right: -20px;">
+                <button type="button" class="btn btn-sm btn-default btn-flat">基础参数</button>
+                <button type="button" class="btn btn-sm btn-default btn-flat">查询参数</button>
+            </div>
+        </div>
+        <div class="callout callout-success">
+            <button type="button" class="close">x</button>
+            <h5>首页 / 系统管理 / 插件管理</h5>
+            <h4 style="display: inline;">系统日志表</h4>
+            <h5 style="display: inline;padding-left: 10px;">副标题太长怎么办...</h5>
+            <div style="width: 150px;float: right;margin-right: -20px;">
+                <button type="button" class="btn btn-sm btn-info btn-flat">基础参数</button>
+                <button type="button" class="btn btn-sm btn-info btn-flat">查询参数</button>
+            </div>
+        </div>
+        <div class="callout bg-gray">
+            <button type="button" class="close">x</button>
+            <h5>首页 / 系统管理 / 插件管理</h5>
+            <h4 style="display: inline;">系统日志表</h4>
+            <h5 style="display: inline;padding-left: 10px;">副标题太长怎么办...</h5>
+            <div style="width: 150px;float: right;margin-right: -20px;">
+                <button type="button" class="btn btn-sm btn-default btn-flat">基础参数</button>
+                <button type="button" class="btn btn-sm btn-default btn-flat">查询参数</button>
+            </div>
+        </div>
+        <div class="callout bg-gray">
+            <button type="button" class="close">x</button>
+            <h5>首页 / 系统管理 / 插件管理</h5>
+            <h4 style="display: inline;">系统日志表</h4>
+            <h5 style="display: inline;padding-left: 10px;">副标题太长怎么办...</h5>
+            <div style="width: 150px;float: right;margin-right: -20px;">
+                <button type="button" class="btn btn-sm btn-default btn-flat">基础参数</button>
+                <button type="button" class="btn btn-sm btn-default btn-flat">查询参数</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--字段设置-->
+<div class="box box-success">
+    <div class="box-header with-border">
+        <h3 class="box-title">字段设置</h3>
+        <div class="box-tools pull-right">
+            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        </div>
+    </div>
+
+    <div class="box-body">
+
+        <table class="table table-bordered table-striped dataTable" style="margin-bottom:0" table-layout="fixed">
+            <thead>
+                <tr class="htmlbuild-table-header">
+                    <th class="text-center text-center">字段</th>
+                    <th class="text-center text-center">字段</th>
+                    <th class="text-center text-center">字段</th>
+                </tr>
+            </thead>
+            <tbody class="htmlbuild-table-body">
+                <tr class="even">
+                    <td data-field="user_id" class="text-center">1</td>
+                    <td data-field="role_id" class=" hidden">1</td>
+                    <td data-field="role_name" class="text-center">系统管理员</td>
+                    <td data-field="role_name" class="text-center">系统管理员</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+
+
+
+
+<div id="fil" style="display:none">
+    <div class="filters"><div about="基本条件样式" class="base-filter-template"><div class="input-group margin"><div class="input-group-btn"><span type="button" data-toggle="dropdown" class="btn btn-info dropdown-toggle" aria-expanded="false" style="width: 150px; border-right: none;"><span class="current-operation">编号</span><span class="fa fa-caret-down pull-right"></span></span> <ul class="dropdown-menu"><li class="disabled"><a>选择一个字段</a></li> <li class="divider"></li> <li value="编号" class="active"><a>编号</a></li><li value="名称"><a>名称</a></li><li value="类型"><a>类型</a></li><li value="库名"><a>库名</a></li><li value="主机"><a>主机</a></li><li value="端口"><a>端口</a></li><li value="用户名"><a>用户名</a></li><li value="密码"><a>密码</a></li><li value="注入名"><a>注入名</a></li><li value="表前缀"><a>表前缀</a></li><li value="创建时间(时间戳)"><a>创建时间(时间戳)</a></li><li value="更新时间(时间戳)"><a>更新时间(时间戳)</a></li><li value="状态"><a>状态</a></li><li value="备注"><a>备注</a></li><li value="创建者ID"><a>创建者ID</a></li><li value="更新者ID"><a>更新者ID</a></li></ul></div> <div class="input-group-btn"><span type="button" data-toggle="dropdown" class="btn btn-info dropdown-toggle" style="width: 110px; border-radius: 0px; border-width: 1px 0px 1px 1px;"><span class="current-operation">等于</span><span class="fa fa-caret-down pull-right"></span></span> <ul class="dropdown-menu"><li class="disabled"><a>选择一个操作符</a></li> <li class="divider"></li> <li value="=" class="active"><a>等于</a></li><li value=">"><a>大于</a></li><li value=">="><a>大于或等于</a></li><li value="<"><a>小于</a></li><li value="<="><a>小于或等于</a></li><li value="!="><a>不等于</a></li><li value="%"><a>包含</a></li></ul></div> <input type="text" placeholder="查询值" class="form-control" style="border-color: rgb(0, 172, 214);"> <span class="input-group-btn"><button type="button" class="btn btn-info"><i class="fa fa-close"></i></button></span></div></div> <!----><div about="基本条件样式" class="base-filter-template"><div class="input-group margin"><div class="input-group-btn"><span type="button" data-toggle="dropdown" class="btn btn-info dropdown-toggle" style="width: 150px; border-right: none;"><span class="current-operation">字段</span><span class="fa fa-caret-down pull-right"></span></span> <ul class="dropdown-menu"><li class="disabled"><a>选择一个字段</a></li> <li class="divider"></li> <li value="编号"><a>编号</a></li><li value="名称"><a>名称</a></li><li value="类型"><a>类型</a></li><li value="库名"><a>库名</a></li><li value="主机"><a>主机</a></li><li value="端口"><a>端口</a></li><li value="用户名"><a>用户名</a></li><li value="密码"><a>密码</a></li><li value="注入名"><a>注入名</a></li><li value="表前缀"><a>表前缀</a></li><li value="创建时间(时间戳)"><a>创建时间(时间戳)</a></li><li value="更新时间(时间戳)"><a>更新时间(时间戳)</a></li><li value="状态"><a>状态</a></li><li value="备注"><a>备注</a></li><li value="创建者ID"><a>创建者ID</a></li><li value="更新者ID"><a>更新者ID</a></li></ul></div> <div class="input-group-btn"><span type="button" data-toggle="dropdown" class="btn btn-info dropdown-toggle" style="width: 110px; border-radius: 0px; border-width: 1px 0px 1px 1px;"><span class="current-operation">等于</span><span class="fa fa-caret-down pull-right"></span></span> <ul class="dropdown-menu"><li class="disabled"><a>选择一个操作符</a></li> <li class="divider"></li> <li value="=" class="active"><a>等于</a></li><li value=">"><a>大于</a></li><li value=">="><a>大于或等于</a></li><li value="<"><a>小于</a></li><li value="<="><a>小于或等于</a></li><li value="!="><a>不等于</a></li><li value="%"><a>包含</a></li></ul></div> <input type="text" placeholder="查询值" class="form-control" style="border-color: rgb(0, 172, 214);"> <span class="input-group-btn"><button type="button" class="btn btn-info"><i class="fa fa-close"></i></button></span></div></div> <!----> <div class="add-filter-template"><div class="btn-group"><div class="btn-group"><button type="button" data-toggle="dropdown" class="btn btn-info dropdown-toggle" aria-expanded="false"><i class="fa fa-plus"></i> 添加条件<span class="fa fa-caret-down pull-right"></span></button> <ul class="dropdown-menu"><li value="BASE"><a>标准条件</a></li> <li class="divider"></li> <li value="AND"><a>条件集合（全部匹配）</a></li> <li value="OR"><a>条件集合（部分匹配）</a></li></ul></div></div></div></div>
+</div>
+<div id="base" class="table_row" style="display:none">
+    <div class="row">
+        <div class="col-sm-6">
+            <label class="col-sm-3" for="parent_id">父级菜单</label>
+            <div class="col-sm-9">
+                <select id="parent_id" name="parent_id" data-placeholders="选择一个父级菜单，默认：根节点" class="form-control select2-hidden-accessible" style="width: 100%" data-select2-id="parent_id" tabindex="-1" aria-hidden="true">
+                    <option data-select2-id="2"></option>
+                </select>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="name" class="col-sm-3 control-label must-start">菜单名称</label>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <input name="name" type="text" class="form-control" id="name" value="" placeholder="输入名字">
+                        <span class="input-group-addon" onclick="showIcons()"><i id="current_icon" class="fa fa-fonticons"></i></span>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" name="icon" value="">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-3">设置表头</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" placeholder="Enter ...">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label class="col-sm-3">设置描述</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" placeholder="Enter ...">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="display:flex;justify-content: space-between;">
+        <label><input type="checkbox">可选择</label>
+        <label><input type="checkbox">可编辑</label>
+        <label><input type="checkbox">可筛选</label>
+        <label><input type="checkbox">可添加</label>
+        <label><input type="checkbox">可删除</label>
+        <label><input type="checkbox">可收缩</label>
+        <label><input type="checkbox">可关闭</label>
+    </div>
+</div>

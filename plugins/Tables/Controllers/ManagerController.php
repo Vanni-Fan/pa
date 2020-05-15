@@ -1,5 +1,6 @@
 <?php
 namespace plugins\Tables\Controllers;
+
 use HtmlBuilder\Components;
 use HtmlBuilder\Element;
 use HtmlBuilder\Forms;
@@ -22,13 +23,14 @@ class ManagerController extends AdminBaseController
     private $params = [];
     public function initialize()
     {
-        $this->page_size = 10;
-        PA::$loader->registerNamespaces([
-            'Tables' => POWER_DATA . 'TablesPlugins/'
-        ]);
-        PA::$loader->register();
+//        $this->page_size = 10;
+//        PA::$loader->registerNamespaces([
+//            'Tables' => POWER_DATA . 'TablesPlugins/'
+//        ]);
+//        PA::$loader->register();
         $this->params = $this->getParam();
         unset($this->params['Rule']);
+        $this->template_path = POWER_BASE_DIR . 'plugins/Tables/views/templates/';
         return parent::initialize();
     }
 
@@ -184,6 +186,7 @@ class ManagerController extends AdminBaseController
         $db = Factory::load($arr);
         # 查出所有的表
         $tables = [];
+
         switch($source_info->type){ # todo 加入其它支持的数据库
             case 'mysql':
                 $tables = $db->query('show tables')->fetchAll(PDO::FETCH_COLUMN);
@@ -224,6 +227,9 @@ class ManagerController extends AdminBaseController
      */
     public function settingsAction(){
         $this->title = 'Tables插件设置';
+
+        $this->render('manager/edit');
+        return;
         if($this->getParam('command')){
              return $this->{$this->getParam('command')}();
         }
