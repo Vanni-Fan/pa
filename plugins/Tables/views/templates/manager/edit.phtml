@@ -31,7 +31,14 @@
         margin: 0;
         padding: 0;
     }
+    .my_fields td{
+        padding:0 !important;
+        margin:0;
+        vertical-align: middle !important;
+    }
 </style>
+<script src="/dist/plugins/vue/vue.js"></script>
+<script src="/dist/vue.component.js"></script>
 <script>
 /**
  * 显示一个模态框，可选参数：
@@ -46,6 +53,27 @@
  *  height： 高，默认auto
  * @param params
  */
+let sources = [
+    {source_id:1, name:'pa_db'},
+    {source_id:2, name:'wu_db'},
+];
+let tables = [
+    {
+        fields:[
+            {id:1,field:'user_id',name:'用户ID',tooltip:'这个是用户的ID',width:10,sort:1,filter:1,show:1,render:'',type:'text',params:{},icon:'',class:''},
+            {id:1,field:'name',name:'用户名',tooltip:'',width:10,sort:1,filter:1,show:1,render:'',type:'text',params:{},icon:'',class:''},
+            {id:1,field:'sex',name:'性别',tooltip:'',width:10,sort:1,filter:1,show:1,render:'',type:'text',params:{},icon:'',class:''},
+            {id:1,field:'mobile',name:'手机号',tooltip:'',width:10,sort:1,filter:1,show:1,render:'',type:'text',params:{},icon:'',class:''}
+        ],
+        menus:[
+            {id:1,name:'用户管理',icon:'fa fa-users',title:'用户表',subtitle:'',filter:{},canMin:1,canSelect:1,canEdit:1,canAppend:1,canDelete:1,canFilter:1},
+            {id:2,name:'插件管理',icon:'fa fa-group',title:'插件表',subtitle:'',filter:{},canMin:1,canSelect:1,canEdit:1,canAppend:1,canDelete:1,canFilter:1},
+            {id:3,name:'角色管理',icon:'fa fa-tools',title:'角色表',subtitle:'',filter:{},canMin:1,canSelect:1,canEdit:1,canAppend:1,canDelete:1,canFilter:1}
+        ]
+    }
+];
+//let sources = <?// =$sources?>
+
 $(function() {
     let a = $('#base').clone();
     a.css('display','block');
@@ -76,6 +104,35 @@ $(function() {
             click: t => t.close()
         }
     },'a');
+    let vo = new Vue({
+        data:function(){
+            return {
+                fields:fields,
+                filters:filters
+            };
+        },
+        el:'#FILTERS_TEMPLATE',
+        methods:{
+            getFilters:function(){
+                return this.filters;
+            },
+            checkFilters:function(fs){
+                var rs = true;
+                for(var i=0; i<fs.length; i++){
+                    if(fs[i].sub){
+                        rs = this.checkFilters(fs[i].sub);
+                        if(!rs) break;
+                    } else {
+                        if(!fs[i].key || !fs[i].val){
+                            rs = false;
+                            break;
+                        }
+                    }
+                }
+                return rs;
+            }
+        }
+    });
 });
 
 </script>
@@ -89,7 +146,7 @@ $(function() {
 <!--二级菜单-->
 <div class="box box-success">
     <div class="box-header with-border">
-        <h3 class="box-title header_select">
+        <div class="box-title header_select">
             <div class="">
                 <select name="" class="form-control">
                     <option value="">数据源</option>
@@ -105,7 +162,7 @@ $(function() {
                 </select>
             </div>
             <button type="button" class="btn btn-info btn-flat">添加</button>
-        </h3>
+        </div>
     </div>
 
     <div class="box-body table_base">
@@ -165,18 +222,67 @@ $(function() {
 
         <table class="table table-bordered table-striped dataTable" style="margin-bottom:0" table-layout="fixed">
             <thead>
-                <tr class="htmlbuild-table-header">
-                    <th class="text-center text-center">字段</th>
-                    <th class="text-center text-center">字段</th>
-                    <th class="text-center text-center">字段</th>
+                <tr class="">
+                    <th class="text-center">字段名</th>
+                    <th class="text-center">显示名</th>
+                    <th class="text-center" width="100px">字段类型</th>
+                    <th class="text-center" width="100px">展示宽度</th>
+                    <th class="text-center" width="100px">提示语言</th>
+                    <th class="text-center" width="80px">不展示</th>
+                    <th class="text-center" width="80px">可排序</th>
+                    <th class="text-center" width="80px">可筛选</th>
+                    <th class="text-center" width="80px">可显示</th>
+                    <th class="text-center" width="50px">图标</th>
                 </tr>
             </thead>
-            <tbody class="htmlbuild-table-body">
+            <tbody class="my_fields">
                 <tr class="even">
-                    <td data-field="user_id" class="text-center">1</td>
-                    <td data-field="role_id" class=" hidden">1</td>
-                    <td data-field="role_name" class="text-center">系统管理员</td>
-                    <td data-field="role_name" class="text-center">系统管理员</td>
+                    <td class="text-center">abcd_defg</td>
+                    <td class="text-center"><input class="form-control" ype="text"></td>
+                    <td class="text-center"><select class="form-control"><option>文本</option><option>数字</option></select></td>
+                    <td class="text-center"><input class="form-control" type="number"></td>
+                    <td class="text-center"><input class="form-control" type="text"></td>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center"><i class="fa fa-save"></i></td>
+                </tr>
+                <tr class="odd">
+                    <td class="text-center">abcd_defg</td>
+                    <td class="text-center"><input class="form-control" ype="text"></td>
+                    <td class="text-center"><select class="form-control"><option>文本</option><option>数字</option></select></td>
+                    <td class="text-center"><input class="form-control" type="number"></td>
+                    <td class="text-center"><input class="form-control" type="text"></td>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center"><i class="fa fa-save"></i></td>
+                </tr>
+                <tr class="even">
+                    <td class="text-center">abcd_defg</td>
+                    <td class="text-center"><input class="form-control" ype="text"></td>
+                    <td class="text-center"><select class="form-control"><option>文本</option><option>数字</option></select></td>
+                    <td class="text-center"><input class="form-control" type="number"></td>
+                    <td class="text-center"><input class="form-control" type="text"></td>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center"><i class="fa fa-save"></i></td>
+                </tr>
+                <tr class="odd">
+                    <td class="text-center">abcd_defg</td>
+                    <td class="text-center"><input class="form-control" ype="text"></td>
+                    <td class="text-center"><select class="form-control"><option>文本</option><option>数字</option></select></td>
+                    <td class="text-center"><input class="form-control" type="number"></td>
+                    <td class="text-center"><input class="form-control" type="text"></td>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center"><input type="checkbox"></td>
+                    <td class="text-center"><i class="fa fa-save"></i></td>
                 </tr>
             </tbody>
         </table>
@@ -191,6 +297,13 @@ $(function() {
 <div id="fil" style="display:none">
     <div class="filters"><div about="基本条件样式" class="base-filter-template"><div class="input-group margin"><div class="input-group-btn"><span type="button" data-toggle="dropdown" class="btn btn-info dropdown-toggle" aria-expanded="false" style="width: 150px; border-right: none;"><span class="current-operation">编号</span><span class="fa fa-caret-down pull-right"></span></span> <ul class="dropdown-menu"><li class="disabled"><a>选择一个字段</a></li> <li class="divider"></li> <li value="编号" class="active"><a>编号</a></li><li value="名称"><a>名称</a></li><li value="类型"><a>类型</a></li><li value="库名"><a>库名</a></li><li value="主机"><a>主机</a></li><li value="端口"><a>端口</a></li><li value="用户名"><a>用户名</a></li><li value="密码"><a>密码</a></li><li value="注入名"><a>注入名</a></li><li value="表前缀"><a>表前缀</a></li><li value="创建时间(时间戳)"><a>创建时间(时间戳)</a></li><li value="更新时间(时间戳)"><a>更新时间(时间戳)</a></li><li value="状态"><a>状态</a></li><li value="备注"><a>备注</a></li><li value="创建者ID"><a>创建者ID</a></li><li value="更新者ID"><a>更新者ID</a></li></ul></div> <div class="input-group-btn"><span type="button" data-toggle="dropdown" class="btn btn-info dropdown-toggle" style="width: 110px; border-radius: 0px; border-width: 1px 0px 1px 1px;"><span class="current-operation">等于</span><span class="fa fa-caret-down pull-right"></span></span> <ul class="dropdown-menu"><li class="disabled"><a>选择一个操作符</a></li> <li class="divider"></li> <li value="=" class="active"><a>等于</a></li><li value=">"><a>大于</a></li><li value=">="><a>大于或等于</a></li><li value="<"><a>小于</a></li><li value="<="><a>小于或等于</a></li><li value="!="><a>不等于</a></li><li value="%"><a>包含</a></li></ul></div> <input type="text" placeholder="查询值" class="form-control" style="border-color: rgb(0, 172, 214);"> <span class="input-group-btn"><button type="button" class="btn btn-info"><i class="fa fa-close"></i></button></span></div></div> <!----><div about="基本条件样式" class="base-filter-template"><div class="input-group margin"><div class="input-group-btn"><span type="button" data-toggle="dropdown" class="btn btn-info dropdown-toggle" style="width: 150px; border-right: none;"><span class="current-operation">字段</span><span class="fa fa-caret-down pull-right"></span></span> <ul class="dropdown-menu"><li class="disabled"><a>选择一个字段</a></li> <li class="divider"></li> <li value="编号"><a>编号</a></li><li value="名称"><a>名称</a></li><li value="类型"><a>类型</a></li><li value="库名"><a>库名</a></li><li value="主机"><a>主机</a></li><li value="端口"><a>端口</a></li><li value="用户名"><a>用户名</a></li><li value="密码"><a>密码</a></li><li value="注入名"><a>注入名</a></li><li value="表前缀"><a>表前缀</a></li><li value="创建时间(时间戳)"><a>创建时间(时间戳)</a></li><li value="更新时间(时间戳)"><a>更新时间(时间戳)</a></li><li value="状态"><a>状态</a></li><li value="备注"><a>备注</a></li><li value="创建者ID"><a>创建者ID</a></li><li value="更新者ID"><a>更新者ID</a></li></ul></div> <div class="input-group-btn"><span type="button" data-toggle="dropdown" class="btn btn-info dropdown-toggle" style="width: 110px; border-radius: 0px; border-width: 1px 0px 1px 1px;"><span class="current-operation">等于</span><span class="fa fa-caret-down pull-right"></span></span> <ul class="dropdown-menu"><li class="disabled"><a>选择一个操作符</a></li> <li class="divider"></li> <li value="=" class="active"><a>等于</a></li><li value=">"><a>大于</a></li><li value=">="><a>大于或等于</a></li><li value="<"><a>小于</a></li><li value="<="><a>小于或等于</a></li><li value="!="><a>不等于</a></li><li value="%"><a>包含</a></li></ul></div> <input type="text" placeholder="查询值" class="form-control" style="border-color: rgb(0, 172, 214);"> <span class="input-group-btn"><button type="button" class="btn btn-info"><i class="fa fa-close"></i></button></span></div></div> <!----> <div class="add-filter-template"><div class="btn-group"><div class="btn-group"><button type="button" data-toggle="dropdown" class="btn btn-info dropdown-toggle" aria-expanded="false"><i class="fa fa-plus"></i> 添加条件<span class="fa fa-caret-down pull-right"></span></button> <ul class="dropdown-menu"><li value="BASE"><a>标准条件</a></li> <li class="divider"></li> <li value="AND"><a>条件集合（全部匹配）</a></li> <li value="OR"><a>条件集合（部分匹配）</a></li></ul></div></div></div></div>
 </div>
+
+
+<div id="FILTERS-TEMPLATE" style="display: none">
+    <filters :value="filters" :fields="fields"></filters>
+</div>
+
+
 <div id="base" class="table_row" style="display:none">
     <div class="row">
         <div class="col-sm-6">

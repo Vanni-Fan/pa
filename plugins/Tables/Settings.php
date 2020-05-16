@@ -44,7 +44,6 @@ class Settings {
                 new Column('table_id',['type' => Column::TYPE_INTEGER,'unsigned'=>1]),
                 new Column('field',['type' => Column::TYPE_VARCHAR,'size' => 50]),
                 new Column('name',['type' => Column::TYPE_VARCHAR,'size' => 255]),
-                new Column('text',['type' => Column::TYPE_VARCHAR,'size' => 255]),
                 new Column('tooltip',['type' => Column::TYPE_VARCHAR,'size' => 255,'notNull'=> 0]),
                 new Column('width',['type' => Column::TYPE_TINYINTEGER,'notNull'=> 0,'unsigned'=>1]),
                 new Column('sort',['type' => Column::TYPE_TINYINTEGER,'size'=>1,'default'=>1,'unsigned'=>1]),
