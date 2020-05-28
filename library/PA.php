@@ -42,4 +42,8 @@ final class PA{
      * @var array
      */
     static public array $user = [];
+    /**
+     * 命令行运行时的参数
+     */
+    static public array $args = [];
 }

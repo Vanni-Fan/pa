@@ -36,65 +36,51 @@
         margin:0;
         vertical-align: middle !important;
     }
+
+
+
+
 </style>
+<link rel="stylesheet" href="/dist/css/vue.filters.component.css">
 <script src="/dist/plugins/vue/vue.js"></script>
-<script src="/dist/vue.component.js"></script>
+<script src="/dist/js/vue.filters.component.js"></script>
 <script>
-/**
- * 显示一个模态框，可选参数：
- *  title: 标题(html)
- *  body: 内容(html)
- *  close.text: 关闭按钮(html)
- *  close.click: 关闭按钮的回调(function)
- *  ok.text: 确认按钮(html)
- *  ok.click: 确认按钮的回调(function)
- *  delay: 延迟多久自动关闭,0表示不会自动关闭(int)
- *  width: 宽，默认auto
- *  height： 高，默认auto
- * @param params
- */
-let sources = [
-    {source_id:1, name:'pa_db'},
-    {source_id:2, name:'wu_db'},
-];
+// 所有数据源和表
+let sources = <?=json_encode($sources)?>;
+let all_menus = <?=json_encode($all_menus)?>;
 let tables = [
     {
         fields:[
-            {id:1,field:'user_id',name:'用户ID',tooltip:'这个是用户的ID',width:10,sort:1,filter:1,show:1,render:'',type:'text',params:{},icon:'',class:''},
-            {id:1,field:'name',name:'用户名',tooltip:'',width:10,sort:1,filter:1,show:1,render:'',type:'text',params:{},icon:'',class:''},
-            {id:1,field:'sex',name:'性别',tooltip:'',width:10,sort:1,filter:1,show:1,render:'',type:'text',params:{},icon:'',class:''},
-            {id:1,field:'mobile',name:'手机号',tooltip:'',width:10,sort:1,filter:1,show:1,render:'',type:'text',params:{},icon:'',class:''}
+            {id:1,field:'user_id',name:'用户ID',tooltip:'这个是用户的ID',width:10,sort:0,filter:1,show:1,render:'',type:'text',params:{},icon:'',class:''},
+            {id:1,field:'name',name:'用户名',tooltip:'',width:10,sort:1,filter:1,show:1,render:'',type:'timestamp',params:{},icon:'',class:''},
+            {id:1,field:'sex',name:'性别',tooltip:'',width:10,sort:1,filter:1,show:0,render:'',type:'user',params:{},icon:'',class:''},
+            {id:1,field:'mobile',name:'手机号',tooltip:'',width:10,sort:1,filter:1,show:1,render:'',type:'media',params:{},icon:'',class:''}
         ],
         menus:[
-            {id:1,name:'用户管理',icon:'fa fa-users',title:'用户表',subtitle:'',filter:{},canMin:1,canSelect:1,canEdit:1,canAppend:1,canDelete:1,canFilter:1},
-            {id:2,name:'插件管理',icon:'fa fa-group',title:'插件表',subtitle:'',filter:{},canMin:1,canSelect:1,canEdit:1,canAppend:1,canDelete:1,canFilter:1},
-            {id:3,name:'角色管理',icon:'fa fa-tools',title:'角色表',subtitle:'',filter:{},canMin:1,canSelect:1,canEdit:1,canAppend:1,canDelete:1,canFilter:1}
+            {id:1,name:'用户管理',icon:'fa fa-users',title:'用户表',subtitle:'',filter:[],canMin:1,canSelect:1,canEdit:1,canAppend:1,canDelete:1,canFilter:1,canClose:1},
+            {id:2,name:'插件管理',icon:'fa fa-group',selected:true,title:'插件表',subtitle:'',filter:[],canMin:1,canSelect:1,canEdit:1,canAppend:1,canDelete:1,canFilter:1,canClose:0},
+            {id:3,name:'角色管理',icon:'fa fa-tools',title:'角色表',subtitle:'',filter:[],canMin:1,canSelect:1,canEdit:1,canAppend:1,canDelete:1,canFilter:1,canClose:0}
         ]
     }
 ];
-//let sources = <?// =$sources?>
 
-$(function() {
-    let a = $('#base').clone();
-    a.css('display','block');
-    showDialogs({
-        title: "<b>添加数据表菜单</b>",
-        body: a,
-        close: {
-            text: "取消",
-            click: t => t.close()
-        },
-        ok: {
-            text: "确定",
-            click: t => t.close()
+/**
+ * 显示基础参数配置
+ * @param index 数字下标
+ */
+function showParams(index){
+    let vo = new Vue({
+        el:$('#base').clone().css('display','block').get(0),
+        data:function(){
+            return Object.assign(
+                tables[0].menus[index],
+                {menus:all_menus}
+            );
         }
     });
-
-    let b = $('#fil').clone();
-    b.css('display','block');
     showDialogs({
-        title: "<b>添加查询条件</b>",
-        body: b,
+        title: "<b>添加数据表菜单</b>",
+        body: vo.$el,
         close: {
             text: "取消",
             click: t => t.close()
@@ -103,33 +89,120 @@ $(function() {
             text: "确定",
             click: t => t.close()
         }
-    },'a');
+    },'win-params');
+}
+
+/**
+ * 显示查询条件
+ * @param fields 字段
+ * @param filters 默认查询条件
+ * @param callback 回调函数
+ */
+function showFilter(fields, filters, callback){
     let vo = new Vue({
+        mounted(){
+            this.F = this.$refs.filters;
+        },
         data:function(){
             return {
                 fields:fields,
-                filters:filters
+                filters:filters,
             };
         },
-        el:'#FILTERS_TEMPLATE',
+        el:$('<filters ref="filters" :value="filters" :fields="fields"></filters>').get(0)
+    });
+    showDialogs({
+        title: "<b>添加数据表菜单</b>",
+        body: vo.$el,
+        close: {
+            text: "取消",
+            click: t => t.close()
+        },
+        ok: {
+            text: "确定",
+            click: t => {
+                let value = vo.F.getFilters()
+                let ok = vo.F.checkFilters(value)
+                if(ok){
+                    callback(value)
+                    t.close()
+                }
+                else{
+                    showDialogs({
+                        body:'<b>请提供完整的查询条件</b>',
+                        width:300,
+                        delay:3000
+                    },'t')
+                }
+            }
+        }
+    },'win-filter');
+}
+
+
+function showIcons(){
+
+}
+$(function() {
+    // 当数据源变动时，数据表跟着变动
+    // 当数据表变动时，数据中的基础数据 + 字段数据 + 查询参数 相应变动
+
+    // 创建菜单列表的vue对象
+    window['vo'] = new Vue({
+        el:document.getElementById('vue-dom'),
+        data:function () {
+            return {
+                current_db_index:0,
+                sources:sources,
+                menus:[] //tables[0].menus,
+            //    fields: tables[0].fields
+            };
+        },
         methods:{
-            getFilters:function(){
-                return this.filters;
+            setParams:function(i){
+                showParams(i);
             },
-            checkFilters:function(fs){
-                var rs = true;
-                for(var i=0; i<fs.length; i++){
-                    if(fs[i].sub){
-                        rs = this.checkFilters(fs[i].sub);
-                        if(!rs) break;
-                    } else {
-                        if(!fs[i].key || !fs[i].val){
-                            rs = false;
-                            break;
+            setFilter:function (i) {
+                showFilter(Object.fromEntries(this.fields.map(v=>[v.field,v.name])), this.menus[i].filter,alert);
+            },
+            selectMenu:function(i){
+                for(let index=0; index<this.menus.length; index++){
+                    this.menus[index].selected = index == i;
+                }
+                Vue.set(this.menus, i, this.menus[i]);
+            },
+            delTable:function (i) {
+                showDialogs({
+                    title:'是否删除此数据表管理权限',
+                    close:{
+                        text:'关闭',
+                        click:t=>t.close()
+                    },
+                    ok:{
+                        text:'删除',
+                        click:t=>{
+                            // 提交删除
+                            t.close()
                         }
                     }
-                }
-                return rs;
+                })
+            },
+            changeSource:function(event){
+                this.current_db_index = event.currentTarget.value.split(':')[0];
+            },
+            addMenu:function (event) {
+                let url = '<?=$add_menus_url?>'.replace('S_ID','11').replace('T_ID',22);
+                console.log('添加')
+            },
+            changeTable:function(event){
+                let sid = $('#source_id').val().split(':')[1];
+                let tid = $('#table_id').val();
+                let url = '<?=$get_menus_url?>'.replace('S_ID',sid).replace('T_ID',tid);
+                $.ajax(url).then(d=>{
+                    console.log(d);
+                    window['vo'].$data.menus = d;
+                    window['vo'].$data.fields = d[0].fields;
+                });
             }
         }
     });
@@ -137,180 +210,116 @@ $(function() {
 
 </script>
 
-
-
-
-
-
-
-<!--二级菜单-->
-<div class="box box-success">
-    <div class="box-header with-border">
-        <div class="box-title header_select">
-            <div class="">
-                <select name="" class="form-control">
-                    <option value="">数据源</option>
-                    <option value="BBB">aaa</option>
-                    <option value="BBB">我是超长的数据源名称能不能显示出来呢？</option>
-                </select>
+<div id="vue-dom">
+    <!--二级菜单-->
+    <div class="box box-success">
+        <div class="box-header with-border">
+            <div class="box-title header_select">
+                <div class="">
+                    <select id="source_id" class="form-control" @change="changeSource">
+                        <option value="">数据源</option>
+                        <template v-for="(row, index) in sources">
+                        <option :value="index + ':' + row.source_id">{{row.name}}</option>
+                        </template>
+                    </select>
+                </div>
+                <div class="">
+                    <select id="table_id" class="form-control  " data-placeholder="" style="width:100%;height: auto;" @change="changeTable">
+                        <option value="">数据表</option>
+                        <template v-for="table in sources[current_db_index].tables">
+                        <option :value="table">{{table}}</option>
+                        </template>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-info btn-flat" @click="addMenu">添加</button>
             </div>
-            <div class="">
-                <select name="" class="form-control  " data-placeholder="" style="width:100%;height: auto;">
-                    <option value="">数据表</option>
-                    <option value="BBB">aaa</option>
-                    <option value="BBB">ccc</option>
-                </select>
-            </div>
-            <button type="button" class="btn btn-info btn-flat">添加</button>
+        </div>
+
+        <div class="box-body table_base">
+            <template v-for="(val, index) in menus">
+                <div :class="val.selected ? 'callout callout-success' : 'callout bg-gray'" @click="selectMenu(index)">
+                    <button type="button" class="close" @click="delTable(index)">x</button>
+                    <h5>{{val.name}}</h5>
+                    <h4 style="display: inline;">{{val.name}}</h4>
+                    <h5 style="display: inline;padding-left: 10px;">{{val.subtitle}}</h5>
+                    <div style="width: 150px;float: right;margin-right: -20px;">
+                        <button type="button" class="btn btn-sm btn-default btn-flat" @click="setParams(index)">基础参数</button>
+                        <button type="button" class="btn btn-sm btn-default btn-flat" @click="setFilter(index)">查询参数</button>
+                    </div>
+                </div>
+            </template>
         </div>
     </div>
+    <!--字段设置-->
 
-    <div class="box-body table_base">
-        <div class="callout bg-gray">
-            <button type="button" class="close">x</button>
-            <h5>首页 / 系统管理 / 插件管理</h5>
-            <h4 style="display: inline;">系统日志表</h4>
-            <h5 style="display: inline;padding-left: 10px;">副标题太长怎么办...</h5>
-            <div style="width: 150px;float: right;margin-right: -20px;">
-                <button type="button" class="btn btn-sm btn-default btn-flat">基础参数</button>
-                <button type="button" class="btn btn-sm btn-default btn-flat">查询参数</button>
+    <div class="box box-success" v-if="menus[current_db_index]">
+        <div class="box-header with-border">
+            <h3 class="box-title">
+                字段设置
+                <button type="button" class="btn btn-info btn-flat" style="margin-left: 20px;width: 140px;">保存</button>
+            </h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
             </div>
         </div>
-        <div class="callout callout-success">
-            <button type="button" class="close">x</button>
-            <h5>首页 / 系统管理 / 插件管理</h5>
-            <h4 style="display: inline;">系统日志表</h4>
-            <h5 style="display: inline;padding-left: 10px;">副标题太长怎么办...</h5>
-            <div style="width: 150px;float: right;margin-right: -20px;">
-                <button type="button" class="btn btn-sm btn-info btn-flat">基础参数</button>
-                <button type="button" class="btn btn-sm btn-info btn-flat">查询参数</button>
-            </div>
-        </div>
-        <div class="callout bg-gray">
-            <button type="button" class="close">x</button>
-            <h5>首页 / 系统管理 / 插件管理</h5>
-            <h4 style="display: inline;">系统日志表</h4>
-            <h5 style="display: inline;padding-left: 10px;">副标题太长怎么办...</h5>
-            <div style="width: 150px;float: right;margin-right: -20px;">
-                <button type="button" class="btn btn-sm btn-default btn-flat">基础参数</button>
-                <button type="button" class="btn btn-sm btn-default btn-flat">查询参数</button>
-            </div>
-        </div>
-        <div class="callout bg-gray">
-            <button type="button" class="close">x</button>
-            <h5>首页 / 系统管理 / 插件管理</h5>
-            <h4 style="display: inline;">系统日志表</h4>
-            <h5 style="display: inline;padding-left: 10px;">副标题太长怎么办...</h5>
-            <div style="width: 150px;float: right;margin-right: -20px;">
-                <button type="button" class="btn btn-sm btn-default btn-flat">基础参数</button>
-                <button type="button" class="btn btn-sm btn-default btn-flat">查询参数</button>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!--字段设置-->
-<div class="box box-success">
-    <div class="box-header with-border">
-        <h3 class="box-title">字段设置</h3>
-        <div class="box-tools pull-right">
-            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        <div class="box-body">
+            <table class="table table-bordered table-striped dataTable" style="margin-bottom:0" table-layout="fixed">
+                <thead>
+                    <tr class="">
+                        <th class="text-center">字段名</th>
+                        <th class="text-center">显示名</th>
+                        <th class="text-center" width="150px">展示样式</th>
+                        <th class="text-center" width="100px">展示宽度</th>
+                        <th class="text-center" width="100px">提示语言</th>
+                        <th class="text-center" width="80px">不展示</th>
+                        <th class="text-center" width="80px">可排序</th>
+                        <th class="text-center" width="80px">可筛选</th>
+                        <th class="text-center" width="80px">可显示</th>
+                        <th class="text-center" width="50px">图标</th>
+                    </tr>
+                </thead>
+                <tbody class="my_fields">
+                <template v-for="(row,index) in menus[current_db_index].fields">
+                    <tr :class="index%2 ? 'even' : 'odd'">
+                        <td class="text-center">{{row.field}}</td>
+                        <td class="text-center"><input class="form-control" type="text" v-model="row.name"></td>
+                        <td class="text-center">
+                            <select class="form-control" v-model="row.type">
+                                <option value="text" :selected="row.type == 'text'">默认文字展示</option>
+                                <option value="media" :selected="row.type == 'media'">媒体链接 转 媒体图标</option>
+                                <option value="user" :selected="row.type == 'user'">用户ID 转 用户名</option>
+                                <option value="timestamp" :selected="row.type == 'timestamp'">时间戳 转 本地时间</option>
+                            </select>
+                        </td>
+                        <td class="text-center"><input class="form-control" type="number" v-model="row.width"></td>
+                        <td class="text-center"><input class="form-control" type="text" v-model="row.tooltip"></td>
+                        <td class="text-center"><input type="checkbox" v-model="row.show" :checked="row.show"></td>
+                        <td class="text-center"><input type="checkbox" v-model="row.sort" :checked="row.sort"></td>
+                        <td class="text-center"><input type="checkbox" v-model="row.filter" :checked="row.filter"></td>
+                        <td class="text-center"><input type="checkbox" v-model="row.canShow" :checked="row.canShow"></td>
+                        <td class="text-center"><i :class="'fa ' + (row.icon ? row.icon : 'fa-fonticons' ) "></i></td>
+                    </tr>
+                </template>
+                </tbody>
+            </table>
+
         </div>
-    </div>
-
-    <div class="box-body">
-
-        <table class="table table-bordered table-striped dataTable" style="margin-bottom:0" table-layout="fixed">
-            <thead>
-                <tr class="">
-                    <th class="text-center">字段名</th>
-                    <th class="text-center">显示名</th>
-                    <th class="text-center" width="100px">字段类型</th>
-                    <th class="text-center" width="100px">展示宽度</th>
-                    <th class="text-center" width="100px">提示语言</th>
-                    <th class="text-center" width="80px">不展示</th>
-                    <th class="text-center" width="80px">可排序</th>
-                    <th class="text-center" width="80px">可筛选</th>
-                    <th class="text-center" width="80px">可显示</th>
-                    <th class="text-center" width="50px">图标</th>
-                </tr>
-            </thead>
-            <tbody class="my_fields">
-                <tr class="even">
-                    <td class="text-center">abcd_defg</td>
-                    <td class="text-center"><input class="form-control" ype="text"></td>
-                    <td class="text-center"><select class="form-control"><option>文本</option><option>数字</option></select></td>
-                    <td class="text-center"><input class="form-control" type="number"></td>
-                    <td class="text-center"><input class="form-control" type="text"></td>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center"><i class="fa fa-save"></i></td>
-                </tr>
-                <tr class="odd">
-                    <td class="text-center">abcd_defg</td>
-                    <td class="text-center"><input class="form-control" ype="text"></td>
-                    <td class="text-center"><select class="form-control"><option>文本</option><option>数字</option></select></td>
-                    <td class="text-center"><input class="form-control" type="number"></td>
-                    <td class="text-center"><input class="form-control" type="text"></td>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center"><i class="fa fa-save"></i></td>
-                </tr>
-                <tr class="even">
-                    <td class="text-center">abcd_defg</td>
-                    <td class="text-center"><input class="form-control" ype="text"></td>
-                    <td class="text-center"><select class="form-control"><option>文本</option><option>数字</option></select></td>
-                    <td class="text-center"><input class="form-control" type="number"></td>
-                    <td class="text-center"><input class="form-control" type="text"></td>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center"><i class="fa fa-save"></i></td>
-                </tr>
-                <tr class="odd">
-                    <td class="text-center">abcd_defg</td>
-                    <td class="text-center"><input class="form-control" ype="text"></td>
-                    <td class="text-center"><select class="form-control"><option>文本</option><option>数字</option></select></td>
-                    <td class="text-center"><input class="form-control" type="number"></td>
-                    <td class="text-center"><input class="form-control" type="text"></td>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center"><input type="checkbox"></td>
-                    <td class="text-center"><i class="fa fa-save"></i></td>
-                </tr>
-            </tbody>
-        </table>
-
     </div>
 </div>
 
 
 
-
-
-<div id="fil" style="display:none">
-    <div class="filters"><div about="基本条件样式" class="base-filter-template"><div class="input-group margin"><div class="input-group-btn"><span type="button" data-toggle="dropdown" class="btn btn-info dropdown-toggle" aria-expanded="false" style="width: 150px; border-right: none;"><span class="current-operation">编号</span><span class="fa fa-caret-down pull-right"></span></span> <ul class="dropdown-menu"><li class="disabled"><a>选择一个字段</a></li> <li class="divider"></li> <li value="编号" class="active"><a>编号</a></li><li value="名称"><a>名称</a></li><li value="类型"><a>类型</a></li><li value="库名"><a>库名</a></li><li value="主机"><a>主机</a></li><li value="端口"><a>端口</a></li><li value="用户名"><a>用户名</a></li><li value="密码"><a>密码</a></li><li value="注入名"><a>注入名</a></li><li value="表前缀"><a>表前缀</a></li><li value="创建时间(时间戳)"><a>创建时间(时间戳)</a></li><li value="更新时间(时间戳)"><a>更新时间(时间戳)</a></li><li value="状态"><a>状态</a></li><li value="备注"><a>备注</a></li><li value="创建者ID"><a>创建者ID</a></li><li value="更新者ID"><a>更新者ID</a></li></ul></div> <div class="input-group-btn"><span type="button" data-toggle="dropdown" class="btn btn-info dropdown-toggle" style="width: 110px; border-radius: 0px; border-width: 1px 0px 1px 1px;"><span class="current-operation">等于</span><span class="fa fa-caret-down pull-right"></span></span> <ul class="dropdown-menu"><li class="disabled"><a>选择一个操作符</a></li> <li class="divider"></li> <li value="=" class="active"><a>等于</a></li><li value=">"><a>大于</a></li><li value=">="><a>大于或等于</a></li><li value="<"><a>小于</a></li><li value="<="><a>小于或等于</a></li><li value="!="><a>不等于</a></li><li value="%"><a>包含</a></li></ul></div> <input type="text" placeholder="查询值" class="form-control" style="border-color: rgb(0, 172, 214);"> <span class="input-group-btn"><button type="button" class="btn btn-info"><i class="fa fa-close"></i></button></span></div></div> <!----><div about="基本条件样式" class="base-filter-template"><div class="input-group margin"><div class="input-group-btn"><span type="button" data-toggle="dropdown" class="btn btn-info dropdown-toggle" style="width: 150px; border-right: none;"><span class="current-operation">字段</span><span class="fa fa-caret-down pull-right"></span></span> <ul class="dropdown-menu"><li class="disabled"><a>选择一个字段</a></li> <li class="divider"></li> <li value="编号"><a>编号</a></li><li value="名称"><a>名称</a></li><li value="类型"><a>类型</a></li><li value="库名"><a>库名</a></li><li value="主机"><a>主机</a></li><li value="端口"><a>端口</a></li><li value="用户名"><a>用户名</a></li><li value="密码"><a>密码</a></li><li value="注入名"><a>注入名</a></li><li value="表前缀"><a>表前缀</a></li><li value="创建时间(时间戳)"><a>创建时间(时间戳)</a></li><li value="更新时间(时间戳)"><a>更新时间(时间戳)</a></li><li value="状态"><a>状态</a></li><li value="备注"><a>备注</a></li><li value="创建者ID"><a>创建者ID</a></li><li value="更新者ID"><a>更新者ID</a></li></ul></div> <div class="input-group-btn"><span type="button" data-toggle="dropdown" class="btn btn-info dropdown-toggle" style="width: 110px; border-radius: 0px; border-width: 1px 0px 1px 1px;"><span class="current-operation">等于</span><span class="fa fa-caret-down pull-right"></span></span> <ul class="dropdown-menu"><li class="disabled"><a>选择一个操作符</a></li> <li class="divider"></li> <li value="=" class="active"><a>等于</a></li><li value=">"><a>大于</a></li><li value=">="><a>大于或等于</a></li><li value="<"><a>小于</a></li><li value="<="><a>小于或等于</a></li><li value="!="><a>不等于</a></li><li value="%"><a>包含</a></li></ul></div> <input type="text" placeholder="查询值" class="form-control" style="border-color: rgb(0, 172, 214);"> <span class="input-group-btn"><button type="button" class="btn btn-info"><i class="fa fa-close"></i></button></span></div></div> <!----> <div class="add-filter-template"><div class="btn-group"><div class="btn-group"><button type="button" data-toggle="dropdown" class="btn btn-info dropdown-toggle" aria-expanded="false"><i class="fa fa-plus"></i> 添加条件<span class="fa fa-caret-down pull-right"></span></button> <ul class="dropdown-menu"><li value="BASE"><a>标准条件</a></li> <li class="divider"></li> <li value="AND"><a>条件集合（全部匹配）</a></li> <li value="OR"><a>条件集合（部分匹配）</a></li></ul></div></div></div></div>
-</div>
-
-
-<div id="FILTERS-TEMPLATE" style="display: none">
-    <filters :value="filters" :fields="fields"></filters>
-</div>
-
-
-<div id="base" class="table_row" style="display:none">
+<!-- 基础信息模板 -->
+<div id="base" class="table_row" style="display: none">
     <div class="row">
         <div class="col-sm-6">
             <label class="col-sm-3" for="parent_id">父级菜单</label>
             <div class="col-sm-9">
                 <select id="parent_id" name="parent_id" data-placeholders="选择一个父级菜单，默认：根节点" class="form-control select2-hidden-accessible" style="width: 100%" data-select2-id="parent_id" tabindex="-1" aria-hidden="true">
-                    <option data-select2-id="2"></option>
+                    <template v-for="(row, index) in menus">
+                        <option :value="row.menu_id" data-select2-id="2">{{ '　'.repeat(row.level) + row.name}}</option>
+                    </template>
                 </select>
             </div>
         </div>
@@ -319,7 +328,7 @@ $(function() {
                 <label for="name" class="col-sm-3 control-label must-start">菜单名称</label>
                 <div class="col-sm-9">
                     <div class="input-group">
-                        <input name="name" type="text" class="form-control" id="name" value="" placeholder="输入名字">
+                        <input name="name" type="text" class="form-control" id="name" v-model="name" placeholder="输入名字">
                         <span class="input-group-addon" onclick="showIcons()"><i id="current_icon" class="fa fa-fonticons"></i></span>
                     </div>
                 </div>
@@ -333,7 +342,7 @@ $(function() {
             <div class="form-group">
                 <label class="col-sm-3">设置表头</label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control" placeholder="Enter ...">
+                    <input type="text" v-model="title" class="form-control" placeholder="Enter ...">
                 </div>
             </div>
         </div>
@@ -341,19 +350,19 @@ $(function() {
             <div class="form-group">
                 <label class="col-sm-3">设置描述</label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control" placeholder="Enter ...">
+                    <input type="text" v-model="subtitle" class="form-control" placeholder="Enter ...">
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row" style="display:flex;justify-content: space-between;">
-        <label><input type="checkbox">可选择</label>
-        <label><input type="checkbox">可编辑</label>
-        <label><input type="checkbox">可筛选</label>
-        <label><input type="checkbox">可添加</label>
-        <label><input type="checkbox">可删除</label>
-        <label><input type="checkbox">可收缩</label>
-        <label><input type="checkbox">可关闭</label>
+        <label><input type="checkbox" v-model="canSelect" :checked="canSelect">可选择</label>
+        <label><input type="checkbox" v-model="canEdit" :checked="canEdit">可编辑</label>
+        <label><input type="checkbox" v-model="canFilter" :checked="canFilter">可筛选</label>
+        <label><input type="checkbox" v-model="canAppend" :checked="canAppend">可添加</label>
+        <label><input type="checkbox" v-model="canDelete" :checked="canDelete">可删除</label>
+        <label><input type="checkbox" v-model="canMin" :checked="canMin">可收缩</label>
+        <label><input type="checkbox" v-model="canClose" :checked="canClose">可关闭</label>
     </div>
 </div>

@@ -1,5 +1,6 @@
 <?php
 namespace plugins\DataSource\Models;
+use Phalcon\Db\Adapter\PdoFactory as DB;
 use PowerModelBase as PMB;
 
 class DataSources extends PMB{
@@ -11,11 +12,12 @@ class DataSources extends PMB{
 
     public static function getSources(array $filter=[]){
         # 配置中的数据源
+        $id = 1;
         foreach(\PA::$config as $key=>$value){
             if(is_object($value) && $value->has('adapter')){
                 $v = $value->toArray();
-                $v['source_id'] = '######';
-                $v['name'] = 'system';
+                $v['source_id'] = $id++;
+                $v['name'] = $key;
                 $v['injection_name'] = $key;
                 $v['bind_events_manager'] = 1;
                 $v['status'] = 1;
@@ -30,5 +32,35 @@ class DataSources extends PMB{
         $where = [];
         self::parseWhere(['where'=>$filter], $where);
         foreach(self::find($where) as $row) yield $row->toArray();
+    }
+
+    public static function getDB(array $config){
+        if($config['name'] === 'pa_db')              return \PA::$db;
+        if(\PA::$di->has($config['injection_name'])) return \PA::$di->get($config['injection_name']);
+
+        switch($config['adapter']){
+            case 'sqlite':
+                $connect = ['dbname' => $config['dbname']];
+                break;
+            case 'mysql':
+            case 'postgresql':
+            default:
+                $connect = [
+                    'host'     => $config['host'] ?: 'localhost',
+                    'port'     => $config['port'] ?? '3306',
+                    'dbname'   => $config['dbname'],
+                    'username' => $config['username'] ?? 'root',
+                    'password' => $config['password'],
+//                               'options'  => [\PDO::ATTR_TIMEOUT=>3], # 3秒超时
+                    'charset'  => 'utf8mb4'
+                ];
+                break;
+        }
+
+        try{
+            return (new DB)->newInstance($config['adapter'], $connect);
+        }catch (\Throwable $e){
+            return null;
+        }
     }
 }

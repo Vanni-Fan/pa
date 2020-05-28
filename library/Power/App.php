@@ -120,10 +120,13 @@ class App{
             }
             # 有配置 modules 目录
             else{
-                $domain_base  = PA::$config['root_domain'] ?: (substr($_SERVER['SERVER_NAME'], strpos($_SERVER['SERVER_NAME'],'.')+1));
+                $server_name = $_SERVER['SERVER_NAME'] ?? PA::$args['server'];
+                $domain_base = PA::$config['root_domain'] ?: (substr($server_name, strpos($server_name,'.')+1));
                 foreach(PA::$config['domain_bind'] as $domain=>$_module){
-                    $domain = strpos($domain, '.')!==false ? $domain : "$domain.$domain_base";
-                    if(strpos($_SERVER['HTTP_HOST'], $domain)!==0) continue;
+                    if($domain !== '*'){
+                        $domain = strpos($domain, '.')!==false ? $domain : "$domain.$domain_base";
+                        if(strpos($_SERVER['HTTP_HOST'] ?? PA::$args['server'], $domain)!==0) continue;
+                    }
                     $modules = $this->registerModules(PA::$config['module_path'], $_module, $routers);
                 }
             }
@@ -302,7 +305,7 @@ class App{
 
     public function run($config_file=null){
         if($config_file) $this->init($config_file);
-        echo PA::$app->handle($_SERVER["REQUEST_URI"])->getContent();
+        echo PA::$app->handle($_SERVER["REQUEST_URI"] ?? PA::$args['uri'])->getContent();
 //        $response = PA::$app->handle('/');
 //        echo "<pre>";
 //        echo "是否已经发送:".$response->isSent();

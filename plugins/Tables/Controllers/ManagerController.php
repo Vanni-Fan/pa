@@ -9,6 +9,9 @@ use HtmlBuilder\Parser\AdminLte\Parser;
 use PDO;
 use Phalcon\Db\Adapter\Pdo\Factory;
 use Phalcon\Text;
+use plugins\DataSource\Models\DataSources;
+use plugins\Tables\Models\TablesFields;
+use plugins\Tables\Models\TablesMenus;
 use Power\Controllers\AdminBaseController;
 use PA;
 use Power\Models\Roles;
@@ -226,13 +229,32 @@ class ManagerController extends AdminBaseController
      * @throws \Exception
      */
     public function settingsAction(){
+        if($this->getParam('command')) return $this->{$this->getParam('command')}();
+
         $this->title = 'Tables插件设置';
 
+        [$sources,$iterator] = [[],DataSources::getSources()];
+        iterator_apply($iterator,function($iterator, &$sources){
+            $item = $iterator->current();
+            $db   = DataSources::getDB($item);
+            $sources[] = [
+                'source_id' => $item['source_id'],
+                'name'      => $item['name'],
+                'tables'    => $db ? $db->listTables() : [],
+            ];
+            return true;
+        },[$iterator, &$sources]);
+
+        $this->view->sources = $sources;
+        $this->view->get_menus_url = $this->getUrl(['command'=>'getMenuList','s_id'=>'S_ID','t_id'=>'T_ID']);
+        $this->view->add_menus_url = $this->getUrl(['command'=>'addMenu','s_id'=>'S_ID','t_id'=>'T_ID']);
+        $this->view->save_menus_url = $this->getUrl(['command'=>'saveMenu','s_id'=>'S_ID','t_id'=>'T_ID']);
+
+        $this->view->all_menus = Menus::getFlatMenus();
         $this->render('manager/edit');
+
         return;
-        if($this->getParam('command')){
-             return $this->{$this->getParam('command')}();
-        }
+
         
         $sync_table_url = $this->getUrl(['command'=>'sync_table']);
         $parser = new Parser();
@@ -292,6 +314,18 @@ OUT
         $this->render();
     }
 
+    public function getMenuList(){
+        [$data, $_menus] = [[], TablesMenus::find(['source_id=?0 and table=?1','bind'=>[$this->params['s_id'], $this->params['t_id']]])];
+        iterator_apply($_menus, function (&$data, $interator){
+            $item            = $interator->current()->toArray();
+            $item['filters'] = $item['filters'] ? json_decode($item['filters'], 1) : [];
+            $item['fields']  = TablesFields::find(['table_id=?0', 'bind'=>[$item['id']]])->toArray();
+            $data[]          = $item;
+            return true;
+        },[&$data, $_menus]);
+
+        $this->jsonOut($data);
+    }
     /**
      * 获得列表数据 Ajax
      */

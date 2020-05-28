@@ -6,7 +6,7 @@ use PA;
 
 class ErrorController extends Controller{
     public function initialize(){
-        header('x-powered-by: '.PA::$config['site.domain.logogram'].'/'.PA::$config['site.version']);
+        \Utils::isCli() || header('x-powered-by: '.PA::$config['site.domain.logogram'].'/'.PA::$config['site.version']);
     }
     
     public static function handlerError($code,$msg,$file,$line){

@@ -62,7 +62,7 @@ class ManagerController extends AdminBaseController
             ->updateApi($this->getUrl(['command'=>'updateSource','sid'=>'_ID_']))
             ->createApi($this->getUrl(['command'=>'updateSource','sid'=>0]))
             ->canEdit('操作')
-            ->editCallback('(s,v)=>s.source_id=="######" ? "配置文件" : v')
+            ->editCallback('(s,v)=>s.source_id<1000 ? "配置文件" : v')
         );
 
         # 渲染

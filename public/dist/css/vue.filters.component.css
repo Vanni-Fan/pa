@@ -1,0 +1,31 @@
+.filter-set{
+    margin-left:20px;
+    margin-top: 5px;
+    border-left-style: dashed;
+    border-left-width:1px;
+    border-left-color: #cccccc;
+    padding-left: 5px;
+    margin-bottom: 10px;
+}
+.filter-set-before{
+    width: 20px;background-color: white;margin-left: -15px;font-size: 20px;display: block;position: absolute;color:#cccccc;
+}
+.filter-set-condition{
+    margin-left:10px;
+}
+.filter-set-after{
+    font-size: 20px;background-color: white;position: relative;margin-left: -15px;height: 10px;color:#cccccc;
+}
+.dropdown-toggle .fa-caret-down{
+    line-height: 20px;
+}
+.add-filter-template{
+    margin-left: 10px;
+}
+.filters{
+    min-height: 10px;
+}
+.filters-min-height{
+    height:35px;
+    overflow: hidden;
+}

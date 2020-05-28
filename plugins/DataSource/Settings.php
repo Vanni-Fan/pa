@@ -18,7 +18,7 @@ class Settings {
         return false;
     }
     public static function install($controller, $plugin){
-        return PA::$db->createTable(
+        PA::$db->createTable(
             PA::$config->pa_db->prefix.'datasources',
             '',
             ['columns' => [
@@ -41,6 +41,12 @@ class Settings {
                 new Column('updated_user',['type'=>Column::TYPE_INTEGER,'unsigned'=>true]),
             ]]
         );
+        # 产生一个1000以上的自增
+        $row = (new DataSources)->assign(['source_id'=>1000,'name'=>'tmp','adapter'=>'mysql','dbname'=>'tmp']);
+        $row->create();
+        $row->delete();
+
+        return true;
     }
     public static function uninstall($controller, $plugin){
         return PA::$db->dropTable(PA::$config->pa_db->prefix.'datasources');
