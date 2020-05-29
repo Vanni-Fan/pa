@@ -30,13 +30,19 @@ class ErrorController extends Controller{
     }
     
     public function indexAction($dispatch,$exception){
-        if(PA::$config['debug']){
-            echo '<h1>发生错误</h1>';
-            echo '<h2>'.$exception->getMessage().'</h2>';
-            echo '<pre>'.$exception->getTraceAsString().'</pre>';
+        if(\Utils::isCli()){
+            $msg = "\n发生错误:".$exception->getMessage()."\n".print_r($exception->getTraceAsString(),1)."\n";
+            echo \Shell::getColorText($msg,31,43);
+            echo \Shell::getColorText("\n",37,40);
         }else{
-            echo '<h1>网站有点问题。。。</h1>';
+            if(PA::$config['debug']){
+                echo '<h1>发生错误</h1>';
+                echo '<h2>'.$exception->getMessage().'</h2>';
+                echo '<pre>'.$exception->getTraceAsString().'</pre>';
+            }else{
+                echo '<h1>网站有点问题。。。</h1>';
+            }
+            echo "<span>Power by PA</span>";
         }
-        echo "<span>Power by PA</span>";
     }
 }

@@ -88,7 +88,7 @@ class App{
             PA::$db = (new DB())->newInstance($db_adapter, $db_connect);
             # 配置文件
             // $db_config = array_column(PA::$db->fetchAll('SELECT var_name as name,var_default as value FROM '.PA::$config->path('pa_db.prefix').'configs'),'value','name');
-            $db_config = array_column(\Power\Models\Configs::find()->toArray(),'var_name','var_default');
+            $db_config = array_column(\Power\Models\Configs::find()->toArray(),'var_default','var_name');
             PA::$config->merge(new \Phalcon\Config($db_config));// 数据配置
             # 路由
             foreach(\Power\Models\Menus::find(['url_suffix is not null','columns'=>'url_suffix,router,modules']) as $_router){
@@ -120,20 +120,23 @@ class App{
             }
             # 有配置 modules 目录
             else{
+                # SERVER_NAME 输出为服务端配置的域名，HTTP_HOST 输出的是客户端请求时的域名(包含端口)
                 $server_name = $_SERVER['SERVER_NAME'] ?? PA::$args['server'];
                 $domain_base = PA::$config['root_domain'] ?: (substr($server_name, strpos($server_name,'.')+1));
                 foreach(PA::$config['domain_bind'] as $domain=>$_module){
-                    if($domain !== '*'){
-                        $domain = strpos($domain, '.')!==false ? $domain : "$domain.$domain_base";
-                        if(strpos($_SERVER['HTTP_HOST'] ?? PA::$args['server'], $domain)!==0) continue;
+                    if('*' === $domain){
+                        $modules = $this->registerModules(PA::$config['module_path'], $_module, $routers);
+                        break;
                     }
+                    $domain = strpos($domain, '.')!==false ? $domain : "$domain.$domain_base";
+                    if(strpos($_SERVER['HTTP_HOST'] ?? PA::$args['server'], $domain)!==0) continue; // 不是本域名
                     $modules = $this->registerModules(PA::$config['module_path'], $_module, $routers);
+                    break; // 只应用第一个找到的模块
                 }
             }
         }
 //        print_r($routers);
         if($modules) PA::$app->registerModules($modules);
-
         # 8、加载插件，调用 plugin的 autoload 方法。具体操作请在 autoload 方法里面实现
         foreach(PA::$config->plugins ?? [] as $plugin){
             $path = POWER_BASE_DIR . 'plugins/'.$plugin;
@@ -249,9 +252,10 @@ class App{
 
     /**
      * 根据一个目录注册模块，包括名字空间，和路由规则
-     * @param $module_dir 模块目录，里面的每个文件夹都被解析成一个模块
-     * @param $include 只分析指定的某几个目录，如果有条目大于1或等于空，表示要模块前缀
-     * @param &$routers 被设置的路由数组
+     * @param string $module_dir 模块目录，里面的每个文件夹都被解析成一个模块
+     * @param string $include 只分析指定的某几个目录，如果有条目大于1或等于空，表示要模块前缀
+     * @param array &$routers 被设置的路由数组
+     * @return array
      */
     public static function registerModules(string $module_dir, string $include, array &$routers):array{
         static $modules = []; // [ $module_name => $module_path, ... ]
@@ -299,7 +303,6 @@ class App{
 //                $module.'\\Models'      => $path.'/models',
 //            ], true);
         }
-
         return $registered_modules;
     }
 
