@@ -23,7 +23,7 @@ $desc = [
 ];
 
 # 获得参数
-Shell::args($argv);
+Shell::args(array_slice($argv,1));
 Shell::rules($rule);
 Shell::description($desc);
 

@@ -158,11 +158,12 @@ class Shell{
         foreach($args_rule as $key => $pattern){
             $found = 0;
             for($i=0; $i<$total; $i++){
-                @list($param, $value) = explode('=', $arguments[$i]);
+                $tmp = explode('=', $arguments[$i]);
+                $param = $tmp[0];
+                $value = $tmp[1]??null;
 
 //                echo "$key => $pattern  |  $param  |  $value \n";
                 if(preg_match($pattern, $param)){
-//                    echo "FOUND!!!\n\n";
                     $found = 1;
                     if(is_null($value) && isset($arguments[$i+1]) && substr($arguments[$i+1],0,1)!='-') $value = $arguments[++$i]; # 是否有 var=value 的类型
                     if(is_null($value) && isset($use_stdin[$key]))                             $value = $stdin_str;                            # 是否从标准输入读取
@@ -198,10 +199,17 @@ class Shell{
                 if($key_prefix === '-'){
                     $key = ltrim($arguments[$i],'-');
                     if($val_prefix === '-'){
-                        [$key, $val] = explode('=', $key);
-                        $val = $val ?? true;
+                        $_tmp = explode('=', $key);
+                        $key = $_tmp[0];
+                        $val = $_tmp[1] ?? true;
                     }else{
-                        $val = $arguments[++$i]??'';
+                        if(!isset($arguments[$i+1])){
+                            $_tmp = explode('=', $key);
+                            $key = $_tmp[0];
+                            $val = $_tmp[1] ?? true;
+                        }else{
+                            $val = $arguments[++$i];
+                        }
                     }
                     $params[$key] = $val;
                 }
