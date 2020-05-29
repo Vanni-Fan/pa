@@ -37,6 +37,7 @@ RUN docker-php-source extract \
         && apt-get install -y libpng-dev libjpeg-dev libxpm-dev libfreetype6-dev \
         && docker-php-ext-configure gd --with-jpeg --with-freetype --with-xpm --enable-gd-jis-conv \
         && docker-php-ext-install gd && docker-php-ext-enable gd \
+        && docker-php-ext-install sockets && docker-php-ext-enable sockets \
     ) fi \
     && docker-php-source delete 
 
@@ -153,7 +154,6 @@ RUN if [ "$WITH_PA_PASSWORD" = "yes" ]; then ( \
 
 RUN rm -rf /var/lib/apt/lists/* /tmp/*
 
-
 # 复制源文件
 COPY ./controllers /var/www/pa/controllers
 COPY --chown=www-data:www-data ./data /var/www/pa/data
@@ -162,6 +162,8 @@ COPY ./models /var/www/pa/models
 COPY --chown=www-data:www-data ./plugins /var/www/pa/plugins
 COPY --chown=www-data:www-data ./public /var/www/pa/public
 COPY ./views /var/www/pa/views
+
+RUN composer update -d /var/www/pa/library
 
 # 复制配置文件
 COPY ./docker/sites-enabled/0-default.conf /etc/apache2/sites-enabled/0-default.conf
