@@ -113,23 +113,72 @@ class UsersController extends AdminBaseController {
         $dom = Forms::form($this->url('update'),'POST')->add(
             Layouts::columns()->column(
                 Element::create('div')->style('display:block')->add(
-                    Forms::input('name','登录名',$default['name']??'')->required(true)->labelWidth(3),
-                    Forms::input('password','密码','','password')->labelWidth(3)->id('pass_1')->validate(Validate::expression('两次密码不匹配','$("#pass_1-input").val()==$("#pass_2-input").val()')),
+                    Forms::input('name','登录名',$default['name']??'')->required(true)->labelWidth(3)->id('user_name')
+                        ->validate(
+                            Validate::callback('用户名已存在','userExists')
+                        ),
+                    Forms::input('password','密码','','password')->labelWidth(3)->id('pass_1')
+//                        ->validate(Validate::expression('两次密码不匹配','$("#pass_1-input").val()==$("#pass_2-input").val()')),
+                        ->validate(Validate::callback('两次密码不匹配','checkPass')),
                     Forms::select('role_id','选择角色',$default['role_id']??1)->required(true)->labelWidth(3)->choices($all_roles),
                     Forms::input('mobile','手机号',$default['mobile']??'','mobile')->labelWidth(3),
-                    Forms::button('','返回')->action('back')->style('gray')
+                    Forms::button('','返回')->action('button')->style('default')->on('click','history.back()')
                 )
             ,6)->column(
                 Element::create('div')->style('display:block')->add(
                     Forms::input('nickname','显示名',$default['nickname']??'')->required(true)->labelWidth(3),
-                    Forms::input('password_2','密码确认','','password')->labelWidth(3)->id('pass_2')->validate(Validate::expression('两次密码不匹配','$("#pass_1-input").val()==$("#pass_2-input").val()')),
+                    Forms::input('password_2','密码确认','','password')->labelWidth(3)->id('pass_2')
+//                        ->validate(Validate::expression('两次密码不匹配','$("#pass_1-input").val()==$("#pass_2-input").val()')),
+                        ->validate(Validate::callback('两次密码不匹配','checkPass')),
                     Forms::radio('is_enabled','是否可用',$default['is_enabled']??1)->required(true)->labelWidth(3)->choices([['value'=>1,'text'=>'启用'],['value'=>0,'text'=>'禁用']]),
                     Forms::file('image','头像',$default['image']??'')->labelWidth(3)->accept('image/*')->corpWidth(100)->returnUrl($this->url('index')),
                     Forms::button('','提交')->class('pull-right')->action('submit'),
                 )
             ,6),
-        );
+        )->on('submit','checkForm');
         $this->view->contents = $parser->parse($dom);
+
+        $this->addScript("
+            function checkForm(){
+                let p1 = $('#pass_1-input').val();
+                let p2 = $('#pass_2-input').val();
+                if(!p1 && !p2 && {$this->item_id}){
+                    return true;
+                }
+                if(!p1){ HB_input_error('pass_1','请输入密码'); return false; }
+                if(!p2){ HB_input_error('pass_2','请确认密码'); return false; }
+                return false;
+            }
+            function checkPass(){
+                let p1 = $('#pass_1-input').val();
+                let p2 = $('#pass_2-input').val();
+                if(!p1 || !p2) return true;
+                if(p1 == p2) {
+                    HB_input_ok('pass_1') && HB_input_ok('pass_2');
+                    return true;
+                }else{
+                    return false;
+                } 
+            }
+            function userExists(){
+                let status = false;
+                let msg = '';
+                $.ajax({
+                    url:'" . $this->url('update',['item_id'=>$this->item_id,'action'=>'exists']) . "?name='+$('#user_name-input').val(),
+                    async:false,
+                    success:d=>{
+                        status = d.ok;
+                        msg = d.msg;
+                    }
+                });
+                if(!status){
+                    HB_input_error('user_name',msg);
+                }else{
+                    HB_input_ok('user_name');
+                }
+                return status;
+            }
+        ");
         $parser->setResources($this);
         return $this->render(null);
     }
@@ -196,4 +245,21 @@ class UsersController extends AdminBaseController {
         return $this->listAction();
     }
 
+    public function existsAction(){
+        $name = $this->request->getQuery('name');
+        $len  = strlen($name);
+        if($len>10 || $len<3) return $this->jsonOut(['msg'=>'用户名的长度在3到10之间','ok'=>false]);
+
+        if($this->item_id){
+            $where = ['name = ?0 and user_id != ?1','bind'=>[$name, $this->item_id]];
+        }else{
+            $where = ['name = ?0','bind'=>[$name]];
+        }
+
+        if(Users::findFirst($where)){
+            $this->jsonOut(['msg'=>'用户名已存在','ok'=>false]);
+        }else{
+            $this->jsonOut(['msg'=>'','ok'=>true]);
+        }
+    }
 }

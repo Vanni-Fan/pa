@@ -2,7 +2,7 @@
     <?php foreach($elements as $element) echo $this->parse($element); ?>
 </form>
 <?php
-$this->script(/** @lang JavaScript */<<<'Out'
+$this->script(/** @lang JavaScript */ <<<'Out'
 // 检查所有的 input、select、file、textarea、checkbox、radio 的 data-validator 属性的定义，然后调用
 function HB_form_check(id){
     var ok = true;
@@ -15,7 +15,9 @@ function HB_form_check(id){
         '#'+id+' radio[data-validator]'
     ).each(function(index, element) {
         ok = eval($(element).data('validator'));
-        if(!ok) console.log(element);
+        if($(element).attr('data-verified')){
+            ok = $(element).attr('data-verified') == '1';
+        }
         if(!ok) return false;
     });
     if(!ok){
@@ -35,5 +37,10 @@ Out
 $this->script('$("#'.$id.'").submit(function(){ return HB_form_check("'.$id.'")})');
 
 
-
+$event_str = '';
+foreach ($events as $event){
+    $event_str .= '$("#'. $id . ($event['selector'] ? " {$event['selector']}" : '') . '").'.$event['event'].'(eval('.$event['code'].'));';
+    //[] = ['event' => $event_name, 'code' => $js_code, 'selector' => $selector];
+}
+if($event_str) $this->script($event_str);
 ?>

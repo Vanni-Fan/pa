@@ -304,7 +304,7 @@ class AdminBaseController extends Controller{
     }
     
     # 获得当前权限
-    public static function getMenus(int $user_id):array{
+    public function getMenus(int $user_id):array{
         return $this->menus;
     }
     

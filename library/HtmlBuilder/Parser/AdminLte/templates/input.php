@@ -48,6 +48,16 @@ function HB_input_check(id,obj){
         HB_input_verify(id, $(e.currentTarget));
     });
 }
+function HB_input_ok(id){
+    $('#'+id).removeClass('has-error').addClass('has-success'); 
+    $('#'+id+'-message').text('');
+    $('#'+id+'-input').attr('data-verified', 1);
+}
+function HB_input_error(id,msg){
+    $('#'+id).addClass('has-error'); 
+    $('#'+id+'-message').text(msg);
+    $('#'+id+'-input').attr('data-verified', 0);
+}
 function HB_input_verify(id,obj){
     var value = obj.val().trim();
     var valid = true;
@@ -77,16 +87,16 @@ function HB_input_verify(id,obj){
                     }
                     break;
                 case 'expression':
-                    if(validator.rule.callback)   valid = validator.rule.callback();
-                    if(validator.rule.expression) valid = eval(validator.rule.expression);
+                    valid = eval(validator.rule.expression);
+                    break;
+                case 'callback':
+                    valid = eval(validator.rule.callback)();
                     break;
             }
-            if(valid){
-                $('#'+id).removeClass('has-error').addClass('has-success'); 
-                $('#'+id+'-message').text('');
-            }else{
-                $('#'+id).addClass('has-error'); 
-                $('#'+id+'-message').text(validator.text);
+            if(valid)HB_input_ok(id);
+            else{
+                HB_input_error(id, validator.text);
+                break;
             }
         }
     }

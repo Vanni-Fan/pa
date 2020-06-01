@@ -42,7 +42,10 @@ class Validate{
                 $this->rule = (object)array_merge(['regex'=>''], $option);
                 break;
             case 'expression':
-                $this->rule = (object)array_merge(['callback'=>'','expression'], $option);
+                $this->rule = (object)array_merge(['expression'=>''], $option);
+                break;
+            case 'callback':
+                $this->rule = (object)array_merge(['callback'=>''], $option);
                 break;
             case 'mail':
                 $this->rule = new \stdClass;
@@ -93,5 +96,9 @@ class Validate{
 
     public static function expression(string $message, string $expression){
         return new static('expression',$message, ['expression'=>$expression]);
+    }
+    
+    public static function callback(string $message, string $callback){
+        return new static('callback',$message, ['callback'=>$callback]);
     }
 }

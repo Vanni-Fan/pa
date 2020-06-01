@@ -1,4 +1,17 @@
-# docker build -f build-phalcon-dockerfile -t registry.cn-hangzhou.aliyuncs.com/vanni/phalcon:7.4-apache ..
+# 构建步骤：
+#  1、 更新后台的依赖（composer.json 位于 library 目录下）
+#       1.1、 安装 composer
+#       1.2、 composer update -d ./library
+#  2、 更新前端的依赖（bower.json 位于 public/dist 目录下）
+#       2.1、 安装 node
+#       2.2、 npm install -g npm
+#       2.3、 npm install -g bower
+#       2.4、 cd public/dist
+#       2.5、 bower update
+#       2.6、 cd ../..
+#  3、 构建容器
+#       3.1、 cd docker
+#       3.2、 docker build -f build-phalcon-dockerfile -t registry.cn-hangzhou.aliyuncs.com/vanni/phalcon:7.4-apache ..
 
 FROM php:7.4-apache
 ENV DOCUMENT_ROOT=/var/www/pa
@@ -155,6 +168,7 @@ RUN if [ "$WITH_PA_PASSWORD" = "yes" ]; then ( \
 RUN rm -rf /var/lib/apt/lists/* /tmp/*
 
 # 复制源文件
+COPY ./bin /var/www/pa/bin
 COPY ./controllers /var/www/pa/controllers
 COPY --chown=www-data:www-data ./data /var/www/pa/data
 COPY ./library /var/www/pa/library
@@ -162,8 +176,6 @@ COPY ./models /var/www/pa/models
 COPY --chown=www-data:www-data ./plugins /var/www/pa/plugins
 COPY --chown=www-data:www-data ./public /var/www/pa/public
 COPY ./views /var/www/pa/views
-
-RUN composer update -d /var/www/pa/library
 
 # 复制配置文件
 COPY ./docker/sites-enabled/0-default.conf /etc/apache2/sites-enabled/0-default.conf
