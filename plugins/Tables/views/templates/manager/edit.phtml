@@ -68,14 +68,30 @@ let tables = [
  * 显示基础参数配置
  * @param index 数字下标
  */
-function showParams(index){
+function showParams(data){
     let vo = new Vue({
         el:$('#base').clone().css('display','block').get(0),
         data:function(){
             return Object.assign(
-                tables[0].menus[index],
+                {menu_id:0},
+                data,
                 {menus:all_menus}
             );
+        },
+        methods: {
+            submit:function(t){
+                let sid = $('#source_id').val().split(':')[1];
+                let tid = $('#table_id').val();
+                let url = '<?=$add_menus_url?>'.replace('S_ID',sid).replace('T_ID',tid);
+                let post = Object.assign({}, vo.$data);
+                delete(post.menus);
+                delete(post.fields);
+                delete(post.filter);
+                $.ajax(url,{method:'post',data:post}).then(d=>{
+                    window['vo'].$data.menus = d;
+                    t.close()
+                })
+            }
         }
     });
     showDialogs({
@@ -86,11 +102,12 @@ function showParams(index){
             click: t => t.close()
         },
         ok: {
-            text: "确定",
-            click: t => t.close()
-        }
+           text: "确定",
+           click: t => vo.$data.menu_name ? vo.submit(t) : showDialogs({body:'请输入菜单名称',delay:3000,width:200},'mt')
+}
     },'win-params');
 }
+
 
 /**
  * 显示查询条件
@@ -154,13 +171,14 @@ $(function() {
             return {
                 current_db_index:0,
                 sources:sources,
+                can_add:false,
                 menus:[] //tables[0].menus,
             //    fields: tables[0].fields
             };
         },
         methods:{
             setParams:function(i){
-                showParams(i);
+                showParams(this.menus[i]);
             },
             setFilter:function (i) {
                 showFilter(Object.fromEntries(this.fields.map(v=>[v.field,v.name])), this.menus[i].filter,alert);
@@ -191,13 +209,15 @@ $(function() {
                 this.current_db_index = event.currentTarget.value.split(':')[0];
             },
             addMenu:function (event) {
-                let url = '<?=$add_menus_url?>'.replace('S_ID','11').replace('T_ID',22);
-                console.log('添加')
+                showParams(
+                    {menu_name:'',icon:'fa fa-users',title:'',subtitle:'',filter:[],canMin:1,canSelect:1,canEdit:1,canAppend:1,canDelete:1,canFilter:1,canClose:1,fields:[]}
+                );
             },
             changeTable:function(event){
                 let sid = $('#source_id').val().split(':')[1];
                 let tid = $('#table_id').val();
                 let url = '<?=$get_menus_url?>'.replace('S_ID',sid).replace('T_ID',tid);
+                this.can_add = (sid !== '' && tid !== '');
                 $.ajax(url).then(d=>{
                     console.log(d);
                     window['vo'].$data.menus = d;
@@ -231,7 +251,7 @@ $(function() {
                         </template>
                     </select>
                 </div>
-                <button type="button" class="btn btn-info btn-flat" @click="addMenu">添加</button>
+                <button type="button" class="btn btn-info btn-flat" @click="addMenu" :disabled="!can_add">添加</button>
             </div>
         </div>
 
@@ -239,8 +259,8 @@ $(function() {
             <template v-for="(val, index) in menus">
                 <div :class="val.selected ? 'callout callout-success' : 'callout bg-gray'" @click="selectMenu(index)">
                     <button type="button" class="close" @click="delTable(index)">x</button>
-                    <h5>{{val.name}}</h5>
-                    <h4 style="display: inline;">{{val.name}}</h4>
+                    <h5>{{val.menu_name}}</h5>
+                    <h4 style="display: inline;">{{val.title}}</h4>
                     <h5 style="display: inline;padding-left: 10px;">{{val.subtitle}}</h5>
                     <div style="width: 150px;float: right;margin-right: -20px;">
                         <button type="button" class="btn btn-sm btn-default btn-flat" @click="setParams(index)">基础参数</button>
@@ -316,9 +336,9 @@ $(function() {
         <div class="col-sm-6">
             <label class="col-sm-3" for="parent_id">父级菜单</label>
             <div class="col-sm-9">
-                <select id="parent_id" name="parent_id" data-placeholders="选择一个父级菜单，默认：根节点" class="form-control select2-hidden-accessible" style="width: 100%" data-select2-id="parent_id" tabindex="-1" aria-hidden="true">
+                <select v-model="menu_id" name="parent_id" data-placeholders="选择一个父级菜单，默认：根节点" class="form-control select2-hidden-accessible" style="width: 100%" data-select2-id="parent_id" tabindex="-1" aria-hidden="true">
                     <template v-for="(row, index) in menus">
-                        <option :value="row.menu_id" data-select2-id="2">{{ '　'.repeat(row.level) + row.name}}</option>
+                        <option :value="row.menu_id" data-select2-id="2" :selected="row.menu_id == menu_id">{{ '　'.repeat(row.level) + row.name}}</option>
                     </template>
                 </select>
             </div>
@@ -328,8 +348,8 @@ $(function() {
                 <label for="name" class="col-sm-3 control-label must-start">菜单名称</label>
                 <div class="col-sm-9">
                     <div class="input-group">
-                        <input name="name" type="text" class="form-control" id="name" v-model="name" placeholder="输入名字">
-                        <span class="input-group-addon" onclick="showIcons()"><i id="current_icon" class="fa fa-fonticons"></i></span>
+                        <input name="name" type="text" class="form-control" v-model="menu_name" placeholder="请输入菜单名称">
+                        <span class="input-group-addon" onclick="showIcons()"><i class="fa fa-fonticons"></i></span>
                     </div>
                 </div>
             </div>
@@ -342,7 +362,7 @@ $(function() {
             <div class="form-group">
                 <label class="col-sm-3">设置表头</label>
                 <div class="col-sm-9">
-                    <input type="text" v-model="title" class="form-control" placeholder="Enter ...">
+                    <input type="text" v-model="title" class="form-control" placeholder="表头，默认为菜单名称">
                 </div>
             </div>
         </div>
@@ -350,7 +370,7 @@ $(function() {
             <div class="form-group">
                 <label class="col-sm-3">设置描述</label>
                 <div class="col-sm-9">
-                    <input type="text" v-model="subtitle" class="form-control" placeholder="Enter ...">
+                    <input type="text" v-model="subtitle" class="form-control" placeholder="描述，默认为空">
                 </div>
             </div>
         </div>

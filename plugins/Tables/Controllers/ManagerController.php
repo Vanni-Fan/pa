@@ -8,14 +8,19 @@ use HtmlBuilder\Layouts;
 use HtmlBuilder\Parser\AdminLte\Parser;
 use PDO;
 use Phalcon\Db\Adapter\Pdo\Factory;
+use Phalcon\Di\FactoryDefault;
+use Phalcon\Mvc\Model\MetaData\Memory;
+use Phalcon\Paginator\Adapter\Model;
 use Phalcon\Text;
 use plugins\DataSource\Models\DataSources;
 use plugins\Tables\Models\TablesFields;
 use plugins\Tables\Models\TablesMenus;
 use Power\Controllers\AdminBaseController;
 use PA;
+use Power\Models\Permissions;
 use Power\Models\Roles;
 use Power\Models\menus;
+use Power\Models\Users;
 use Tables\System\PluginsTableMenus;
 use Tables\System\PluginsTableSources;
 
@@ -314,12 +319,106 @@ OUT
         $this->render();
     }
 
+
+    public function addMenu(){
+        $data = $_POST;
+        $time = time();
+        $db   = (new Users)->getWriteConnection();
+        $err  = '';
+        $db->begin();
+        try {
+            if (!empty($_POST['id'])) { // 修改
+                $obj = TablesMenus::findFirst((int)$_POST['id']);
+                # 移动或修改菜单
+                $menu = Menus::findFirst($obj->menu_id);
+                $menu->name = $data['menu_name'];
+                $menu->parent_id = $data['menu_id'];
+                $menu->save();
+            } else {  // 添加
+                $obj = new TablesMenus();
+                # 添加菜单
+                $menu = new Menus;
+                $menu->assign([
+                    'name' => $data['menu_name'],
+                    'router' => json_encode([
+                        "priority"=> 10,
+                        "namespace"=> "Power\\Controllers",
+                        "controller"=> "Roles"
+                     ]),
+                    'params'=>json_encode([
+
+                    ]),
+                    'icon' => '',
+                    'parent_id' => $data['menu_id'] ?: null,
+                    'is_enabled' => 1,
+                    'created_user' => $this->userinfo['user_id'],
+                    'updated_user' => $this->userinfo['user_id'],
+                    'created_time' => $time,
+                    'updated_time' => $time,
+                ])->save();
+                # 分配权限
+                (new Permissions)->assign([
+                    'role_id' => $this->userinfo['role_id'],
+                    'type' => 'menu',
+                    'menu_id' => $menu->menu_id,
+                    'value' => 255,
+                    'created_user' => $this->userinfo['user_id'],
+                    'updated_user' => $this->userinfo['user_id'],
+                    'created_time' => $time,
+                    'updated_time' => $time,
+                ])->save();
+                $data['menu_id'] = $menu->menu_id;
+            }
+            $data['table']     = $this->getParam('t_id');
+            $data['title']     = $data['title'] ?: $data['name'];
+            $data['source_id'] = (int)$this->params['s_id'];
+            $data['canMin']    = $data['canMin']==='true'    ? 1 : 0;
+            $data['canClose']  = $data['canClose']==='true'  ? 1 : 0;
+            $data['canSelect'] = $data['canSelect']==='true' ? 1 : 0;
+            $data['canEdit']   = $data['canEdit']==='true'   ? 1 : 0;
+            $data['canAppend'] = $data['canAppend']==='true' ? 1 : 0;
+            $data['canDelete'] = $data['canDelete']==='true' ? 1 : 0;
+            $data['canFilter'] = $data['canFilter']==='true' ? 1 : 0;
+            $obj->assign($data)->save();
+            $data['id'] = (int)$obj->id;
+            # 创建默认字段
+            if(empty($_POST['id'])) {
+                $model = DataSources::getModel($data['source_id'], $data['table']);
+                $fields = $model->getModelsMetaData()->getAttributes($model); # todo
+                foreach ($fields as $field) {
+                    $tf = DataSources::getModel(1, PA::$config->pa_db->prefix . 'tables_fields');
+                    $tf->create();
+                    $tf->table_id = $data['id'];
+                    $tf->field = $field;
+                    $tf->name = $field;
+                    $tf->save();
+                }
+            }
+
+            $db->commit();
+        }catch(\Throwable $e){
+            $err = $e->getMessage();
+            $db->rollback();
+        }
+        if($err) return $this->jsonOut(['error'=>$err]);
+        $this->getMenuList();
+    }
+
     public function getMenuList(){
         [$data, $_menus] = [[], TablesMenus::find(['source_id=?0 and table=?1','bind'=>[$this->params['s_id'], $this->params['t_id']]])];
         iterator_apply($_menus, function (&$data, $interator){
             $item            = $interator->current()->toArray();
+//            $item['menu_name']    = $item['menu_name'];
+            $item['menu_id'] = (int)$item['menu_id'];
             $item['filters'] = $item['filters'] ? json_decode($item['filters'], 1) : [];
             $item['fields']  = TablesFields::find(['table_id=?0', 'bind'=>[$item['id']]])->toArray();
+            $item['canMin']    = (int)$item['canMin'];
+            $item['canClose']  = (int)$item['canClose'];
+            $item['canSelect'] = (int)$item['canSelect'];
+            $item['canEdit']   = (int)$item['canEdit'];
+            $item['canAppend'] = (int)$item['canAppend'];
+            $item['canDelete'] = (int)$item['canDelete'];
+            $item['canFilter'] = (int)$item['canFilter'];
             $data[]          = $item;
             return true;
         },[&$data, $_menus]);

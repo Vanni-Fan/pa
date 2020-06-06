@@ -1,6 +1,7 @@
 <?php
 namespace plugins\DataSource\Models;
 use Phalcon\Db\Adapter\PdoFactory as DB;
+use Phalcon\Di\FactoryDefault;
 use PowerModelBase as PMB;
 
 class DataSources extends PMB{
@@ -10,7 +11,7 @@ class DataSources extends PMB{
         $this->setSource(\PA::$config->path('pa_db.prefix').'datasources');
     }
 
-    public static function getSources(array $filter=[]){
+    public static function getSources(array $filter=[], $only_system=false){
         # 配置中的数据源
         $id = 1;
         foreach(\PA::$config as $key=>$value){
@@ -29,9 +30,11 @@ class DataSources extends PMB{
         }
 
         # 数据库中的数据源
-        $where = [];
-        self::parseWhere(['where'=>$filter], $where);
-        foreach(self::find($where) as $row) yield $row->toArray();
+        if(!$only_system) {
+            $where = [];
+            self::parseWhere(['where' => $filter], $where);
+            foreach (self::find($where) as $row) yield $row->toArray();
+        }
     }
 
     public static function getDB(array $config){
@@ -62,5 +65,39 @@ class DataSources extends PMB{
         }catch (\Throwable $e){
             return null;
         }
+    }
+
+    /**
+     * 使用ID获取数据库连接对象
+     * @param int $id
+     * @return mixed|\Phalcon\Db|\Phalcon\Db\Adapter\AdapterInterface|null
+     */
+    public static function getDBbyId(int $id){
+        if($id<1000){
+            if($id==1) return \PA::$db;
+        }
+        $all = array_column(iterator_to_array(self::getSources()), null,'source_id');
+        print_r($all);
+        return self::getDB($all[$id]);
+    }
+
+    public static function getModel($id, $table){
+        # di 按 $id 缓存； model 按 $id + $table 缓存
+        static $di_cache = [], $model_cache=[];
+        if(empty($di_cache[$id])){
+            $di_cache[$id] = new FactoryDefault();
+            $di_cache[$id]->set('db', DataSources::getDBbyId($id));
+            $table_cls = new \stdClass();
+            $table_cls->name = $table;
+            $di_cache[$id]->set('table', $table_cls);
+        }
+        if(empty($model_cache["$id:$table"])) {
+            $model_cache["$id:$table"] = new class(null, $di_cache[$id]) extends \Phalcon\Mvc\Model {
+                function initialize(){
+                    $this->setSource($this->getDI()->get('table')->name);
+                }
+            };
+        }
+        return $model_cache["$id:$table"];
     }
 }
