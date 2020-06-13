@@ -136,7 +136,7 @@
                         </li> -->
                         <!-- Menu Footer-->
                         <li class="user-footer">
-                            <div class="pull-left"><a href="<?=$c->routerUrl('display',['namespace'=>'Power\\Controllers','controller'=>'Users'],['item_id'=>$c->getUserId()])?>" class="btn btn-default btn-flat">个人信息</a></div>
+                            <div class="pull-left"><a href="<?=$c->routerUrl('display',['namespace'=>'Power\\Controllers','controller'=>'Users','module'=>''],['item_id'=>$c->getUserId()])?>" class="btn btn-default btn-flat">个人信息</a></div>
                             <div class="pull-right"><a href="<?=PA_URL_PATH.'logout'?>" class="btn btn-default btn-flat">登出系统</a></div>
                         </li>
                     </ul>

@@ -8,9 +8,7 @@ use HtmlBuilder\Layouts;
 use HtmlBuilder\Parser\AdminLte\Parser;
 use PDO;
 use Phalcon\Db\Adapter\Pdo\Factory;
-use Phalcon\Di\FactoryDefault;
-use Phalcon\Mvc\Model\MetaData\Memory;
-use Phalcon\Paginator\Adapter\Model;
+use Phalcon\Db\Column;
 use Phalcon\Text;
 use plugins\DataSource\Models\DataSources;
 use plugins\Tables\Models\TablesFields;
@@ -384,13 +382,61 @@ OUT
             # 创建默认字段
             if(empty($_POST['id'])) {
                 $model = DataSources::getModel($data['source_id'], $data['table']);
-                $fields = $model->getModelsMetaData()->getAttributes($model); # todo
-                foreach ($fields as $field) {
+                $fields = $model->getModelsMetaData()->getDataTypes($model);
+                $row = [
+                    'table_id'=>$data['id'],
+//                    'field'=>'',
+//                    'name'=>'',
+//                    'tooltip'=>'',
+//                    'width'=>'',
+//                    'sort'=>'',
+//                    'filter'=>'',
+//                    'show'=>'',
+//                    'primary'=>'',
+//                    'render'=>'',
+//                    'type'=>'',
+//                    'params'=>'',
+//                    'icon'=>'',
+//                    'class'=>'',
+                ];
+                foreach ($fields as $field=>$type) {
+                    $row['name'] = $row['field'] = $field;
+
+                    switch($type){
+                        case Column::TYPE_INTEGER:
+                        case Column::TYPE_BIGINTEGER:
+                        case Column::BIND_PARAM_INT:
+                        case Column::TYPE_FLOAT:
+                        case Column::TYPE_DOUBLE:
+                        case Column::TYPE_DECIMAL:
+                        case Column::TYPE_BOOLEAN:
+                            $row['type'] = 'number';
+                            break;
+                        case Column::TYPE_DATE:
+                            $row['type'] = 'date';
+                            break;
+                        case Column::TYPE_TIMESTAMP:
+                        case Column::TYPE_DATETIME:
+                            $row['type'] = 'datetime';
+                            break;
+                        case Column::TYPE_TINYBLOB:
+                        case Column::TYPE_BLOB:
+                        case Column::TYPE_MEDIUMBLOB:
+                        case Column::TYPE_LONGBLOB:
+                        case Column::TYPE_JSONB:
+                            $row['type'] = 'file';
+                            break;
+                        case Column::TYPE_VARCHAR:
+                        case Column::TYPE_CHAR:
+                        case Column::TYPE_TEXT:
+                        case Column::TYPE_JSON:
+                        default:
+                            $row['type'] = 'text';
+                            break;
+                    }
+
                     $tf = DataSources::getModel(1, PA::$config->pa_db->prefix . 'tables_fields');
-                    $tf->create();
-                    $tf->table_id = $data['id'];
-                    $tf->field = $field;
-                    $tf->name = $field;
+                    $tf->assign($row);
                     $tf->save();
                 }
             }
@@ -398,6 +444,7 @@ OUT
             $db->commit();
         }catch(\Throwable $e){
             $err = $e->getMessage();
+            echo $e->getTraceAsString();
             $db->rollback();
         }
         if($err) return $this->jsonOut(['error'=>$err]);

@@ -73,31 +73,21 @@ class DataSources extends PMB{
      * @return mixed|\Phalcon\Db|\Phalcon\Db\Adapter\AdapterInterface|null
      */
     public static function getDBbyId(int $id){
-        if($id<1000){
-            if($id==1) return \PA::$db;
-        }
+//        if($id==1) return \PA::$db;
         $all = array_column(iterator_to_array(self::getSources()), null,'source_id');
-        print_r($all);
         return self::getDB($all[$id]);
     }
 
     public static function getModel($id, $table){
-        # di 按 $id 缓存； model 按 $id + $table 缓存
-        static $di_cache = [], $model_cache=[];
-        if(empty($di_cache[$id])){
-            $di_cache[$id] = new FactoryDefault();
-            $di_cache[$id]->set('db', DataSources::getDBbyId($id));
-            $table_cls = new \stdClass();
-            $table_cls->name = $table;
-            $di_cache[$id]->set('table', $table_cls);
-        }
-        if(empty($model_cache["$id:$table"])) {
-            $model_cache["$id:$table"] = new class(null, $di_cache[$id]) extends \Phalcon\Mvc\Model {
-                function initialize(){
-                    $this->setSource($this->getDI()->get('table')->name);
-                }
-            };
-        }
-        return $model_cache["$id:$table"];
+        $di_cache[$id] = new FactoryDefault();
+        $di_cache[$id]->set('db', DataSources::getDBbyId($id));
+        $table_cls = new \stdClass();
+        $table_cls->name = $table;
+        $di_cache[$id]->set('table', $table_cls);
+        return new class(null, $di_cache[$id]) extends \Phalcon\Mvc\Model {
+            function initialize(){
+                $this->setSource($this->getDI()->get('table')->name);
+            }
+        };
     }
 }
