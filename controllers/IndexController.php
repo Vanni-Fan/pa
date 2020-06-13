@@ -16,26 +16,37 @@ class IndexController extends AdminBaseController{
         $this->title = 'HtmlBuilder Test Page';
         $parser = new Parser();
         $inputs = [];
+
+//        // 输入框实例
 //        $inputs[] = $parser->parse(
-//            Forms::input('c','手机号有验证')->statistics()->inputBeforeIcon('fa fa-users')->validate(
-//                Validate::number('请输入数字',1,8888),
+//            Forms::input('c','4个数字8验证器')->statistics()->inputBeforeIcon('fa fa-users')->validate(
+//                Validate::number('请输入4位数字',1,8888),
 //                Validate::regex('必须全是8','^8+$'),
 //            )
 //        );
-//        $inputs[] = $parser->parse(Forms::input('a','用户名')->statistics()->subtype('datetime'));
-//        $inputs[] = $parser->parse(Forms::input('a','用户名')->statistics()->subtype('email'));
+//        // 日期测试
+//        $inputs[] = $parser->parse(Forms::input('a','日期和时间')->statistics()->subtype('datetime'));
+//        $inputs[] = $parser->parse(Forms::input('a','邮件')->statistics()->subtype('email'));
+//        // 分栏样式
 //        $inputs[] = $parser->parse(Forms::input('b','个人说明')->required()->placeHolder('填写你的说明')->description('xxxx')->labelWidth(3)->tooltip('hhhh'));
-//        $inputs[] = $parser->parse(Forms::input('c','手机号')->inputBeforeIcon('fa fa-users')->required()->inputMask("'mask':'(999) 999-9999'"));
-//        $inputs[] = $parser->parse(Forms::input('c','手机号')->inputBeforeIcon('fa fa-star')->required()->subtype('date'));
-//        $inputs[] = $parser->parse(Forms::input('c','手机号')->inputBeforeIcon('fa fa-users')->required()->subtype('time'));
-//        $inputs[] = $parser->parse(Forms::input('c','ABCD')->labelWidth(2)->labelPosition('right-right')->visible(false));
-//        $inputs[] = $parser->parse(Forms::input('c','xxx')->labelWidth(3)->labelPosition('right-left'));
-//        $inputs[] = $parser->parse(Forms::input('c','xxx')->labelWidth(4)->labelPosition('left-right'));
-//        $inputs[] = $parser->parse(Forms::input('c','xxx')->labelWidth(5)->labelPosition('left-left')->enabled(false));
-//        $inputs[] = $parser->parse(Forms::input('c','xxx')->inputBeforeIcon('fa fa-users')->labelWidth(5)->labelPosition('left-left')->inputAfterIcon('fa fa-users'));
-//        $inputs[] = $parser->parse(Layouts::columns()->column(Forms::input('a'),4)->column(Forms::input('a'),8));
+//        // 电话
+//        $inputs[] = $parser->parse(Forms::input('c','电话测试')->inputBeforeIcon('fa fa-users')->required()->inputMask("'mask':'(999) 999-9999'"));
+//        $inputs[] = $parser->parse(Forms::input('c','日期')->inputBeforeIcon('fa fa-star')->required()->subtype('date'));
+//        $inputs[] = $parser->parse(Forms::input('c','时间')->inputBeforeIcon('fa fa-users')->required()->subtype('time'));
+//        $inputs[] = $parser->parse(Forms::input('c','隐藏的')->labelWidth(2)->labelPosition('right-right')->visible(false));
+//        $inputs[] = $parser->parse(Forms::input('c','标签在右边')->labelWidth(3)->labelPosition('right-left'));
+//        $inputs[] = $parser->parse(Forms::input('c','标签在左边，并且居右')->labelWidth(4)->labelPosition('left-right'));
+//        $inputs[] = $parser->parse(Forms::input('c','禁用状态')->labelWidth(5)->labelPosition('left-left')->enabled(false));
+//        $inputs[] = $parser->parse(Forms::input('c','标签在左左')->inputBeforeIcon('fa fa-users')->labelWidth(5)->labelPosition('left-left')->inputAfterIcon('fa fa-users'));
+//
+//        //列测试
+//        $inputs[] = $parser->parse(Layouts::columns()->column(Forms::input('a')->value('我占4列'),4)->column(Forms::input('a')->placeHolder('我占8列'),8));
+//
+//        //盒子测试
 //        $ttt = $parser->parse(Layouts::columns()->column(Forms::input('a','用户名')->labelWidth(3),4)->column(Forms::input('a'),8));
 //        $inputs[] = $parser->parse(Layouts::box($ttt,'标题',Forms::input('a','模块名称')->labelWidth(4))->style('Success')->labelIcon('fa fa-users')->canClose()->canMini()->class('ttt'));
+//
+//        //tag测试
 //        $inputs[] = $parser->parse(
 //            Layouts::columns()->column(
 //                Layouts::tabs()->tab('PageA', Forms::input('a','ahhh'))->tab('PageB', Forms::input('b','tttt'),true),
@@ -45,24 +56,24 @@ class IndexController extends AdminBaseController{
 //                9
 //            )
 //        );
+//
+//        // 按钮组
 //        $inputs[] = $parser->parse(
-//            Forms::button()->label('ssssssssss')->add(
-//                Forms::button()->subtype('default')->label('AAA'),
-//                Forms::button()->subtype('default')->label('BBB')->style('default'),
-//                Forms::button()->subtype('default')->label('CCC')->style('danger'),
-//                )
+//            Forms::button('name')->subtype('group')->add(
+//                Forms::button('aaa')->subtype('default')->label('AAA')->on('click','alert("aaa");'),
+//                Forms::button('bbb')->subtype('default')->label('BBB')->style('default')->on('click','alert("bbb");'),
+//                Forms::button('ccc')->subtype('default')->label('CCC')->style('danger')->on('click','alert("ccc");'),
+//            )
 //        );
-
+//
+//        // 输入按钮
 //        $inputs[] = $parser->parse(
-//            Forms::button()->btnBeforeIcon('fa fa-users')->btnAfterIcon(
-//                Forms::button()->subtype('default')->label('sss')
-////                Forms::button()->add(
-////                    Forms::button()->subtype('default')->label('sss')
-////                )
-//            )->subtype('input')
+//            Forms::button('')
+//                ->btnBeforeIcon('fa fa-users')
+//                ->btnAfterIcon(Forms::button('def')->subtype('default')->label('搜索')->on('click','alert("点搜索")')
+//            )->subtype('input')->on('click','alert("点击事件")')
 //        );
-//        print_r(Forms::checkbox('asdfsdfa','bb','ssss')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'1']]));
-//        exit;
+//
 //        $inputs[] = $parser->parse(
 //            Forms::checkbox('asdfsdfa','bb','1')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'2']])->other(
 //               '其他选项'
@@ -73,22 +84,22 @@ class IndexController extends AdminBaseController{
 //                Forms::input('xxx')->placeHolder('其他')->disabled()
 //            )
 //        );
-
+//
 //        $inputs[] = $parser->parse(
 //            Forms::select('asdfsdfa','bbx','2','select')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'2']])->isTags(true)//->multiple(true)
 //            ->labelWidth(3)->rows(1)
 //        );
 
-//        $inputs[] = $parser->parse(
-//            Forms::form($this->url('update'))->add(
+        $inputs[] = $parser->parse(
+            Forms::form($this->url('update'))->add(
 //                Forms::input('aaa','用户')->subtype('color'),
 //                Forms::input('bbb','秘密')->subtype('password'),
-//                Forms::file('xxxx')->accept('image/*')->placeHolder('用户头像'),//->setCorpSize(200,400),//->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
+                Forms::file('xxxx')->accept('image/*')->placeHolder('用户头像')->setCorpSize(200,400),//,//->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
 //                Forms::file('yyyy[]')->accept('image/*')->subtype('multiple')->setCorpSize(200,200),//->label('用户头像')->labelWidth(4)->description('头像必须300x234'),
-//                Forms::button('重置')->action('reset'),
-//                Forms::button('提交')->action('submit'),
-//            )
-//        );
+                Forms::button('','重置')->action('reset'),
+                Forms::button('','提交')->action('submit'),
+            )
+        );
 
         $inputs[] = $parser->parse(
 //            Forms::form($this->url('update'))->add(
@@ -97,9 +108,11 @@ class IndexController extends AdminBaseController{
                         'filters'=>[
                             'op'=>'AND',
                             'sub'=>[
-                                ['key'=>'e','op'=>'>=','val'=>'11'],
-                                ['key'=>'e','op'=>'<','val'=>'1001'],
-                                ['key'=>'d','op'=>'>=','val'=>'11'],
+                                ['key'=>'o.user_id','op'=>'>=','val'=>'11'],
+                                ['key'=>'b','op'=>'<','val'=>'1001'],
+                                ['key'=>'d.sdf','op'=>'>=','val'=>'11'],
+                                ['key'=>'xx.sdf','op'=>'>=','val'=>'11'],
+                                ['key'=>'c','op'=>'>=','val'=>'11'],
                             ]
                         ],
                         'sort' => [
@@ -115,15 +128,15 @@ class IndexController extends AdminBaseController{
                     $this->url('update',['action'=>'getTableData'])
                 )->fields(
                     [
-                        ['name'=>'a', 'text'=>'字段A','tooltip'=>'这个是字段A','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
-                        ['name'=>'b', 'text'=>'字段B','tooltip'=>'这个是字段B','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
-                        ['name'=>'c', 'text'=>'字段C','tooltip'=>'这个是字段C','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
-                        ['name'=>'d', 'text'=>'字段D','tooltip'=>'这个是字段D','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
-                        ['name'=>'e', 'text'=>'字段E','tooltip'=>'这个是字段E','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'text','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
+                        ['name'=>'a', 'text'=>'字段A','tooltip'=>'这个是字段A','sort'=>1, 'filter'=>'o.user_id', 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'date','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
+                        ['name'=>'b', 'text'=>'字段B','tooltip'=>'这个是字段B','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'time','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
+                        ['name'=>'c', 'text'=>'字段C','tooltip'=>'这个是字段C','sort'=>'aa.c_Id', 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'color','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
+                        ['name'=>'d', 'text'=>'字段D','tooltip'=>'这个是字段D','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'datetime-local','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
+                        ['name'=>'e', 'text'=>'字段E','tooltip'=>'这个是字段E','sort'=>1, 'filter'=>1, 'edit'=>1, 'delete'=>'canDelete', 'width'=>200, 'show'=>1, 'type'=>'datetime','params'=>[], 'icon'=>'fa fa-users', 'class'=>''],
                     ]
                 )->primary('c')->deleteApi(
                     $this->url('delete',['item_id'=>'{id}'])
-                )->description('测试表格组件'),
+                )->description('测试表格组件')//->afterQueryCallback('t=>alert("查询之后")')->beforeQueryCallback('t=>alert("查询之前")'),
 //                Components::timerange('time')->label('时间段')->value(['12:12:12','13:13:13']),
 //                Components::multiselect($this->url('index',['action'=>'getItems']))
 //                  ->addSelect('a[]',null,2,$this->url('index',['action'=>'getItems']).'?type=A')

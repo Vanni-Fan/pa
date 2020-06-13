@@ -36,6 +36,23 @@ class App{
         }
     }
 
+    /**
+     * 获取当前的模块名称
+     * @return string
+     */
+    public static function getModuleName(){
+        $name = PA::$app->dispatcher->getModuleName();
+        if(empty($name)){
+            $domain = $_SERVER['SERVER_NAME'] ?? $_SERVER['HTTP_HOST'] ?? PA::$args['server'];
+            if(empty(PA::$config->root_domain)){
+                $name = explode('.', $domain)[0];
+            }else{
+                $name = substr($domain, 0, strlen($domain)-strlen(PA::$config->root_domain)-1);
+            }
+        }
+        return $name;
+    }
+
     public function init($config=null){
         # 1、PA初始化：Loader目录注册,Loader名字空间注册,常量设置
         # 设置基础环境
@@ -308,6 +325,7 @@ class App{
 
     public function run($config_file=null){
         if($config_file) $this->init($config_file);
+//        PA::$app->useImplicitView(false);
         echo PA::$app->handle($_SERVER["REQUEST_URI"] ?? PA::$args['uri'])->getContent();
 //        $response = PA::$app->handle('/');
 //        echo "<pre>";

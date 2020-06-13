@@ -82,6 +82,7 @@ function initFileUpload(id, isSingle, canCorp, corpOptions){
                     backgroundImage: 'url(' + imageBlobUrl + ')',
                     backgroundSize: 'cover'
                 }).click(function(){
+                    cropperWarp.init();
                     startCorp($(id+'-icon')[0], 0);
                 });
             }else{
@@ -237,9 +238,9 @@ $corpOptions = '{}';
 # 加载裁剪相关的 CSS 、HTML & JS 代码
 if($canCorp) {
     $corpOptions = '{width:'.((int)($corpWidth??$corpHeight??100)).',height:'.((int)($corpHeight??$corpWidth??100)).'}';
-    $this->css('/dist/plugins/bootstrap-slider/slider.css');
+    $this->css('/dist/plugins/bootstrap-slider/bootstrap-slider.min.css');
     $this->css('/dist/plugins/cropperjs/cropper.css');
-    $this->js('/dist/plugins/bootstrap-slider/bootstrap-slider.js');
+    $this->js('/dist/plugins/bootstrap-slider/bootstrap-slider.min.js');
     $this->js('/dist/plugins/cropperjs/cropper.js');
     
     # 图片裁剪 CSS，缓存
@@ -325,28 +326,28 @@ if($canCorp) {
 
     # 图片裁剪 JS & Form的Ajax提交，缓存
     $this->script(/** @lang JavaScript */ "
-        var cropperWarp = {
-            cropper: new Cropper(document.getElementById('htmlBuilder_image_source')),
-            slider: $('#htmlBuilder_slider_bar').slider({step: 1,min: -45,value:0,max: 45,tooltip:'hide'}), // 滑动条
-            sliderStatus: {rotate:0,horizontal:false,vertical:false},
-            croppedFile:null, // 裁剪器裁剪后的File对象
-            currentFile:null, // 当前正在被裁剪的File对象
-            currentObject:{}, // 当前正在被裁剪的选项
-            setFile:function setFile(file){
+        var cropperWarp = new function(){
+            this.cropper = new Cropper(document.getElementById('htmlBuilder_image_source'));
+            this.slider = $('#htmlBuilder_slider_bar').slider({step: 1,min: -90,value:0,max: 90,tooltip:'hide'}); // 滑动条
+            this.sliderStatus = {rotate:0,horizontal:false,vertical:false};
+            this.croppedFile=null; // 裁剪器裁剪后的File对象
+            this.currentFile=null; // 当前正在被裁剪的File对象
+            this.currentObject={}; // 当前正在被裁剪的选项
+            this.setFile = function setFile(file){
                 this.currentFile = file;
                 this.cropper.replace(this.getImageUrl(file));
                 return this;
-            },
-            doRotate:function doRotate(i){ this.cropper.rotate(i) },
-            doHorizontal:function doHorizontal(){
+            };
+            this.doRotate = function doRotate(i){ this.cropper.rotate(i) };
+            this.doHorizontal = function doHorizontal(){
                 this.cropper.scale(this.sliderStatus.horizontal ? 1 : -1, this.sliderStatus.vertical ? -1 :1);
                 this.sliderStatus.horizontal = !this.sliderStatus.horizontal;
-            },
-            doVertical:function doVertical(){
+            };
+            this.doVertical = function doVertical(){
                 this.cropper.scale(this.sliderStatus.horizontal ? -1 : 1, this.sliderStatus.vertical ? 1 :-1);
                 this.sliderStatus.vertical = !this.sliderStatus.vertical;
-            },
-            doCrop:function doCrop(func){
+            };
+            this.doCrop = function doCrop(func){
                 var that = this;
                 window.hasCorp[this.currentObject.form_id] = true;
                 this.cropper.getCroppedCanvas(this.currentObject).toBlob(function(blob){
@@ -355,30 +356,35 @@ if($canCorp) {
                     that.hide();
                 }, this.currentFile.type);
                 return this;
-            },
-            setImage:function setImage(url){ this.cropper.replace(url); return this; }, // 设置图片
-            setAspectRatio:function setAspectRatio(aspectRatio){ this.cropper.setAspectRatio(aspectRatio); return this; }, // 设置高宽比
-            doReset:function doReset(){ this.cropper.reset(); return this; },
-            getImage:function getImage(){ return this.croppedFile },
-            getImageUrl:function getImageUrl(blob){
+            };
+            this.setImage = function setImage(url){ this.cropper.replace(url); return this; }; // 设置图片
+            this.setAspectRatio = function setAspectRatio(aspectRatio){ this.cropper.setAspectRatio(aspectRatio); return this; }; // 设置高宽比
+            this.doReset = function doReset(){ this.cropper.reset(); return this; };
+            this.getImage = function getImage(){ return this.croppedFile };
+            this.getImageUrl = function getImageUrl(blob){
                 //console.log('blob对象是:',blob);
                 return URL.createObjectURL(blob || this.croppedFile);
-            },
-            show:function show(){ $('.cropperWarpDiv').show(); return this; },
-            hide:function hide(){ $('.cropperWarpDiv').hide(); return this; },
-            init:function init(){
-                var that = this;
-                this.slider.on(\"slide\", function(sliderValue) {
+            };
+            this.show = function show(){ $('.cropperWarpDiv').show(); return this; };
+            this.hide = function hide(){ $('.cropperWarpDiv').hide(); return this; };
+            
+            var that = this;
+            var eventObj = {
+                slide: function(sliderValue) {
                     var newValue = sliderValue.value - that.sliderStatus.rotate;
                     that.doRotate(newValue);
                     that.sliderStatus.rotate = sliderValue.value;
-                });
-                this.slider.on('slideStart', function () { that.sliderStatus.rotate = 0 });
-                this.slider.on('slideStop', function () { that.sliderStatus.rotate = 0; that.slider.slider('setValue',0);});
+                },
+            }
+            this.init = function init(){
+                this.slider.off('slide', eventObj.slide);
+                this.slider.on('slide', eventObj.slide);
                 return this;
             }
         };
-        cropperWarp.init();"
+//        setTimeout(cropperWarp.init, 3000)
+        "
+
     );
 
     # 裁剪器，缓存

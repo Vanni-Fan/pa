@@ -314,7 +314,7 @@ function HtmlBuilder_table_init(id){
         // if(!field.show) continue;
         var sortStatus = '';
         var filterStatus = '';
-        if(field.sort){
+        if(field.sort && ["false",0,"0"].indexOf(field.sort.toString()) === -1){
             var sort_index = options.query.sort.findIndex(function(_v){ return _v.name === field.name; });
             if(sort_index === -1){
                 sortStatus = '<i onclick="HtmlBuilder_table_sort(\'' + id + '\', \'' + field.name + '\')" class="sort-status fa fa-sort text-gray"></i><span class="sort-badge hidden"></span>';
@@ -357,12 +357,21 @@ function HtmlBuilder_table_changePageSize(obj){
 // 点击排序时的动作
 function HtmlBuilder_table_sort(id, field){
     var options = window[id];
-    var found = options.query.sort.findIndex(function(_v){ return _v.name === field});
+
+    // 排序字段名称
+    var field_index = options.fields.findIndex(function(_v){return _v.name === field});
+    var sort = (options.fields[field_index].sort || 1).toString();
+    var sort_field_name = (["true",1,"1"].indexOf(sort)>-1) ? options.fields[field_index].name : sort;
+
+    // 是否已经在排序条件当中
+    var found = options.query.sort.findIndex(function(_v){ return _v.name === sort_field_name});
+    
+    // console.log('找',id, field, sort_field_name, found);
     var old_class = [], new_class = [];
     if(found === -1){
         old_class = ['fa-sort','text-gray'];
         new_class = ['fa-sort-amount-asc','text-info'];
-        options.query.sort.push({name:field,type:'asc'});
+        options.query.sort.push({name:sort_field_name,type:'asc',field:field});
     }else{
         var type = options.query.sort[found].type;
         if(type === 'asc'){
@@ -380,7 +389,7 @@ function HtmlBuilder_table_sort(id, field){
     // 设置排序角标
     $('#' + id + ' th .sort-badge').addClass('hidden').text('');
     for(var index in options.query.sort){
-        $('#' + id + ' th[data-field="' + options.query.sort[index].name + '"] .sort-badge').text(parseInt(index)+1).removeClass('hidden');
+        $('#' + id + ' th[data-field="' + options.query.sort[index].field + '"] .sort-badge').text(parseInt(index)+1).removeClass('hidden');
     }
     
     window[id] = options;
@@ -403,7 +412,7 @@ function HtmlBuilder_table_setFilter(id, field) {
                     showDialogs({
                         body:'有些条件不完整，请修复',
                         width:'200px',
-                        delay:2000
+                        delay:2000 
                     },'sub');
                     return;
                 }
@@ -421,11 +430,19 @@ function HtmlBuilder_table_setFilter(id, field) {
     
     var fields = {};
     for(var i=0;i<window[id].fields.length;i++){
-        if(window[id].fields[i].hasOwnProperty('filter') && !window[id].fields[i].filter) continue;
-        fields[window[id].fields[i].name] = window[id].fields[i].text;
+        var k = window[id].fields[i].name; // 默认的键名为
+        if(window[id].fields[i].hasOwnProperty('filter')){
+            var _filter = window[id].fields[i].filter.toString();
+            if(["false",0,"0",""].indexOf(_filter) >= 0) continue;// 不需要过滤
+            k = (["true",1,"1"].indexOf(_filter) >= 0) ? window[id].fields[i].name : _filter; // 直接使用name字段
+        }
+        fields[k] = {
+            text:window[id].fields[i].text,
+            type:window[id].fields[i].type ? window[id].fields[i].type : 'text' 
+        };
     }
     var filters = $.isEmptyObject(window[id].query.filters) ? [] : window[id].query.filters.sub;
-    // console.log('当前的过滤条件', window[id].query.filters, filters);
+    console.log('当前的过滤条件', window[id].query.filters, filters, fields);
     // 固定的添加项目，用于新增
     // 找到 当前的 filters
     window['FILTERS_'+id] = new Vue({
@@ -463,7 +480,8 @@ function HtmlBuilder_table_setFilter(id, field) {
 
 // 执行AJAX查询
 function HtmlBuilder_table_query(id){
-   $.ajax(window[id].queryApi,{method:'post',data:window[id].query}).done(function(data){
+    if(window[id].beforeQueryCallback) eval(window[id].beforeQueryCallback)();
+    $.ajax(window[id].queryApi,{method:'post',data:window[id].query}).done(function(data){
         HtmlBuilder_table_setData(data, id);
     });
 }
@@ -540,6 +558,8 @@ function HtmlBuilder_table_setData(data, id) {
             HtmlBuilder_table_query(id);
         }
     });
+    
+    if(window[id].afterQueryCallback) eval(window[id].afterQueryCallback)();
 }
 
 // 设置固定表头的宽度（在固定表头时）

@@ -23,7 +23,7 @@ class RouterController extends Controller {
             $forward['action'] = $forward['params']['action'];
         }elseif(isset($param['setting'])){  // 页面设置
             $forward['action'] = 'setting';
-        }else{
+        }elseif(empty($forward['action'])){
             $forward['action'] = $action;
         }
         if(empty($forward['controller'])) $forward['controller'] = 'index';
@@ -31,7 +31,7 @@ class RouterController extends Controller {
             PA::$app->getModule($forward['module'])(); // 加载模块
             $this->dispatcher->setModuleName($forward['module']);
         }
-            $this->dispatcher->forward($forward);
+        $this->dispatcher->forward($forward);
     }
     
     public function __call($name, $param){

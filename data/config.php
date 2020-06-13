@@ -84,7 +84,18 @@ return [
     'error' => [
         'handler'   => 'Power\\Controllers\\ErrorController::handlerError',
         'exception' => 'Power\\Controllers\\ErrorController::handlerException',
-        'controller'=> 'Power\\Controllers\\ErrorController',
+//        'mappings'  => [
+//            # 为不同模块设置不通的错误处理机制，格式为 ['模块名'=>'处理器',...]，调用方法： 处理器($异常对象,$模块名)
+//            # 模块名支持*号匹配所有，也支持逗号分隔多个模块
+//            'api'   => [...],// 一般展示 JSON 输出
+//            'web'   => [...],// 一般展示网站的 404
+//            'admin' => [...],// 一般展示管理端的权限拒绝
+//            '*'     => [
+//                'controller' => 'error',
+//                'action'     => 'index',
+//                'namespace'  => 'Power\Controllers'
+//            ]
+//        ]
     ],
 
     # 插件的激活，将插件放到 pa 的 plugins 目录下，并在此配置名称

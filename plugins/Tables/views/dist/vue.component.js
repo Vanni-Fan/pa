@@ -30,31 +30,43 @@ Vue.component('condition',{
     template:'<div about="基本条件样式" class="base-filter-template">\n' +
         '        <div class="input-group margin">\n' +
         '            <div class="input-group-btn">\n' +
+        '                <template v-if="!value.key || fields.hasOwnProperty(value.key)">' +
         '                <span type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" style="width:150px;border-right:none;">\n' +
-        '                    <span class="current-operation">{{value.key ? fields[value.key] : "字段"}}</span><span class="fa fa-caret-down pull-right"></span>\n' +
+        '                    <span class="current-operation">{{value.key ? fields[value.key].text : "字段"}}</span><span class="fa fa-caret-down pull-right"></span>\n' +
         '                </span>\n' +
         '                <ul class="dropdown-menu">\n' +
         '                    <li class="disabled"><a>选择一个字段</a></li>\n' +
-        '                    <li class="divider"></li>\n' +
-        '                    <template v-for="(val, key) in fields">' +
-        '                        <li :value="val" :class="value.key==key ? \'active\' : null" @click="selectField(key);"><a>{{val}}</a></li>\n' +
-        '                    </template>' +
+        '                    <li class="divider"></li>' +
+        '                        <template v-for="(val, key) in fields">' +
+        '                            <li :value="val.text" :class="value.key==key ? \'active\' : null" @click="value.key=key"><a>{{val.text}}</a></li>\n' +
+        '                        </template>' +
         '                </ul>\n' +
+        '                </template><template v-else>' +
+        '                    <div class="btn btn-info disabled" style="border-right:none;min-width: 150px;">{{value.key}}</div>' +
+        '                </template>' +
         '            </div>\n' +
         '            <div class="input-group-btn">\n' +
+        '                <template v-if="!value.key || fields.hasOwnProperty(value.key)">' +
         '                <span type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" style="width:110px;border-radius:0;border-width:1px 0 1px 1px;">' +
         '                <span class="current-operation">{{opText ? opText : "操作符"}}</span><span class="fa fa-caret-down pull-right"></span></span>\n' +
         '                <ul class="dropdown-menu">\n' +
         '                    <li class="disabled"><a>选择一个操作符</a></li>\n' +
         '                    <li class="divider"></li>\n' +
         '                    <template v-for="operation in operations">' +
-        '                        <li :value="operation.op" :class="operation.text==opText ? \'active\' : null" @click="selectOp(operation.op);"><a>{{operation.text}}</a></li>\n' +
+        '                        <li :value="operation.op" :class="operation.text==opText ? \'active\' : null" @click="value.op=operation.op"><a>{{operation.text}}</a></li>\n' +
         '                    </template>' +
         '                </ul>\n' +
+        '                </template><template v-else>' +
+        '                    <div class="btn btn-info disabled" style="border-radius:0;min-width: 111px;">{{value.op}}</div>' +
+        '                </template>' +
         '            </div>\n' +
-        '            <input type="text" class="form-control" style="border-color:#00acd6;" placeholder="查询值" v-model="value.val">\n' +
+        '            <template v-if="!value.key || fields.hasOwnProperty(value.key)">' +
+        '            <input :type="value.key ? fields[value.key].type : \'text\'" class="form-control" style="border-color:#00acd6;border-right:none;" placeholder="查询值" v-model="value.val">\n' +
+        '            </template><template v-else>' +
+        '            <input type="text" disabled="disabled" style="border-left:0;" class="form-control" :value="value.val">\n' +
+        '            </template>' +
         '            <span class="input-group-btn">\n' +
-        '              <button type="button" class="btn btn-info" @click="del"><i class="fa fa-close"></i></button>\n' +
+        '              <button type="button" :disabled="value.key!==\'\' && !fields.hasOwnProperty(value.key)" class="btn btn-info" @click="$emit(\'del\')"><i class="fa fa-close"></i></button>\n' +
         '            </span>\n' +
         '        </div>\n' +
         '    </div>',
@@ -69,7 +81,7 @@ Vue.component('condition',{
                 {'op':'<=','text':'小于或等于'},
                 {'op':'!=','text':'不等于'},
                 {'op':'%', 'text':'包含'}
-            ]
+            ],
         }
     },
     computed:{
@@ -80,17 +92,6 @@ Vue.component('condition',{
             });
             if(index==-1) return '操作符';
             return this.operations[index].text;
-        }
-    },
-    methods:{
-        selectField:function(key){
-            this.value.key = key;
-        },
-        selectOp:function(op){
-            this.value.op = op;
-        },
-        del:function () {
-            this.$emit('del');
         }
     }
 });

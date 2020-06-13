@@ -48,6 +48,9 @@ class Table extends Element
     public $verticalLine   = ''; // 垂直线 todo
     public $horizontalLine = ''; // 水平线 todo
     public $primary        = 'id'; // 主键，用于编辑和删除的替换ID
+
+    public string $beforeQueryCallback = ''; // 查询之前的回调方法
+    public string $afterQueryCallback  = ''; // 查询之后的回调方法
     
     public function __construct(string $name)
     {
@@ -56,14 +59,14 @@ class Table extends Element
     }
 
     /**
-     * 字段定义[ [name:字段名, text:显示名, tooltip:提示符, sort:1(是否可排序), filter:1(是否可以添加过滤条件), edit:1(是否可编辑), width:null, show:1, type:编辑器类型, params:[编辑器的参数，必须、验证器等], icon:图标, class:额外的样式] ]
+     * 字段定义[ [name:字段名, text:显示名, tooltip:提示符, sort:排序, filter:筛选, edit:编辑, width:列宽, show:可视, type:类型, params:[编辑器的参数，必须、验证器等], icon:图标, class:样式] ]
      * 定义表的每一列的显示情况，每一列可以包含下面字段：
      * [
      *  name:字段名, 必须
      *  text:显示名, 必须
      *  tooltip:提示符, 可选，默认无
-     *  sort:是否可排序, 可选，默认0
-     *  filter:是否可以添加过滤条件, 可选，默认0
+     *  sort:是否可排序, 可选，默认0，如果为字符串，表示用此名称排序，否则用 name 中的名字排序；0表示不能排序
+     *  filter:是否可以添加过滤条件, 可选，默认1，表示支持查询，如果为字符串，则表示用此名称查询，否则用 name 中的名称查询； 0表示不支持查询
      *  width:列宽，可选，默认无
      *  show:是否显示, 可选，默认1
      *  render:JS的渲染器回调函数，可选，默认无
