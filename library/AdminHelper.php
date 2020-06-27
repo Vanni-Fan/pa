@@ -172,4 +172,25 @@ class AdminHelper{
         }
         return $fixed_choices;
     }
+
+    /**
+     * 获得 PA 中所有的 icons
+     */
+    public static function getIcons():array
+    {
+        $files['fa']    = file(POWER_BASE_DIR.'public/dist/bower_components/font-awesome/less/icons.less'); 
+        $files['glyph'] = file(POWER_BASE_DIR.'public/dist/bower_components/bootstrap/less/glyphicons.less'); 
+        $icons = [];
+        foreach($files as $type=>$rows){
+            foreach($rows as $row){
+                $match = ($type === 'fa') ? ['.@{fa-css-prefix}-','fa fa-'] : ['.glyphicon-','glyphicon glyphicon-'];
+                $font  = substr($row, 0, strlen($match[0]));
+                if($font === $match[0]){
+                    $parts = preg_split('/[, :]+/',$row);
+                    $icons[] = str_replace($match[0], $match[1], $parts[0]);
+                }
+            }
+        }
+        return $icons;
+    }
 }

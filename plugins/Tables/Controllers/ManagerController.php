@@ -21,7 +21,7 @@ use Power\Models\menus;
 use Power\Models\Users;
 use Tables\System\PluginsTableMenus;
 use Tables\System\PluginsTableSources;
-
+use AdminHelper;
 
 
 class ManagerController extends AdminBaseController
@@ -252,6 +252,7 @@ class ManagerController extends AdminBaseController
         $this->view->get_menus_url = $this->getUrl(['command'=>'getMenuList','s_id'=>'S_ID','t_id'=>'T_ID']);
         $this->view->add_menus_url = $this->getUrl(['command'=>'addMenu','s_id'=>'S_ID','t_id'=>'T_ID']);
         $this->view->save_menus_url = $this->getUrl(['command'=>'saveMenu','s_id'=>'S_ID','t_id'=>'T_ID']);
+        $this->view->all_icons = AdminHelper::getIcons();
 
         $this->view->all_menus = Menus::getFlatMenus();
         $this->render('manager/edit');

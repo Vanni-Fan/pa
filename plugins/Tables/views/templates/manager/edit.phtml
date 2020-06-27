@@ -63,7 +63,7 @@ let tables = [
         ]
     }
 ];
-
+let all_icons = <?=json_encode($all_icons)?>;
 /**
  * 显示基础参数配置
  * @param index 数字下标
@@ -158,7 +158,7 @@ function showFilter(fields, filters, callback){
 
 
 function showIcons(){
-
+    alert('aa');
 }
 $(function() {
     // 当数据源变动时，数据表跟着变动
