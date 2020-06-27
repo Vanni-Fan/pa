@@ -70,7 +70,7 @@ class AdminBaseController extends Controller{
      * 如果需要自定义用户，那么请重载此方法
      * @return mixed
      */
-    public function getUserId():int{
+    public function getUserId():?int{
         return $this->userinfo['user_id'];
     }
     
@@ -267,8 +267,13 @@ class AdminBaseController extends Controller{
      * @throws \Exception
      * @return string
      */
-    public function getPaginatorString(int $total, int $current_page=1, int $page_size=20, int $page_items=5){
-        $p = new \Pagination($total, $this->current_page ?? $current_page, $this->page_size ?? $page_size, $this->page_items ?? $page_items);
+    public function getPaginatorString(int $total, int $current_page=null, int $page_size=null, int $page_items=null, string $url=null):string{
+        $p = new \Pagination(
+            $total,
+            $current_page ?? $this->current_page ?? 1,
+            $page_size ?? $this->page_size ?? 20,
+            $page_items ?? $this->page_items ?? 5
+        );
         $p->setStyle('front','<li><a href="{url}">&laquo;</a></li>');
         $p->setStyle('first','<li><a href="{url}">{page}</a></li>');
         $p->setStyle('item','<li><a href="{url}">{page}</a></li>');
@@ -278,8 +283,11 @@ class AdminBaseController extends Controller{
         $p->setStyle('next','<li><a href="{url}">&raquo;</a></li>');
         $get = $_GET;
         unset($get['_url']);
-        $p->setUrl($this->url('index', ['page'=>'{page}']));
-        
+
+        if(is_null($url)) $url = $this->url('index', ['page'=>'{page}']);
+        else $url = $this->url('index', ['page'=>'{page}']);
+        $p->setUrl($url);
+
         return '<div class="box-footer clearfix"><ul class="pagination pagination-sm no-margin pull-right">'.
                $p->getOutput().
                '</ul></div>';

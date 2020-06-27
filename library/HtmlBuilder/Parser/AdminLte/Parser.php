@@ -72,25 +72,19 @@ class Parser{
             if (!file_exists($template_file)) $template_file = $template_dir . 'default.php';
     
             if (empty($element->id)) $element->id = 'HB_' . uniqid();
-    
-            //        $this->events[] = ['event'=>$event_name, 'code'=>$js_code, 'selector'=>$selector];
-            // $('# $id $selector').on('event', function(event){  $code;  });
+
+            // 加载模板
+            extract(get_object_vars($element), EXTR_OVERWRITE);
+            require $template_file;
+
+            // 设置事件
             foreach($element->events as $event){
                 $this->script(
-                    '$("#' . $element->id.$event['selector'] .'").on("'.$event['event'].'", function(event){ '.$event['code'].'; });'
+                    '$(function(){$("#' . $element->id.$event['selector'] .'").on("'.$event['event'].'", function(event){ '.$event['code'].'; })})'
                 );
             }
-//            ob_start();
-//            $parse = function () use ($template_file, $element) {
-                extract(get_object_vars($element), EXTR_OVERWRITE);
-                require $template_file;
-//            };
-//                    $out .= ob_get_flush();//ob_get_clean();
-
-//            ob_start();
-//            $parse();
-//             $parse->call($this);
         }
+
         $out .= ob_get_clean();
         return $out;
     }

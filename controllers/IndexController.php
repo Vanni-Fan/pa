@@ -4,10 +4,7 @@ namespace Power\Controllers;
 use HtmlBuilder\Components;
 use HtmlBuilder\Element;
 use HtmlBuilder\Forms;
-use HtmlBuilder\Layouts;
 use HtmlBuilder\Parser\AdminLte\Parser;
-use HtmlBuilder\Validate;
-use http\Client\Response;
 
 class IndexController extends AdminBaseController{
     public function indexAction(){
@@ -85,10 +82,32 @@ class IndexController extends AdminBaseController{
 //            )
 //        );
 //
-//        $inputs[] = $parser->parse(
-//            Forms::select('asdfsdfa','bbx','2','select')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'2']])->isTags(true)//->multiple(true)
-//            ->labelWidth(3)->rows(1)
-//        );
+        // 普通下来选择
+        $inputs[] = $parser->parse(
+            Forms::select('se1','普通选择','11')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'2']]),
+            Forms::select('se2','普通带搜索','11','select2')->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'2']]),
+            Forms::select('se2','可以输入不存在的值','11','select2')->isTags(1)->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'2']]),
+            Forms::select('se2','可以输入多个值','11','select2')->multiple(1)->isTags(1)->choices([['text'=>'aaa','value'=>'1'],['text'=>'bbb','value'=>'2']]),
+        );
+
+        // 3级联动
+        $inputs[] = $parser->parse(
+            Element::create('div')->id('mse')->style("#mse>div{display:flex}\n#mse button{height:35px;}")->add(
+                Forms::button('')->subtype('group')
+                ->add(
+                    Forms::button('')->class('fa fa-users'),
+                    Components::multiselect('')->on('change','alert(2)'," select[name='sub_category']")->id('vanni')->addSelect(
+                        'main_category','','1',$this->url('display',['command'=>'getCategory'])
+                    )->addSelect(
+                        'abc_category','','1',$this->url('display',['command'=>'getCategory','main_id'=>'[$0]'])
+                    )->addSelect(
+                        'sub_category','','1',$this->url('display',['command'=>'getCategory','main_id'=>'[$0]','sub_id'=>'[$1]'])
+                    ),
+
+                    Forms::button('')->class('fa fa-search')
+                )
+            )
+        );
 
         $inputs[] = $parser->parse(
             Forms::form($this->url('update'))->add(
@@ -192,6 +211,40 @@ class IndexController extends AdminBaseController{
 //        );
 //        var_dump(get_class($this->view));
         $this->render();
+    }
+    public function displayAction(){
+        $param = $this->getParam();
+        if(empty($param['main_id'])){
+            $rs = [
+                ['text'=>'AAA','value'=>1],['text'=>'BBB','value'=>2],['text'=>'CCC','value'=>3],
+            ];
+        }elseif(empty($param['sub_id'])){
+            $rs = [
+                1=>[
+                    ['text'=>'AAA-111','value'=>1],['text'=>'AAA-222','value'=>2],['text'=>'AAA-333','value'=>3]
+                ],
+                2=>[
+                    ['text'=>'BBB-111','value'=>1],['text'=>'BBB-222','value'=>2],['text'=>'BBB-333','value'=>3]
+                ],
+                3=>[
+                    ['text'=>'CCC-111','value'=>1],['text'=>'CCC-222','value'=>2],['text'=>'CCC-333','value'=>3]
+                ]
+            ][$param['main_id']??1];
+        }else{
+            $rs = [
+                1=>[
+                    ['text'=>'AAA-111-111','value'=>1],['text'=>'AAA-222-222','value'=>2],['text'=>'AAA-333-333','value'=>3]
+                ],
+                2=>[
+                    ['text'=>'BBB-111-111','value'=>1],['text'=>'BBB-222-222','value'=>2],['text'=>'BBB-333-333','value'=>3]
+                ],
+                3=>[
+                    ['text'=>'CCC-111-111','value'=>1],['text'=>'CCC-222-222','value'=>2],['text'=>'CCC-333-333','value'=>3]
+                ]
+            ][$param['sub_id']];
+        }
+
+        $this->jsonOut($rs);
     }
 
     public function updateAction(){

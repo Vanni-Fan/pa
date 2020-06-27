@@ -100,7 +100,7 @@ return [
 
     # 插件的激活，将插件放到 pa 的 plugins 目录下，并在此配置名称
     # 比如： 'plugins'=>['GraphQL','Proxy','Tables']
-    'plugins' => [],
+    'plugins' => ['GraphQL','Proxy','Tables'],
 
     # 是否加载数据库的配置，如果开启的话，将加载PA数据库中，配置的路由、和其他配置
     # 数据库中的配置，在配置文件加载后加载，所以会覆盖 config.php 中的配置值

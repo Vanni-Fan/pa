@@ -1,11 +1,54 @@
 <?php
 $this->style(/** @lang CSS */ <<<'OUT'
-    .htmlbuild-multselect{
-        height: 35px;
-        border-right:none;
+.htmlbuild-multselect{height: 35px;border-right:none;}
+.htmlbuild-multselect:last-child{border-right:solid 1px darkgrey;}
+OUT
+);
+$this->script(/** @lang javascript */<<<OUT
+window['HBE'] = window['HBE'] || {};
+window['HBE']["$id"] = $element;
+$(function(){HB_initMultiselect("$id");});
+OUT
+);
+
+$this->script(/** @lang JavaScript 1.5 */<<<'OUT'
+    function HB_initMultiselect(id){
+        let obj = window['HBE'][id];
+        let col = Math.floor(12 / obj.selects.length) || 1;
+        let len = obj.selects.length;
+        for(let i=0; i<len; i++){
+            let one = obj.selects[i];
+            let select = $('<select id="' + id + '_' + i + '" name="' + one.name + '"' + (obj.style === 'single' ? '' : ' multiple=""') + ' class="htmlbuild-multselect col-sm-' + col + '"></select>');
+            $('#' + id + '-selects').append(select);
+    
+            if(one.itemsApi) setOptions(id, i); // 初始化数据
+            
+            if(i !== len-1){
+                select.change(function(event){
+                    setOptions(id, i+1)
+                })
+            }
+        }
     }
-    .htmlbuild-multselect:last-child{
-        border-right:solid 1px darkgrey;;
+    function setOptions(id, index){
+        let obj = window['HBE'][id];
+        let api = obj.selects[index].itemsApi;
+        let dom = $('#' + id + '_' + index);
+        let len = obj.selects.length;
+        dom.find('option').remove();
+        let all = $('#' + id + '-selects select');
+        for(let i=0; i<all.length; i++){ // 将 [$x] 替换成对应的值
+            api = api.replace('[$'+i+']', all.get(i).value);
+        }
+        console.log('api:'+api);
+        $.ajax(api).done(function(data){
+            for(var i in data){
+                dom.append('<option value="' + data[i].value + '">' + data[i].text + '</option>');
+            }
+            if(index !== len-1){
+                setOptions(id, index+1)
+            }
+        });
     }
 OUT
 );
@@ -21,37 +64,3 @@ OUT
     <span id="<?=$id?>-message" class="help-block pull-right"></span>
     <?php } ?>
 </div>
-
-<script>
-var <?=$id?>_Obj = <?=$element??'null'?>;
-$(function () {
-    var colwidth = Math.floor(12 / <?=$id?>_Obj.selects.length) || 1;
-    for(var index in <?=$id?>_Obj.selects){
-        var select = $('<select name="' + <?=$id?>_Obj.selects[index].name + '"' + (<?=$id?>_Obj.style == 'single' ? '' : ' multiple=""') + ' class="htmlbuild-multselect col-sm-' + colwidth + '"></select>');
-        var next_id = parseInt(index)+1;
-        select.attr('id','<?=$id?>_'+index);
-        select.attr('data-sid','<?=$id?>_' + next_id);
-        $('#<?=$id?>-selects').append(select);
-        
-        setOptions(select, <?=$id?>_Obj.rootApi);
-        if(<?=$id?>_Obj.selects[index].subItemsApi){
-            select.attr('data-api', <?=$id?>_Obj.selects[index].subItemsApi);
-            select.change(function(event){ // 设置子菜单
-                var obj = $(event.target);
-                setOptions($('#'+obj.data('sid')), obj.data('api') + obj.val())
-            });
-        }
-    }
-});
-
-function setOptions(selectObj, api){
-    selectObj.find('option').remove();
-    $.ajax(api).done(function(data){
-        for(var i in data){
-            selectObj.append('<option value="' + data[i].value + '">' + data[i].text + '</option>');
-        }
-        var api = selectObj.data('api');
-        if(api) setOptions($('#'+selectObj.data('sid')), selectObj.data('api'));
-    });
-}
-</script>
