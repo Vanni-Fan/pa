@@ -73,7 +73,7 @@ function showParams(data){
         el:$('#base').clone().css('display','block').get(0),
         data:function(){
             return Object.assign(
-                {menu_id:0},
+                {parent_menu_id:0, menu_id:0, canDelete:1, canEdit:1, canMin:1, canClose:1, canSelect:1, canAppend:1, canFilter:1},
                 data,
                 {menus:all_menus}
             );
@@ -94,6 +94,7 @@ function showParams(data){
             }
         }
     });
+    window['vox'] = vo;
     showDialogs({
         title: "<b>添加数据表菜单</b>",
         body: vo.$el,
@@ -219,7 +220,6 @@ $(function() {
                 let url = '<?=$get_menus_url?>'.replace('S_ID',sid).replace('T_ID',tid);
                 this.can_add = (sid !== '' && tid !== '');
                 $.ajax(url).then(d=>{
-                    console.log(d);
                     window['vo'].$data.menus = d;
                     window['vo'].$data.fields = d[0].fields;
                 });
@@ -334,11 +334,11 @@ $(function() {
 <div id="base" class="table_row" style="display: none">
     <div class="row">
         <div class="col-sm-6">
-            <label class="col-sm-3" for="parent_id">父级菜单</label>
+            <label class="col-sm-3">父级菜单</label>
             <div class="col-sm-9">
-                <select v-model="menu_id" name="parent_id" data-placeholders="选择一个父级菜单，默认：根节点" class="form-control select2-hidden-accessible" style="width: 100%" data-select2-id="parent_id" tabindex="-1" aria-hidden="true">
-                    <template v-for="(row, index) in menus">
-                        <option :value="row.menu_id" data-select2-id="2" :selected="row.menu_id == menu_id">{{ '　'.repeat(row.level) + row.name}}</option>
+                <select v-model="parent_menu_id" data-placeholders="选择一个父级菜单，默认：根节点" class="form-control select2-hidden-accessible" style="width: 100%" data-select2-id="parent_id" tabindex="-1" aria-hidden="true">
+                    <template v-for="(row, index) in menus" v-if="row.menu_id != menu_id">
+                        <option :value="row.menu_id" data-select2-id="2" :selected="row.menu_id == parent_menu_id">{{ '　'.repeat(row.level) + row.name}}</option>
                     </template>
                 </select>
             </div>
@@ -386,3 +386,5 @@ $(function() {
         <label><input type="checkbox" v-model="canClose" :checked="canClose">可关闭</label>
     </div>
 </div>
+
+<button onclick="history.back()" class="btn btn-info">返回</button>

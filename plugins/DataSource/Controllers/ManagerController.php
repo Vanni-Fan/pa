@@ -62,7 +62,8 @@ class ManagerController extends AdminBaseController
             ->updateApi($this->getUrl(['command'=>'updateSource','sid'=>'_ID_']))
             ->createApi($this->getUrl(['command'=>'updateSource','sid'=>0]))
             ->canEdit('操作')
-            ->editCallback('(s,v)=>s.source_id<1000 ? "配置文件" : v')
+            ->editCallback('(s,v)=>s.source_id<1000 ? "配置文件" : v'),
+            Forms::button('','返回')->on('click','history.back()')->style('info')
         );
 
         # 渲染
@@ -180,8 +181,9 @@ class ManagerController extends AdminBaseController
                     '编辑数据源详情',
                     // 消息框尾部
                     Element::create('div')->style('display: flex;justify-content: space-around;')->add(
-                        Forms::button('','重置')->action('reset'),
-                        Forms::button('','保存')->action('submit')
+                        Forms::button('','返回')->on('click','history.back()')->style('info'),
+                        Forms::button('','重置')->action('reset')->style('success'),
+                        Forms::button('','保存')->action('submit')->style('primary')
                     )
                 )
             )

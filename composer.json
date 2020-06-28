@@ -19,5 +19,9 @@
             "Power\\Model\\"      : "models/",
             "Power\\Plugin\\"     : "plugins/"
         }
-    }
+    },
+  "require": {
+    "ext-json": "*",
+    "ext-pdo": "*"
+  }
 }
