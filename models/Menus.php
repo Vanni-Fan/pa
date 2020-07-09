@@ -167,7 +167,7 @@ class Menus extends PMB{
         self::findFirst($where)->delete();
         
         # 删除对应的角色中的配置
-        RoleMenus::find($where)->delete();
+        Permissions::find($where)->delete();
         
         # 删除对应的扩展中的信息
         Configs::find($where)->delete();

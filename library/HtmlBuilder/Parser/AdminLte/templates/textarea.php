@@ -5,7 +5,7 @@
 
 <?php }elseif($subtype === 'ckeditor'){
     $this->js('/dist/bower_components/ckeditor/ckeditor.js');
-    $this->script("$(function(){ CKEDITOR.replace('$id') });\n");
+    $this->script("$(function(){ CKEDITOR.replace('$id',{extraPlugins:'justify,colorbutton,font,tableresize,tabletools'}) });");
 }elseif($subtype === 'wysihtml5'){
     $this->css('/dist/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css');
     $this->js('/dist/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js');

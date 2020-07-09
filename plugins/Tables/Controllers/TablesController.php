@@ -2,9 +2,22 @@
 namespace plugins\Tables\Controllers;
 use HtmlBuilder\Components;
 use HtmlBuilder\Parser\AdminLte\Parser;
+use Phalcon\Mvc\Model;
 use Phalcon\Text;
+use plugins\DataSource\Models\AnyTableModel;
+use plugins\DataSource\Models\DataSources;
+use plugins\DataSource\Models\ModelInfo;
+use plugins\Tables\Models\BaseModel;
+use plugins\Tables\Models\TablesFields;
+use plugins\Tables\Models\TablesMenus;
 use Power\Controllers\AdminBaseController;
+use Power\Models\Users;
 
+class abc extends Model {
+    public function initialize(){
+        $this->setSource('pa_configs');
+    }
+};
 class TablesController extends AdminBaseController
 {
     /**
@@ -12,64 +25,52 @@ class TablesController extends AdminBaseController
      */
     protected $model = null;
     protected $page_size = 10;
+    private array $table = [];
+    private array $fields = [];
     
     public function initialize()
     {
         parent::initialize();
-        $this->title = '数据表操作';
-        $this->subtitle = 'Management tool for table:<u>$table</u> from plugin:<u>TablesPlugins</u>.';
-    }
-    
-    public function fixField(){
-        foreach($this->fields as &$field){
-            $field['name']   = ucwords(str_replace('_',' ', $field['Field']));
-            $field['is_pri'] = $field['Key'] == 'PRI';
-            $field['null']   = $field['Null'] == 'YES';
-            $field['disabled']= $field['Extra'] == 'auto_increment' || $field['Default'] == 'CURRENT_TIMESTAMP';
-            if(strpos($field['Type'],'enum(') === 0){
-                $field['Default'] = explode("','", substr($field['Type'], 6, -2));
-                $field['Type'] = 'select';
-            }
-        }
-    }
-    
-    private function getModel(){
-        $params = $this->getParam();
-        $source = \Tables\System\PluginsTableSources::findFirst($params['Rule']['params']['source_id']);
-        if(!$source){
-            throw new \Exception('没有对应的数据源');
-        }else $source = $source->toArray();
-        $table = Text::camelize($params['Rule']['params']['table']);
-        if($source['is_system']){
-            $object = call_user_func(['\\Power\\Models\\'.$table,'getInstance']);
-        }else{
-            $object = call_user_func(['\\Tables\\'.Text::camelize(strtr(dirname($source['dbname']),['.','-'])).'\\'.$table, 'getInstance']);
-        }
-        return $object;
+        $this->table    = TablesMenus::findFirst($this->getParam()['table_id'])->toArray();
+        $this->title    = $this->table['menu_name'];
+        $this->fields   = TablesFields::find(['table_id=?0','bind'=>[$this->table['id']]])->toArray();
+        $this->subtitle = '表格管理插件:<u>TablesPlugins</u>.';
     }
     
     public function indexAction(){
-        $parse  = new Parser();
         $params = $this->getParam();
         $fields = [];
-        foreach($this->getModel()->describe() as $field){
-            $fields[] = [
-                'name'=>$field->getName(),
-                'text'=>$field->getName(),
-                'type'=>$field->getType(),
-                'sort'=>1
-            ];
+        $primary = [];
+        # 过滤掉，不能显示的字段
+        foreach($this->fields as $field){
+            $field['name']   = $field['field'];
+            $field['sort']   = intval($field['sort']);
+            $field['show']   = intval($field['show']);
+            $field['filter'] = intval($field['filter']);
+            if($field['canShow']) $fields[] = $field;
+            if($field['primary']) $primary[] = $field['field'];
         }
-        
-        $this->view->contents = $parse->parse(
-            Components::table($params['Rule']['name'].'的数据')
-                      ->fields($fields)
-                      ->canEdit(true)
-                      ->createApi($this->url('append'))
-                      ->updateApi($this->url('update',['item_id'=>'{ID}']))
-                      ->queryApi($this->url('list',['ajax'=>'getList']))
-        );
+        # 表格对象
+        $table = Components::table($this->table['title'])->fields($fields)->primary($primary);
+        $table->selectMode($this->table['canSelect'] ? 'multi' : null);
+        $table->canMin($this->table['canMin']);
+        $table->canClose($this->table['canClose']);
+        $table->canEdit($this->table['canEdit'] ? '编辑' : null);
+        $table->canAppend($this->table['canAppend']);
+        $table->canDelete($this->table['canDelete']);
+        $table->canFilter($this->table['canFilter']);
+        $table->createApi($this->url('append'));
+        $table->queryApi($this->url('list'));
+        $table->updateApi($this->url('update'));
+        $table->deleteApi($this->url('delete'));
+
+
+        $parse  = new Parser();
+        $table_str  = $parse->parse($table);
         $parse->setResources($this);
+
+//        $this->view->contents = '<pre>'.print_r($this->table,1).print_r($params,1).print_r($this->fields,1).'</pre>'.$table_str;
+        $this->view->contents = $table_str;
         $this->render(null);
     }
     public function listAction(){
@@ -83,11 +84,12 @@ class TablesController extends AdminBaseController
         ];
     
         # 条件
-        $model = $this->getModel();
+        $model = BaseModel::get($this->table['source_id'],$this->table['table']);
         if(isset($_POST['filters'])){
             call_user_func_array([$model,'parseWhere'],[['where'=>&$_POST['filters']], &$where]);
         }
 //        print_r($where);
+
         # 排序
         if(isset($_POST['sort'])){
             $where['order'] = '';
@@ -96,8 +98,7 @@ class TablesController extends AdminBaseController
             }
             $where['order'] = substr($where['order'],0,-1);
         }
-    
-        $data = $model->find($where);
+        $data = $model::find($where);
 
         $this->jsonOut(
             [

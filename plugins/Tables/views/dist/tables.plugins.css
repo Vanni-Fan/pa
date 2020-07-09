@@ -20,13 +20,66 @@
 .margin{
     margin:0;
     margin-bottom:5px;
-}
-button.btn.dropdown-toggle {
-    padding: 0 5px;
+    margin-left:10px;
 }
 .toasts_content{
     opacity:0.8;
 }
 .toasts_bg{
     background-color: transparent;
+}
+
+
+.filter-field, .filter-operation, .filter-value{
+    margin:10px;
+    font-size:16px;
+}
+.filter-field{
+    color:yellow;
+}
+.filter-operation{
+    color:white;
+}
+.filter-value{
+    color:#a5ffb7;
+}
+.filter-close{
+    position: absolute;
+    z-index: 99;
+    right: -5px;
+    top: -5px;
+    width:20px;
+    height:20px;
+    padding:0;
+    line-height: 20px;
+    cursor:pointer;
+}
+.filter-set{
+    margin-left:20px;
+    margin-top: 5px;
+    border-left-style: dashed;
+    border-left-width:1px;
+    border-left-color: #cccccc;
+    padding-left: 5px;
+    margin-bottom: 10px;
+}
+.filter-set-before{
+    width: 20px;background-color: white;margin-left: -15px;font-size: 20px;display: block;position: absolute;color:#cccccc;
+}
+.filter-set-condition{
+    margin-left:10px;
+}
+.filter-set-after{
+    font-size: 20px;background-color: white;position: relative;margin-left: -15px;height: 10px;color:#cccccc;
+}
+.dropdown-toggle .fa-caret-down{
+    line-height: 20px;
+}
+.filters{
+    min-height: 10px;
+    margin-top: 5px;
+}
+.filters-min-height{
+    height:35px;
+    overflow: hidden;
 }

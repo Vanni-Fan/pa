@@ -19,11 +19,11 @@ class MenusController extends AdminBaseController {
     
     function updateAction(){
         $router = $params = [];
-        $router['controller'] = $this->filter->sanitize($_POST['router']['controller'], 'string');
-        if(!empty($_POST['router']['action']))    $router['action']    = $this->filter->sanitize($_POST['router']['action'], 'string');
-        if(!empty($_POST['router']['module']))    $router['module']    = $this->filter->sanitize($_POST['router']['module'], 'string');
-        if(!empty($_POST['router']['path']))      $router['path']      = $this->filter->sanitize($_POST['router']['path'], 'string');
-        if(!empty($_POST['router']['namespace'])) $router['namespace'] = $this->filter->sanitize($_POST['router']['namespace'], 'string');
+        $router['controller'] = trim($this->filter->sanitize($_POST['router']['controller'], 'string'));
+        if(!empty($_POST['router']['action']))    $router['action']    = trim($this->filter->sanitize($_POST['router']['action'], 'string'));
+        if(!empty($_POST['router']['module']))    $router['module']    = trim($this->filter->sanitize($_POST['router']['module'], 'string'));
+        if(!empty($_POST['router']['path']))      $router['path']      = trim($this->filter->sanitize($_POST['router']['path'], 'string'));
+        if(!empty($_POST['router']['namespace'])) $router['namespace'] = trim($this->filter->sanitize($_POST['router']['namespace'], 'string'));
         if(!empty($_POST['router']['priority']))  $router['priority']  = (int)$this->filter->sanitize($_POST['router']['priority'], 'int');
         if(!empty($_POST['params'])) $params = json_decode($_POST['params'],1);
         if($_POST['url_suffix'] && empty($router['priority'])){ // 如果设置了URL，但是没有设置权重，默认给10
@@ -40,7 +40,7 @@ class MenusController extends AdminBaseController {
             'index' => $this->request->getPost('index','int') ?: 0,
             'params' => json_encode($params, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             'router' => $is_dir ? null : json_encode($router,JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
-            'url_suffix'=>$_POST['url_suffix'] ?: null,
+            'url_suffix'=>trim($_POST['url_suffix']) ?: null,
             'is_enabled' => 1
         ];
         if($this->item_id){

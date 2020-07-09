@@ -77,17 +77,4 @@ class DataSources extends PMB{
         $all = array_column(iterator_to_array(self::getSources()), null,'source_id');
         return self::getDB($all[$id]);
     }
-
-    public static function getModel($id, $table){
-        $di_cache[$id] = new FactoryDefault();
-        $di_cache[$id]->set('db', DataSources::getDBbyId($id));
-        $table_cls = new \stdClass();
-        $table_cls->name = $table;
-        $di_cache[$id]->set('table', $table_cls);
-        return new class(null, $di_cache[$id]) extends \Phalcon\Mvc\Model {
-            function initialize(){
-                $this->setSource($this->getDI()->get('table')->name);
-            }
-        };
-    }
 }

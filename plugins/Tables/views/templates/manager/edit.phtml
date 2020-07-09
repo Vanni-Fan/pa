@@ -36,44 +36,42 @@
         margin:0;
         vertical-align: middle !important;
     }
-
-
+    .icons {
+        height: 450px;
+        overflow-y: scroll;
+    }
+    .icons i{
+        font-size:20px;
+        padding:5px;
+        cursor:pointer;
+    }
+    .icons i:hover{
+        color: #fff;
+        background: #333;
+    }
 
 
 </style>
-<link rel="stylesheet" href="/dist/css/vue.filters.component.css">
+<link rel="stylesheet" href="/dist/tables.plugins.css">
 <script src="/dist/plugins/vue/vue.js"></script>
-<script src="/dist/js/vue.filters.component.js"></script>
+<script src="/dist/tables.plugins.component.js"></script>
 <script>
 // 所有数据源和表
 let sources = <?=json_encode($sources)?>;
 let all_menus = <?=json_encode($all_menus)?>;
-let tables = [
-    {
-        fields:[
-            {id:1,field:'user_id',name:'用户ID',tooltip:'这个是用户的ID',width:10,sort:0,filter:1,show:1,render:'',type:'text',params:{},icon:'',class:''},
-            {id:1,field:'name',name:'用户名',tooltip:'',width:10,sort:1,filter:1,show:1,render:'',type:'timestamp',params:{},icon:'',class:''},
-            {id:1,field:'sex',name:'性别',tooltip:'',width:10,sort:1,filter:1,show:0,render:'',type:'user',params:{},icon:'',class:''},
-            {id:1,field:'mobile',name:'手机号',tooltip:'',width:10,sort:1,filter:1,show:1,render:'',type:'media',params:{},icon:'',class:''}
-        ],
-        menus:[
-            {id:1,name:'用户管理',icon:'fa fa-users',title:'用户表',subtitle:'',filter:[],canMin:1,canSelect:1,canEdit:1,canAppend:1,canDelete:1,canFilter:1,canClose:1},
-            {id:2,name:'插件管理',icon:'fa fa-group',selected:true,title:'插件表',subtitle:'',filter:[],canMin:1,canSelect:1,canEdit:1,canAppend:1,canDelete:1,canFilter:1,canClose:0},
-            {id:3,name:'角色管理',icon:'fa fa-tools',title:'角色表',subtitle:'',filter:[],canMin:1,canSelect:1,canEdit:1,canAppend:1,canDelete:1,canFilter:1,canClose:0}
-        ]
-    }
-];
 let all_icons = <?=json_encode($all_icons)?>;
+
+
 /**
  * 显示基础参数配置
  * @param index 数字下标
  */
-function showParams(data){
+function showParams(data,type){
     let vo = new Vue({
         el:$('#base').clone().css('display','block').get(0),
         data:function(){
             return Object.assign(
-                {parent_menu_id:0, menu_id:0, canDelete:1, canEdit:1, canMin:1, canClose:1, canSelect:1, canAppend:1, canFilter:1},
+                {parent_menu_id:0, menu_id:0, canDelete:1, canEdit:1, canMin:1, canClose:1, canSelect:1, canAppend:1, canFilter:1, menu_icon:''},
                 data,
                 {menus:all_menus}
             );
@@ -86,29 +84,31 @@ function showParams(data){
                 let post = Object.assign({}, vo.$data);
                 delete(post.menus);
                 delete(post.fields);
-                delete(post.filter);
+                post.filters = JSON.stringify(post.filters);
+                console.log('提交');
                 $.ajax(url,{method:'post',data:post}).then(d=>{
+                    let last = d.length - 1;
+                    d[last].selected = true;
                     window['vo'].$data.menus = d;
                     t.close()
                 })
             }
         }
     });
-    window['vox'] = vo;
+    window['menu-vue'] = vo;
     showDialogs({
-        title: "<b>添加数据表菜单</b>",
+        title: type==='add' ? "<b>添加数据表菜单</b>" : '<b>修改数据表菜单</b>',
         body: vo.$el,
         close: {
             text: "取消",
             click: t => t.close()
         },
         ok: {
-           text: "确定",
+           text: type==='add' ? '添加' : "保存",
            click: t => vo.$data.menu_name ? vo.submit(t) : showDialogs({body:'请输入菜单名称',delay:3000,width:200},'mt')
 }
     },'win-params');
 }
-
 
 /**
  * 显示查询条件
@@ -129,13 +129,11 @@ function showFilter(fields, filters, callback){
         },
         el:$('<filters ref="filters" :value="filters" :fields="fields"></filters>').get(0)
     });
+    window['vf'] = vo;
     showDialogs({
         title: "<b>添加数据表菜单</b>",
         body: vo.$el,
-        close: {
-            text: "取消",
-            click: t => t.close()
-        },
+        close: {text: "取消",click: t => t.close()},
         ok: {
             text: "确定",
             click: t => {
@@ -157,42 +155,105 @@ function showFilter(fields, filters, callback){
     },'win-filter');
 }
 
+////////////// 图标设置 ///////////////
+// 弹出展示所有的图标，传入一个 setIconClickHandler 返回的函数
+function showIcons(callback){
+    window['icon-click-handler'] = callback;
+    if(!window['icons-str']){
+        window['icons-str'] = '<div class="icons">';
+        for(let i in all_icons){
+            window['icons-str'] += '<i onclick="iconClick(event)" class="' + all_icons[i] + '"></i>';
+        }
+        window['icons-str'] += '</div>';
+    }
 
-function showIcons(){
-    alert('aa');
+    window['icons-obj'] = showDialogs({
+        title:'请选择一个Icon最为菜单的图标',
+        close:{text:'关闭', click:t=>t.close()},
+        body:window['icons-str'],
+        width:800,
+        height:600
+    },'icons-win');
 }
-$(function() {
-    // 当数据源变动时，数据表跟着变动
-    // 当数据表变动时，数据中的基础数据 + 字段数据 + 查询参数 相应变动
+// icons 组件上的点击事件，点击后将回调设置
+function iconClick(e) {
+    window['icon-click-handler']($(e.target).attr('class'));
+    window['icons-obj'].close();
+}
+// 点击 icon 后的设置动作
+function setIcon(v) {
+    console.log(window['icon-click-param']);
+    if(window['icon-click-param'][0] === 'field'){ // 字段
+        let [menu_index, field_index] = window['icon-click-param'][1].split(':');
+        // console.log(menu_index, field_index);
+        window['vo'].$data.menus[menu_index].fields[field_index].icon = v;
+    }else{ // 菜单
+        window['menu-vue'].$data.menu_icon = v;
+    }
+}
+// 设置点击 icon 时的回调函数
+function setIconClickHandler(fun, ...param){
+    window['icon-click-param'] = param;
+    return fun;
+}
 
+/**
+ * 获得用于提交的URL
+ */
+function getUrl(base_url){
+    let sid = $('#source_id').val().split(':')[1];
+    let tid = $('#table_id').val();
+    return base_url.replace('S_ID',sid).replace('T_ID',tid);
+}
+
+$(function() {
     // 创建菜单列表的vue对象
     window['vo'] = new Vue({
         el:document.getElementById('vue-dom'),
         data:function () {
             return {
-                current_db_index:0,
-                sources:sources,
-                can_add:false,
-                menus:[] //tables[0].menus,
-            //    fields: tables[0].fields
+                current_db_index:0,   // 当前选择的数据源下标
+                current_menu_index:0, // 当前选择的菜单下标
+                sources:sources,     // 所有数据源
+                can_add:false,        // 添加菜单按钮是否可用
+                menus:[]              // 所有的菜单数据，包括字段数据和查询参数数据
             };
         },
         methods:{
+            // 弹开修改菜单数据窗体
             setParams:function(i){
                 showParams(this.menus[i]);
             },
+            // 弹开查询参数修改窗体
             setFilter:function (i) {
-                showFilter(Object.fromEntries(this.fields.map(v=>[v.field,v.name])), this.menus[i].filter,alert);
+
+                let fields = {};
+                for(let j=0;j<this.menus[i].fields.length;j++){
+                    let k = this.menus[i].fields[j].field; // 默认的键名为
+                    fields[k] = {
+                        text:this.menus[i].fields[j].text,
+                        type:this.menus[i].fields[j].type
+                    };
+                }
+
+                showFilter(fields, this.menus[i].filter || [], v => {
+                    console.log('返回的过滤器', v)
+                    this.menus[i].filter = v;
+                    this.saveFilters(v);
+                });
             },
+            // 点击选择一个菜单时的事件
             selectMenu:function(i){
                 for(let index=0; index<this.menus.length; index++){
                     this.menus[index].selected = index == i;
                 }
                 Vue.set(this.menus, i, this.menus[i]);
+                this.current_menu_index = i;
             },
-            delTable:function (i) {
+            // 删除一个菜单的事件
+            delMenu:function (i) {
                 showDialogs({
-                    title:'是否删除此数据表管理权限',
+                    title:'是否删除此数据表管理权限:' + i,
                     close:{
                         text:'关闭',
                         click:t=>t.close()
@@ -201,27 +262,74 @@ $(function() {
                         text:'删除',
                         click:t=>{
                             // 提交删除
-                            t.close()
+                            $.ajax(getUrl('<?=$del_menus_url?>')).then(
+                                d=>{
+                                    console.log(d)
+                                    this.menus.splice(i,1);
+                                    if(this.menus.length){
+                                        this.current_menu_index = 0;
+                                        this.menus[0].selected  = true;
+                                    }
+                                    t.close();
+                                }
+                            )
                         }
                     }
                 })
             },
+            // 改变数据源的事件
             changeSource:function(event){
                 this.current_db_index = event.currentTarget.value.split(':')[0];
             },
+            // 添加菜单
             addMenu:function (event) {
                 showParams(
-                    {menu_name:'',icon:'fa fa-users',title:'',subtitle:'',filter:[],canMin:1,canSelect:1,canEdit:1,canAppend:1,canDelete:1,canFilter:1,canClose:1,fields:[]}
+                    {menu_name:'',icon:'fa fa-users',title:'',subtitle:'',filter:[],canMin:1,canSelect:1,canEdit:1,canAppend:1,canDelete:1,canFilter:1,canClose:1,fields:[]},
+                    'add'
                 );
             },
+            // 改变数据表的事件
             changeTable:function(event){
-                let sid = $('#source_id').val().split(':')[1];
-                let tid = $('#table_id').val();
-                let url = '<?=$get_menus_url?>'.replace('S_ID',sid).replace('T_ID',tid);
-                this.can_add = (sid !== '' && tid !== '');
+                let url = getUrl('<?=$get_menus_url?>');
+                this.can_add = ($('#source_id').val() !== '' && $('#table_id').val() !== '');
                 $.ajax(url).then(d=>{
+                    for(let i=0; i<d.length; i++){
+                        for(let j in d[i].fields){
+                            d[i].fields[j].sort    = parseInt(d[i].fields[j].sort);
+                            d[i].fields[j].filter  = parseInt(d[i].fields[j].filter);
+                            d[i].fields[j].show    = parseInt(d[i].fields[j].show);
+                            d[i].fields[j].canShow = parseInt(d[i].fields[j].canShow);
+                            d[i].fields[j].primary = parseInt(d[i].fields[j].primary);
+                        }
+                    }
                     window['vo'].$data.menus = d;
+                    // 默认选中第一个
                     window['vo'].$data.fields = d[0].fields;
+                    this.current_menu_index    = 0;
+                    this.menus[0].selected     = true;
+                });
+            },
+            // 保存字段的函数
+            saveFields:function(){
+                let url = getUrl('<?=$save_fields_url?>');
+                let cmi = this.current_menu_index;
+                $.ajax(url,{method:'post',data:{fields:JSON.stringify(this.menus[cmi].fields)}}).then(d=>{
+                    showDialogs({
+                        body:'<b>'+d+'</b>',
+                        width:300,
+                        delay:3000
+                    })
+                });
+            },
+            // 保存当前的查询参数
+            saveFilters:function(v){
+                let url = getUrl('<?=$save_filters_url?>');
+                $.ajax(url,{method:'post',data:{filters:v}}).then(d=>{
+                    showDialogs({
+                        body:'<b>'+d+'</b>',
+                        width:300,
+                        delay:3000
+                    })
                 });
             }
         }
@@ -258,7 +366,7 @@ $(function() {
         <div class="box-body table_base">
             <template v-for="(val, index) in menus">
                 <div :class="val.selected ? 'callout callout-success' : 'callout bg-gray'" @click="selectMenu(index)">
-                    <button type="button" class="close" @click="delTable(index)">x</button>
+                    <button type="button" class="close" @click="delMenu(index)">x</button>
                     <h5>{{val.menu_name}}</h5>
                     <h4 style="display: inline;">{{val.title}}</h4>
                     <h5 style="display: inline;padding-left: 10px;">{{val.subtitle}}</h5>
@@ -272,11 +380,11 @@ $(function() {
     </div>
     <!--字段设置-->
 
-    <div class="box box-success" v-if="menus[current_db_index]">
+    <div class="box box-success" v-if="menus[current_menu_index]">
         <div class="box-header with-border">
             <h3 class="box-title">
                 字段设置
-                <button type="button" class="btn btn-info btn-flat" style="margin-left: 20px;width: 140px;">保存</button>
+                <button @click="saveFields()" type="button" class="btn btn-info btn-flat" style="margin-left: 20px;width: 140px;">保存</button>
             </h3>
             <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
@@ -300,25 +408,25 @@ $(function() {
                     </tr>
                 </thead>
                 <tbody class="my_fields">
-                <template v-for="(row,index) in menus[current_db_index].fields">
+                <template v-for="(row,index) in menus[current_menu_index].fields">
                     <tr :class="index%2 ? 'even' : 'odd'">
                         <td class="text-center">{{row.field}}</td>
-                        <td class="text-center"><input class="form-control" type="text" v-model="row.name"></td>
+                        <td class="text-center"><input class="form-control" type="text" v-model="row.text"></td>
                         <td class="text-center">
                             <select class="form-control" v-model="row.type">
-                                <option value="text" :selected="row.type == 'text'">默认文字展示</option>
-                                <option value="media" :selected="row.type == 'media'">媒体链接 转 媒体图标</option>
-                                <option value="user" :selected="row.type == 'user'">用户ID 转 用户名</option>
-                                <option value="timestamp" :selected="row.type == 'timestamp'">时间戳 转 本地时间</option>
+                                <option value="text" :selected="row.type == 'text'">文本</option>
+                                <option value="date" :selected="row.type == 'date'">日期</option>
+                                <option value="datetime" :selected="row.type == 'datetime'">日期+时间</option>
+                                <option value="number" :selected="row.type == 'number'">数字</option>
                             </select>
                         </td>
-                        <td class="text-center"><input class="form-control" type="number" v-model="row.width"></td>
+                        <td class="text-center"><input class="form-control" max="9999" size="5" min="1" type="number" v-model="row.width"></td>
                         <td class="text-center"><input class="form-control" type="text" v-model="row.tooltip"></td>
                         <td class="text-center"><input type="checkbox" v-model="row.show" :checked="row.show"></td>
                         <td class="text-center"><input type="checkbox" v-model="row.sort" :checked="row.sort"></td>
                         <td class="text-center"><input type="checkbox" v-model="row.filter" :checked="row.filter"></td>
                         <td class="text-center"><input type="checkbox" v-model="row.canShow" :checked="row.canShow"></td>
-                        <td class="text-center"><i :class="'fa ' + (row.icon ? row.icon : 'fa-fonticons' ) "></i></td>
+                        <td class="text-center" :data-field="current_menu_index + ':' + index" onclick="showIcons(setIconClickHandler(setIcon,'field',$(this).attr('data-field')))"><i :class="row.icon ? row.icon : 'fa fa-fonticons'"></i></td>
                     </tr>
                 </template>
                 </tbody>
@@ -349,7 +457,7 @@ $(function() {
                 <div class="col-sm-9">
                     <div class="input-group">
                         <input name="name" type="text" class="form-control" v-model="menu_name" placeholder="请输入菜单名称">
-                        <span class="input-group-addon" onclick="showIcons()"><i class="fa fa-fonticons"></i></span>
+                        <span class="input-group-addon" onclick="showIcons(setIconClickHandler(setIcon,'menu'))"><i :class="menu_icon ? menu_icon : 'fa fa-fonticons'"></i></span>
                     </div>
                 </div>
             </div>

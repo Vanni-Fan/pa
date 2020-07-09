@@ -324,7 +324,8 @@ function HtmlBuilder_table_init(id){
         }
         var _class = 'text-center ' + (field.show ? '' : ' hidden') + (field.class ? field.class : '');
         var th =
-        '<th data-field="' + field.name + '"' +  (field.hasOwnProperty('width') ? ('width="' + field.width + 'px" style="min-width:' + field.width + 'px;"') : '') + ' class="' + _class + '">' + (field.icon ? ('<span class="'+field.icon+'"></span> ') : '') +
+        '<th data-field="' + field.name + '"' +  (field.hasOwnProperty('width') ? ('width="' + field.width + 'px" style="min-width:' + field.width + 'px;"') : '') + ' class="' + _class + '" title="' + (field.tooltip||'') + '">' + 
+            (field.icon ? ('<span class="'+field.icon+'"></span> ') : '') +
             field.text +
             sortStatus +
             filterStatus +

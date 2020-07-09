@@ -147,7 +147,7 @@ class UsersController extends AdminBaseController {
                 }
                 if(!p1){ HB_input_error('pass_1','请输入密码'); return false; }
                 if(!p2){ HB_input_error('pass_2','请确认密码'); return false; }
-                return false;
+                return true;
             }
             function checkPass(){
                 let p1 = $('#pass_1-input').val();
