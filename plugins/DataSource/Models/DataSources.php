@@ -1,7 +1,6 @@
 <?php
 namespace plugins\DataSource\Models;
 use Phalcon\Db\Adapter\PdoFactory as DB;
-use Phalcon\Di\FactoryDefault;
 use PowerModelBase as PMB;
 
 class DataSources extends PMB{

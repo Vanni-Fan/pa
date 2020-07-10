@@ -18,6 +18,7 @@
             
             <section class="content">
                 <!-- 具体的内容页 -->
+                <?=(isset($use_vue) && $use_vue)? $this->partial(POWER_VIEW_DIR . 'include/vue-lib') : ''?>
                 <?php
                 if(isset($template_file)) {
                     $_file = $template_file;

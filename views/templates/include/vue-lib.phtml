@@ -1,0 +1,353 @@
+<script src="/dist/plugins/vue/vue.js"></script>
+
+<style>
+    .a-block {
+        display: inline-flex;
+        display: -webkit-flex;
+        display: flex;
+        padding: 20px;
+        background-color: #fff;
+    }
+    .a-collapse .a-collapse-title-header,
+    .box .box-header,
+    .a-select {
+        display: inline-flex;
+        display: -webkit-flex;
+        display: flex
+    }
+    .form-group {
+        margin-bottom: 0;
+    }
+    .form-group:after {
+        content: '';
+        display: block;
+        clear: both;
+    }
+    .a-input label,
+    .a-select label {
+        line-height: 34px;
+        white-space:nowrap;
+        margin:0
+    }
+    .a-page > * + * {
+        margin-top: 15px;
+    }
+    .box .box-header {
+        line-height: 18px;
+    }
+    .a-collapse {
+        background-color: #fff;
+        border: 1px solid #ddd;
+    }
+    .a-collapse .a-collapse-body {
+        border-top: 1px solid #ddd;
+        padding: 10px;
+    }
+    .a-collapse .a-collapse-title {
+        padding: 10px;
+        line-height: 20px;
+        border-bottom: 1px solid #f5f5f5;
+        background-color: #f5f5f5;
+    }
+    .a-collapse .a-collapse-title i {
+        display: inline-block;
+        text-align: center;
+        line-height: 20px;
+        height: 20px;
+        width: 20px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    .a_modal {
+        margin: 0;
+        transition: padding-top 0.5s ease-out 0s;
+    }
+    .a_modal .modal-content {
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+</style>
+
+<script type="vue/template" id="_modal" class="vue-component">
+    <div class="a_modal modal fade" :class="showMode?'in':''" style="display: block;padding-top: 154.5px;" v-show="showMode">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title"><slot name="title">{{title}}</slot></h5></div>
+                <div class="modal-body" style="flex-grow: 1;"><slot></slot></div>
+                <div class="modal-footer">
+                    <slot name="btn">
+                        <a-button @click="close" :disabled="loadingMode">关闭</a-button>
+                        <a-button type="primary" @click="submit" :disabled="loadingMode">
+                            <i class="fa fa-spinner fa-spin" v-show="loadingMode"></i>&nbsp;<span>提交</span>
+                        </a-button>
+                    </slot>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script class="vue-component">
+    Vue.component('a-modal', {
+        template: $('script[type="vue/template"]#_modal').html(),
+        data() {
+            return {
+                showMode: false,
+                loadingMode: false
+            };
+        },
+        props: {
+            title: {
+                type: String,
+                default:_=>""
+            },
+            value: {
+                type: Boolean,
+                default:_=>false
+            },
+            async: {
+                type: Boolean,
+                default:_=>false
+            }
+        },
+        watch:{
+            showMode (value) {
+                this.$emit('input', value);
+            }
+        },
+        methods: {
+            close(){
+                this.showMode = false;
+                this.$emit('toggle', this.showMode);
+                this.loadingMode = false;
+            },
+            show(){
+                this.showMode = true;
+                this.$emit('toggle', this.showMode);
+                this.loadingMode = false;
+            },
+            submit(){
+                this.$emit('submit');
+                if (this.async) {
+                    this.loadingMode = true;
+                } else
+                    this.close();
+            }
+        },
+        mounted(){
+            if (this.value) {
+                this.showMode = true;
+            }
+        }
+    });
+</script>
+
+<script type="vue/template" id="_input" class="vue-component">
+    <div class="a-input form-group" style="display: flex">
+        <label v-if="label" class="control-label">{{label}} ： </label>
+        <div style="flex: 1">
+            <input type="text" :placeholder="placeholder" class="form-control" v-model="inputValue">
+        </div>
+    </div>
+</script>
+
+<script class="vue-component">
+    Vue.component('a-input', {
+        template: $('script[type="vue/template"]#_input').html(),
+        data(){
+            return {
+                inputValue: ''
+            };
+        },
+        watch: {
+            value(value){
+                if (this.inputValue !== value) {
+                    this.inputValue = value;
+                }
+            },
+            inputValue(value) {
+                this.$emit('input', value);
+            }
+        },
+        props: {
+            label: {
+                type: String,
+                default: _=>''
+            },
+            placeholder: {
+                type: String,
+                default: _=>''
+            },
+            type: {
+                type: String,
+                default: _=>'text',
+                validator: _=>['text','password'].indexOf(_)>=0
+            },
+            value: {
+                type: String,
+                default: _=> ''
+            }
+        },
+        mounted() {
+            this.inputValue = this.value;
+        }
+    });
+</script>
+
+<script type="vue/template" id="_button" class="vue-component">
+    <button :disabled="disabled" class="btn" @click="event=>$emit('click', event)" :class="'btn-'+type+' btn-'+size"><slot></slot></button>
+</script>
+
+<script class="vue-component">
+    Vue.component('a-button', {
+        template: $('script[type="vue/template"]#_button').html(),
+        props: {
+            disabled: {
+                type: Boolean,
+                default: _=>false
+            },
+            type: {
+                type: String,
+                default: _=>'default',
+                validator: _=>['default','primary','success','info','danger','warning','outline','link'].indexOf(_)>=0
+            },
+            size: {
+                type: String,
+                default: _=>'normal',
+                validator: _=>['normal','sm','xs','lg'].indexOf(_)>=0
+            }
+        }
+    });
+</script>
+
+<script type="vue/template" id="_select" class="vue-component">
+    <div class="a-select form-group">
+        <label v-if="label" class="control-label">{{label}} ： </label>
+        <div class="col-sm-8">
+            <select class ="form-control">
+                <option value="">- 请选择{{label}} -</option>
+                <option v-for="(option, key) in options" :value="key" :key="key">{{option}}</option>
+            </select>
+        </div>
+    </div>
+</script>
+
+<script class="vue-component">
+    Vue.component('a-select', {
+        template: $('script[type="vue/template"]#_select').html(),
+        props: {
+            label: {
+                type: String,
+                default: _=>''
+            },
+            options: {
+                type: Object,
+                default: _=>{}
+            }
+        }
+    });
+</script>
+
+<script type="vue/template" id="_section" class="vue-component">
+    <section class="box box-primary">
+        <div class="box-header with-border" v-if="title">
+            <h3 class="box-title" v-html="title"></h3>
+            <div style="flex: 1;padding: 0 1em"><slot name="title-sub"></slot></div>
+            <div><slot name="title-btn"></slot></div>
+        </div>
+        <div class="box-body"><slot></slot></div>
+    </section>
+</script>
+
+<script class="vue-component">
+    Vue.component('a-section', {
+        template: $('script[type="vue/template"]#_section').html(),
+        props: {
+            title: {
+                type: String,
+                default:_=>''
+            }
+        }
+    });
+</script>
+
+<script type="vue/template" id="_block" class="vue-component">
+    <div class="a-block"><slot></slot></div>
+</script>
+
+<script class="vue-component">
+    Vue.component('a-block', {
+        template: $('script[type="vue/template"]#_block').html()
+    });
+</script>
+
+<script type="vue/template" id="_page" class="vue-component">
+    <div class="a-page"><slot></slot></div>
+</script>
+
+<script class="vue-component">
+    Vue.component('a-page', {
+        template: $('script[type="vue/template"]#_page').html()
+    });
+</script>
+
+<script type="vue/template" id="_collapse" class="vue-component">
+    <div class="a-collapse">
+        <div class="a-collapse-title">
+            <div class="a-collapse-title-header">
+                <span style="flex: 1">
+                    <slot name="title">{{title}}</slot>
+                </span>
+                <i class="fa" :class="fadeShow?'fa-chevron-down':'fa-chevron-right'" @click="toggle"></i>
+            </div>
+        </div>
+        <div ref="body" v-show="fadeShow" class="a-collapse-body">
+            <slot></slot>
+        </div>
+    </div>
+</script>
+
+<script class="vue-component">
+    Vue.component('a-collapse', {
+        template: $('script[type="vue/template"]#_collapse').html(),
+        data(){
+            return {
+                fadeShow: this.show
+            };
+        },
+        methods: {
+            toggle(){
+                $(this.$refs.body).slideToggle(300, _=>{
+                    this.fadeShow = !this.fadeShow
+                    this.$emit('toggle', this.fadeShow);
+                });
+            }
+        },
+        props: {
+            title: {
+                type: String,
+                default:_=>''
+            },
+            show: {
+                type: Boolean,
+                default:_=>true
+            }
+        }
+    });
+</script>
+
+<div id="_app"></div>
+
+<script>
+    function createVue(main_id, vueObject){
+        if (!vueObject.template) {
+            vueObject.template = '<div id="_app">' + $('script[type="vue/template"]' + main_id).html() + '</div>';
+        }
+        if (vueObject.template) {
+            (new Vue(vueObject)).$mount('#_app');
+        }
+    }
+</script>
+

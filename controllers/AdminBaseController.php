@@ -63,6 +63,9 @@ class AdminBaseController extends Controller{
     public function isAllowed(string $action, int $owner=null, int $operator=null):bool{ // 权限， 所有者， 操作者
         if(!$operator) $operator = $this->getUserId();
         if(!$owner) $owner = $this->getUserId();
+        if (!$owner) {
+            $this->forwardToLogin();
+        }
         return Menus::isAllowed($action, $owner, $operator, $this->menus[$this->menu_id]);
     }
     
@@ -81,7 +84,7 @@ class AdminBaseController extends Controller{
      */
     public static function getItemOwner($item_id_or_items=null){
         if(!$item_id_or_items) return 1;
-        return is_array($item_id_or_items) ? array_fill_keys($item_id_or_items,1) : ($item_id_or_items ?? 1);
+        return is_array($item_id_or_items) ? array_fill_keys($item_id_or_items,1) : 1;
     }
 
     /**
@@ -114,18 +117,27 @@ class AdminBaseController extends Controller{
      */
     public function getUserInfo(){return $this->userinfo;}
 
+    protected function forwardToLogin() {
+        $curRouteUrl = $_SERVER['REQUEST_URI'];
+        header('Location: '.PA_URL_PATH.'login?from='.$curRouteUrl);
+        exit;
+    }
+
     public function initialize(){
         header('x-powered-by: '.PA::$config['site.domain.logogram'].'/'.PA::$config['site.version']);
+
+        $curRouteUrl = $_SERVER['REQUEST_URI'];
+
         # 判断是否有Token
-        if(empty($_COOKIE[PA::$config['cookie_name']])) return header('Location: '.PA_URL_PATH.'login');
+        if(empty($_COOKIE[PA::$config['cookie_name']])) return header('Location: '.PA_URL_PATH.'login?from='.$curRouteUrl);
 
         # 解码Token
         $this->tokeninfo = PA::$config['cookie_parser']($_COOKIE[PA::$config['cookie_name']]);
-        if(!$this->tokeninfo) return header('Location: '.PA_URL_PATH.'login');
+        if(!$this->tokeninfo) return header('Location: '.PA_URL_PATH.'login?from='.$curRouteUrl);
 
         # 获取用户信息
         $this->userinfo = Users::getInfo($this->tokeninfo['user_id']);
-        if(!$this->userinfo) return header('Location: '.PA_URL_PATH.'login');
+        if(!$this->userinfo) return header('Location: '.PA_URL_PATH.'login?from='.$curRouteUrl);
 
         $now = time();
         if($this->tokeninfo['login_time']+3600 < $now){ // 一小时前的COOKIE自动续期
@@ -245,10 +257,10 @@ class AdminBaseController extends Controller{
             $_params = json_decode($v['params']?:'[]', 1);
             return
                 $_router
-                && ($_router['controller']??'index') === ($router['controller']??'index')
-                && ($_router['action']??'index')     === ($router['action']??'index')
-                && ($_router['namespace']??'')       === ($router['namespace']??'')
-                && ($_router['module']??'')          === ($router['module']??'')
+                && strtolower($_router['controller']??'index') === strtolower($router['controller']??'index')
+                && strtolower($_router['action']??'index')     === strtolower($router['action']??'index')
+                && strtolower($_router['namespace']??'')       === strtolower($router['namespace']??'')
+                && strtolower($_router['module']??'')          === strtolower($router['module']??'')
                 && array_intersect_key($_params, $params) == $_params
                 ;
         });

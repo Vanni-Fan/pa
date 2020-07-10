@@ -6,7 +6,7 @@ $__ROUTERS = [
     'POST' => [
         $pa_url_path.'login' => [
             'namespace'  => 'Power\Controllers',
-            'controller' => 'authorization',
+            'controller' => 'Authorization',
             'action'     => 'login',
             'priority'  => 10,
         ], # 登录
@@ -24,14 +24,14 @@ $__ROUTERS = [
             'params'     => 2,
             'priority'  => 10,
         ], # 添加的动作
-        $pa_url_path.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9]+}/:params' =>[
+        $pa_url_path.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9-]+}/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'update',
             'priority'  => 10,
             'params'     => 3
         ], # 修改动作
-        $pa_url_path.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9,]+}/delete/:params' =>[
+        $pa_url_path.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9,-]+}/delete/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'delete',
@@ -49,25 +49,31 @@ $__ROUTERS = [
     'GET' => [
         $pa_url_path => [
             'namespace'  => 'Power\Controllers',
-            'controller' => 'index',
+            'controller' => 'Index',
             'action'     => 'index',
+            'priority'  => 10,
+        ],
+        $pa_url_path.'captcha' => [
+            'namespace'  => 'Power\Controllers',
+            'controller' => 'Authorization',
+            'action'     => 'captcha',
             'priority'  => 10,
         ],
         $pa_url_path.'login'      => [
             'namespace'  => 'Power\Controllers',
-            'controller' => 'authorization',
+            'controller' => 'Authorization',
             'action'     => 'loginPage',
             'priority'  => 10,
         ], # 显示登录页面
         $pa_url_path.'logout'     => [
             'namespace'  => 'Power\Controllers',
-            'controller' => 'authorization',
+            'controller' => 'Authorization',
             'action'     => 'logout',
             'priority'  => 10,
         ], # 登出
         '/dist/:params' => [
             'namespace'  => 'Power\Controllers',
-            'controller' => 'resource',
+            'controller' => 'Resource',
             'action'     => 'render',
             'priority'  => 10,
         ], # 显示资源文件
@@ -92,14 +98,14 @@ $__ROUTERS = [
             'priority'  => 10,
             'params'     => 2
         ],              # 添加Item的页面
-        $pa_url_path.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9]+}/:params' =>[
+        $pa_url_path.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9-]+}/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'display',
             'priority'  => 10,
             'params'     => 3
         ], # 显示Item页面
-        $pa_url_path.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9,]+}/delete/:params' =>[
+        $pa_url_path.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9,-]+}/delete/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'delete',
@@ -108,7 +114,7 @@ $__ROUTERS = [
         ], # 删除的Get形式
     ],
     'DELETE' => [
-        $pa_url_path.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9,]+}/:params' =>[
+        $pa_url_path.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9,-]+}/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'delete',
@@ -124,7 +130,7 @@ $__ROUTERS = [
             'priority'  => 10,
             'params'     => 2
         ], # 添加的动作
-        $pa_url_path.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9]+}/:params' =>[
+        $pa_url_path.'menu/{menu_id:[0-9]+}/item/{item_id:[0-9-]+}/:params' =>[
             'namespace'  => 'Power\Controllers',
             'controller' => 'Router',
             'action'     => 'update',
@@ -137,7 +143,7 @@ $__ROUTERS = [
 if(substr($pa_url_path,-1) === '/') {
     $__ROUTERS['GET'][substr($pa_url_path,0,-1)] = [
         'namespace'  => 'Power\Controllers',
-        'controller' => 'index',
+        'controller' => 'Index',
         'action'     => 'index',
         'priority'  => 10,
     ];

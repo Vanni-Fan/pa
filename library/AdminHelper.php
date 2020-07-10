@@ -34,7 +34,7 @@ class AdminHelper{
             #echo "\n<!-- $active -->\n";
 //            echo '<li class="', ($has_sub ? 'treeview' : ''), $active, '"><a href="', ($i['url'].'?menu_id='.$i['menu_id']), '">', "\n";
             $url = $i['url_suffix'] ?: (PA_URL_PATH.'menu/'.$i['menu_id'].'/index');
-            echo '<li class="', ($has_sub ? 'treeview' : ''), $active, '"><a href="', $url , '">', "\n";
+            echo '<li class="', ($has_sub ? 'treeview' : ''), $active, '"><a href="', (empty($i['router']) ? 'javascript:;' : $url) , '">', "\n";
             if ($i['icon']) echo '<i class="', $i['icon'], '"></i>', "\n";
             echo '<span>', $i['name'], '</span>', "\n";
             if ($has_sub || !empty($menuBadges[$i['menu_id']])) {

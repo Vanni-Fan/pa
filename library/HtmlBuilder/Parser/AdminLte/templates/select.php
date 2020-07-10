@@ -36,7 +36,11 @@ $style = $visible ? "display:flex;$style;" : 'display:none;';
             $item = is_array($item) ? $item : ['value'=>$item,'text'=>$item];
             $selected = (array_search($item['value'], $value)===false) ? '' : ' selected';
         ?>
+        <?php if (!empty($item['isgroup'])):?>
+            <optgroup label="<?=$item['text']?>"></optgroup> 
+        <?php else:?>
             <option <?=$selected?> value="<?=$item['value']?>"><?=$item['text']?></option>
+        <?php endif?>
         <?php } ?>
         </select>
     </div>

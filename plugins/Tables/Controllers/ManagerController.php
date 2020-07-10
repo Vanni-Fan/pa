@@ -194,6 +194,8 @@ class ManagerController extends AdminBaseController
                 BaseModel::add($data['source_id'], $data['table']);
                 $model = BaseModel::get($data['source_id'], $data['table']);
                 $fields = $model->getModelsMetaData()->getDataTypes($model);
+                $primary = $model->getModelsMetaData()->getPrimaryKeyAttributes($model);
+
                 $row = [
                     'table_id'=>$data['id'],
 //                    'field'=>'',
@@ -212,6 +214,7 @@ class ManagerController extends AdminBaseController
                 ];
                 foreach ($fields as $field=>$type) {
                     $row['text'] = $row['field'] = $field;
+                    $row['primary'] = in_array($row['field'], $primary) ? 1 : 0;
 
                     switch($type){
                         case Column::TYPE_INTEGER:

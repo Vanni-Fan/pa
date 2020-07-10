@@ -5,7 +5,15 @@
 
 <?php }elseif($subtype === 'ckeditor'){
     $this->js('/dist/bower_components/ckeditor/ckeditor.js');
-    $this->script("$(function(){ CKEDITOR.replace('$id',{extraPlugins:'justify,colorbutton,font,tableresize,tabletools'}) });");
+    $this->script("$(function(){ CKEDITOR.replace('$id', function() {
+        var cfg = {extraPlugins:'justify,colorbutton,font,tableresize,tabletools'};
+        if (typeof ckeditorCfg != 'undefined') {
+            for (var k in ckeditorCfg) {
+                cfg[k] = ckeditorCfg[k];
+            }
+        }
+        return cfg;
+    }()) });");
 }elseif($subtype === 'wysihtml5'){
     $this->css('/dist/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css');
     $this->js('/dist/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js');

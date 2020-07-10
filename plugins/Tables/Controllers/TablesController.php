@@ -1,6 +1,9 @@
 <?php
 namespace plugins\Tables\Controllers;
 use HtmlBuilder\Components;
+use HtmlBuilder\Element;
+use HtmlBuilder\Forms;
+use HtmlBuilder\Layouts;
 use HtmlBuilder\Parser\AdminLte\Parser;
 use Phalcon\Mvc\Model;
 use Phalcon\Text;
@@ -12,19 +15,10 @@ use plugins\Tables\Models\TablesFields;
 use plugins\Tables\Models\TablesMenus;
 use Power\Controllers\AdminBaseController;
 use Power\Models\Users;
+use statistics\Services\ShareStatistic;
 
-class abc extends Model {
-    public function initialize(){
-        $this->setSource('pa_configs');
-    }
-};
 class TablesController extends AdminBaseController
 {
-    /**
-     * @var \Phalcon\Mvc\Model null
-     */
-    protected $model = null;
-    protected $page_size = 10;
     private array $table = [];
     private array $fields = [];
     
@@ -36,7 +30,8 @@ class TablesController extends AdminBaseController
         $this->fields   = TablesFields::find(['table_id=?0','bind'=>[$this->table['id']]])->toArray();
         $this->subtitle = '表格管理插件:<u>TablesPlugins</u>.';
     }
-    
+
+    # 首页
     public function indexAction(){
         $params = $this->getParam();
         $fields = [];
@@ -47,7 +42,7 @@ class TablesController extends AdminBaseController
             $field['sort']   = intval($field['sort']);
             $field['show']   = intval($field['show']);
             $field['filter'] = intval($field['filter']);
-            if($field['canShow']) $fields[] = $field;
+            if($field['canShow']) $fields[]  = $field;
             if($field['primary']) $primary[] = $field['field'];
         }
         # 表格对象
@@ -61,8 +56,8 @@ class TablesController extends AdminBaseController
         $table->canFilter($this->table['canFilter']);
         $table->createApi($this->url('append'));
         $table->queryApi($this->url('list'));
-        $table->updateApi($this->url('update'));
-        $table->deleteApi($this->url('delete'));
+        $table->updateApi($this->url('update',['item_id'=>'_ID_']));
+        $table->deleteApi($this->url('delete',['item_id'=>'_ID_']));
 
 
         $parse  = new Parser();
@@ -73,6 +68,8 @@ class TablesController extends AdminBaseController
         $this->view->contents = $table_str;
         $this->render(null);
     }
+
+    # 列表
     public function listAction(){
         $size  = $_POST['limit']['size']??$this->page_size;
         $page  = $_POST['limit']['page']??1;
@@ -88,7 +85,6 @@ class TablesController extends AdminBaseController
         if(isset($_POST['filters'])){
             call_user_func_array([$model,'parseWhere'],[['where'=>&$_POST['filters']], &$where]);
         }
-//        print_r($where);
 
         # 排序
         if(isset($_POST['sort'])){
@@ -113,42 +109,78 @@ class TablesController extends AdminBaseController
             ]
         );
     }
+
+    # 显示详情
+    public function newAction(){ $this->displayAction(); }
     public function displayAction(){
-        $where = [
-            array_key_first($this->primary) . ' = ?0',
-            'bind' => [$this->item_id]
-        ];
-        $this->view->default = $this->model->findFirst($where)->toArray();
-        $this->render('tables/edit');
+        $model = BaseModel::get($this->table['source_id'], $this->table['table']);
+        if($this->item_id) {
+            $param = [];
+            foreach ($this->fields as $index => $field) {
+                if ($field['primary']) $param[] = "{$field['field']}=?$index";
+            }
+            $where[0] = implode(' AND ', $param);
+            $where['bind'] = explode('-', $this->item_id);
+            $data = $model->findFirst($where);
+        }else{
+            $data = $model->create();
+        }
+
+        $parse = new Parser();
+        $fields = Element::create('div')->style('display:flex;flex-wrap:wrap;');
+        foreach($this->fields as $field){
+            if(!$field['canShow']) continue;
+            $fields->add(
+                Forms::input($field['field'],$field['text'],htmlentities($data->{$field['field']}??''),$field['type'])
+                    ->labelIcon($field['icon']??'')
+                    ->tooltip($field['tooltip']??'')
+            );
+        }
+        $box = Layouts::box($fields,'编辑数据',Element::create('div')->style('display:flex;justify-content:space-between;')->add(
+            Forms::button('','返回')->on('click','history.back()')->style('default'),
+            Forms::button('','提交')->action('submit'),
+        ));
+        $this->view->contents = $parse->parse(
+            Forms::form($this->item_id ? $this->url('update') : $this->url('new'),'POST')->add($box)
+        );
+        $parse->setResources($this);
+        $this->render(null);
     }
-    
+
+    # 创建或更新
+    public function appendAction(){ $this->updateAction(); }
     public function updateAction(){
-        $where = [
-            array_key_first($this->primary) . ' = ?0',
-            'bind' => [$this->item_id]
-        ];
-        $data = $this->model->findFirst($where);
-        
-        $data->assign($this->request->get());
-        $data->save();
+        $model = BaseModel::get($this->table['source_id'], $this->table['table']);
+        if($this->item_id){
+            $param = [];
+            foreach ($this->fields as $index => $field) {
+                if ($field['primary']) $param[] = "{$field['field']}=?$index";
+            }
+            $where[0] = implode(' AND ', $param);
+            $where['bind'] = explode('-', $this->item_id);
+            $model::findFirst($where)->assign($_POST)->update();
+        }else{
+            $model->assign($_POST)->create();
+        }
         $this->response->redirect($this->url(),true);
     }
-    
-    public function newAction(){
-        $this->render('tables/edit');
-    }
-    
-    public function appendAction(){
-        $this->model->assign($this->request->get())->create();
-        $this->response->redirect($this->url(),true);
-    }
-    
+
+
+    # 删除
     public function deleteAction(){
-        $where = [
-            array_key_first($this->primary) . ' = ?0',
-            'bind' => [$this->item_id]
-        ];
-        $this->model->findFirst($where)->delete();
-        $this->jsonOut(['msg'=>'ok']);
+        $model = BaseModel::get($this->table['source_id'],$this->table['table']);
+        $db    = $model->getWriteConnection();
+        $sql   = 'DELETE FROM '. $db->escapeIdentifier($model->getSource()).' WHERE ';
+        $where = [];
+        foreach($this->fields as $field){
+            if($field['primary']) $where[] = $db->escapeIdentifier($field['field']) . '=?';
+        }
+        $sql .= implode(' AND ', $where);
+
+        $items = is_array($this->item_id) ? $this->item_id : [$this->item_id];
+        foreach($items as $item){
+            $db->execute($sql, strpos($item,'-')===false ? $item : explode('-', $item));
+        }
+        $this->listAction();
     }
 }

@@ -8,6 +8,8 @@ use HtmlBuilder\Parser\AdminLte\Parser;
 
 class IndexController extends AdminBaseController{
     public function indexAction(){
+        $this->render(null);
+        return;
 //        phpinfo();
 //        exit;
         $this->title = 'HtmlBuilder Test Page';

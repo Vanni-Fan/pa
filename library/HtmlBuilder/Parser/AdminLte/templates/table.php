@@ -171,25 +171,25 @@ $this->script(/** @lang JavaScript 1.5 */ <<<'OUT'
 
 // 打开或关闭字段显示
 function HtmlBuilder_table_openCloseField(obj){
-    var dom = $(obj);
-    var id = dom.data('id');
-    var field = dom.data('field');
+    let dom = $(obj);
+    let id = dom.data('id');
+    let field = dom.data('field');
     if(obj.checked){
         $('#'+id+' th[data-field='+field+'],#'+id+' td[data-field='+field+']').removeClass('hidden');
     }else{
         $('#'+id+' th[data-field='+field+'],#'+id+' td[data-field='+field+']').addClass('hidden');
     }
-    var index = window[id].fields.findIndex(function(v){ return v.name == field });
+    let index = window[id].fields.findIndex(function(v){ return v.name == field });
     window[id].fields[index].show = obj.checked;
 }
 
 
 // 选择字段
 function HtmlBuilder_table_selectFields(id) {
-    var dom = '<div style="display:table;">';
-    for(var i=0; i<window[id].fields.length; i++){
-        var field = window[id].fields[i];
-        var checked = field.show ? ' checked ' : '';
+    let dom = '<div style="display:table;">';
+    for(let i=0; i<window[id].fields.length; i++){
+        let field = window[id].fields[i];
+        let checked = field.show ? ' checked ' : '';
         dom+='<label class="col-sm-4"><input data-id="'+id+'" data-field="'+field.name+'" onchange="HtmlBuilder_table_openCloseField(this)"' + checked + ' type="checkbox">' + field.text + '</label>';
     }
     
@@ -205,8 +205,8 @@ function HtmlBuilder_table_selectFields(id) {
 
 // 选择所有
 function HtmlBuilder_table_selectAll(id,event){
-    var obj = $(event.currentTarget).find('i');
-    var status = true;
+    let obj = $(event.currentTarget).find('i');
+    let status = true;
     if(obj.hasClass('fa-square-o')){
         status = true;
         obj.removeClass('fa-square-o').addClass('fa-check-square-o');
@@ -241,7 +241,7 @@ function HtmlBuilder_table_delItems(id, items){
         ok:{
             text:'确定',
             click:function(o){
-                var deleteApi = window[id].deleteApi.replace('_ID_', items);
+                let deleteApi = window[id].deleteApi.replace('_ID_', items);
                 $.ajax(deleteApi, {data:window[id].query, method:'POST'}).done(function(data){
                     HtmlBuilder_table_setData(data,id);
                     $('#'+id+' i.check-all').removeClass('fa-check-square-o').addClass('fa-square-o');
@@ -258,9 +258,9 @@ function HtmlBuilder_table_delItems(id, items){
 
 // 获得当前选择的项目
 function HtmlBuilder_table_getSelected(id){
-    var all = $('#' + id + ' .htmlbuild-table-body .htmlbuild-table-selected-row');
-    var ids = [];
-    for(var index=0; index<all.length; index++){
+    let all = $('#' + id + ' .htmlbuild-table-body .htmlbuild-table-selected-row');
+    let ids = [];
+    for(let index=0; index<all.length; index++){
         ids.push(all[index].getAttribute('data-id'));
     }
     return ids;
@@ -269,7 +269,7 @@ function HtmlBuilder_table_getSelected(id){
 // 初始化表格
 function HtmlBuilder_table_init(id){
     // 初始化对象
-    var options = window[id];
+    let options = window[id];
     options.query  = options.query  || {};
     options.fields = options.fields || [];
     options.query.sort    = options.query.sort    || [];
@@ -277,12 +277,12 @@ function HtmlBuilder_table_init(id){
     options.query.filters = options.query.filters || [];
     window[id] = options;
 
-    var obj = $('#htmlbuilder-table-template').clone();
+    let obj = $('#htmlbuilder-table-template').clone();
     obj.removeAttr('id').css('display','block').find('.box-title').html(options.name);
-    var header = obj.find('.htmlbuild-table-header');
+    let header = obj.find('.htmlbuild-table-header');
     
     // 初始化表头
-    var html = '';
+    let html = '';
     obj.find('.table-edit-btn>*').attr('data-id', id);
     if(options.canEdit){ // 去掉编辑按钮
         obj.find('.add-el a').attr('href', options.createApi);
@@ -308,22 +308,22 @@ function HtmlBuilder_table_init(id){
         obj.find('.box-tools button[data-widget="remove"]').remove();
     }
     
-    for(var index in options.fields){
-        var field = options.fields[index];
+    for(let index in options.fields){
+        let field = options.fields[index];
         field.show = field.hasOwnProperty('show') ? field.show : 1;
         // if(!field.show) continue;
-        var sortStatus = '';
-        var filterStatus = '';
+        let sortStatus = '';
+        let filterStatus = '';
         if(field.sort && ["false",0,"0"].indexOf(field.sort.toString()) === -1){
-            var sort_index = options.query.sort.findIndex(function(_v){ return _v.name === field.name; });
+            let sort_index = options.query.sort.findIndex(function(_v){ return _v.name === field.name; });
             if(sort_index === -1){
                 sortStatus = '<i onclick="HtmlBuilder_table_sort(\'' + id + '\', \'' + field.name + '\')" class="sort-status fa fa-sort text-gray"></i><span class="sort-badge hidden"></span>';
             }else{
                 sortStatus = '<i onclick="HtmlBuilder_table_sort(\'' + id + '\', \'' + field.name + '\')" class="sort-status fa fa-sort-amount-' + options.query.sort[sort_index].type + ' text-info"></i><span class="sort-badge">'+ (parseInt(sort_index)+1) + '</span>';
             }
         }
-        var _class = 'text-center ' + (field.show ? '' : ' hidden') + (field.class ? field.class : '');
-        var th =
+        let _class = 'text-center ' + (field.show ? '' : ' hidden') + (field.class ? field.class : '');
+        let th =
         '<th data-field="' + field.name + '"' +  (field.hasOwnProperty('width') ? ('width="' + field.width + 'px" style="min-width:' + field.width + 'px;"') : '') + ' class="' + _class + '" title="' + (field.tooltip||'') + '">' + 
             (field.icon ? ('<span class="'+field.icon+'"></span> ') : '') +
             field.text +
@@ -333,7 +333,7 @@ function HtmlBuilder_table_init(id){
         html += th;
     }
     if(options.canEdit){
-        var cw = options.editColWidth;
+        let cw = options.editColWidth;
         html += '<th class="text-center" width="' + cw + 'px" style="min-width:' + cw + 'px">' + (typeof(options.canEdit) != 'boolean' ? options.canEdit : '编辑') + '</th>';
     }
     header.append(html);
@@ -343,38 +343,38 @@ function HtmlBuilder_table_init(id){
     obj.find('.page-size').val(options.query.limit.size).attr('data-id', id);
     
     // 填充数据
-    // var body = obj.find('.htmlbuild-table-body');
+    // let body = obj.find('.htmlbuild-table-body');
     $('#'+id).append(obj);
     HtmlBuilder_table_query(id);
 }
 
 // 改变分页数
 function HtmlBuilder_table_changePageSize(obj){
-    var id = obj.data('id');
+    let id = obj.data('id');
     window[id].query.limit.size = obj.val();
     HtmlBuilder_table_query(id);
 }
 
 // 点击排序时的动作
 function HtmlBuilder_table_sort(id, field){
-    var options = window[id];
+    let options = window[id];
 
     // 排序字段名称
-    var field_index = options.fields.findIndex(function(_v){return _v.name === field});
-    var sort = (options.fields[field_index].sort || 1).toString();
-    var sort_field_name = (["true",1,"1"].indexOf(sort)>-1) ? options.fields[field_index].name : sort;
+    let field_index = options.fields.findIndex(function(_v){return _v.name === field});
+    let sort = (options.fields[field_index].sort || 1).toString();
+    let sort_field_name = (["true",1,"1"].indexOf(sort)>-1) ? options.fields[field_index].name : sort;
 
     // 是否已经在排序条件当中
-    var found = options.query.sort.findIndex(function(_v){ return _v.name === sort_field_name});
+    let found = options.query.sort.findIndex(function(_v){ return _v.name === sort_field_name});
     
     // console.log('找',id, field, sort_field_name, found);
-    var old_class = [], new_class = [];
+    let old_class = [], new_class = [];
     if(found === -1){
         old_class = ['fa-sort','text-gray'];
         new_class = ['fa-sort-amount-asc','text-info'];
         options.query.sort.push({name:sort_field_name,type:'asc',field:field});
     }else{
-        var type = options.query.sort[found].type;
+        let type = options.query.sort[found].type;
         if(type === 'asc'){
             old_class = ['fa-sort-amount-asc'];
             new_class = ['fa-sort-amount-desc'];
@@ -389,7 +389,7 @@ function HtmlBuilder_table_sort(id, field){
     
     // 设置排序角标
     $('#' + id + ' th .sort-badge').addClass('hidden').text('');
-    for(var index in options.query.sort){
+    for(let index in options.query.sort){
         $('#' + id + ' th[data-field="' + options.query.sort[index].field + '"] .sort-badge').text(parseInt(index)+1).removeClass('hidden');
     }
     
@@ -400,14 +400,14 @@ function HtmlBuilder_table_sort(id, field){
 
 // 打开设置过滤条件的弹窗
 function HtmlBuilder_table_setFilter(id, field) {
-    var dom = $('#FILTERS-TEMPLATE').clone().attr('id','FILTERS_'+id).css('display','block');
+    let dom = $('#FILTERS-TEMPLATE').clone().attr('id','FILTERS_'+id).css('display','block');
     showDialogs({
         title:'编辑筛选条件！',
         body: dom,
         ok:{
             text:'确定',
             click:function(o){ //HtmlBuilder_table_filterConfirm
-                var f = window['FILTERS_'+id].getFilters();
+                let f = window['FILTERS_'+id].getFilters();
                 // console.log(id,f);
                 if(!window['FILTERS_'+id].checkFilters(f)){
                     showDialogs({
@@ -429,11 +429,11 @@ function HtmlBuilder_table_setFilter(id, field) {
         }
     });
     
-    var fields = {};
-    for(var i=0;i<window[id].fields.length;i++){
-        var k = window[id].fields[i].name; // 默认的键名为
+    let fields = {};
+    for(let i=0;i<window[id].fields.length;i++){
+        let k = window[id].fields[i].name; // 默认的键名为
         if(window[id].fields[i].hasOwnProperty('filter')){
-            var _filter = window[id].fields[i].filter.toString();
+            let _filter = window[id].fields[i].filter.toString();
             if(["false",0,"0",""].indexOf(_filter) >= 0) continue;// 不需要过滤
             k = (["true",1,"1"].indexOf(_filter) >= 0) ? window[id].fields[i].name : _filter; // 直接使用name字段
         }
@@ -442,7 +442,7 @@ function HtmlBuilder_table_setFilter(id, field) {
             type:window[id].fields[i].type ? window[id].fields[i].type : 'text' 
         };
     }
-    var filters = $.isEmptyObject(window[id].query.filters) ? [] : window[id].query.filters.sub;
+    let filters = $.isEmptyObject(window[id].query.filters) ? [] : window[id].query.filters.sub;
     console.log('当前的过滤条件', window[id].query.filters, filters, fields);
     // 固定的添加项目，用于新增
     // 找到 当前的 filters
@@ -459,8 +459,8 @@ function HtmlBuilder_table_setFilter(id, field) {
                 return this.filters;
             },
             checkFilters:function(fs){
-                var rs = true;
-                for(var i=0; i<fs.length; i++){
+                let rs = true;
+                for(let i=0; i<fs.length; i++){
                     if(fs[i].sub){
                         rs = this.checkFilters(fs[i].sub);
                         if(!rs) break;
@@ -497,29 +497,37 @@ function HtmlBuilder_table_selectRow(obj){
 
 // AJAX请求后的数据设置
 function HtmlBuilder_table_setData(data, id) {
-    var obj  = $('#'+id);
-    var html = '';
-    var body = obj.find('.htmlbuild-table-body').html('');
-    var options = window[id];
+    let obj  = $('#'+id);
+    let html = '';
+    let body = obj.find('.htmlbuild-table-body').html('');
+    let options = window[id];
     options.query.limit = {page:data.page, size:data.size}; // 缓存当前页面参数
-    for(var row in data.list){
-        var tr_class = row % 2 ? 'odd' : 'even';
-        var primary = data.list[row][options.primary || 'id'];
-        var canSelect = (options.selectMode && (!data.list[row].hasOwnProperty('_CAN_SELECT_') || data.list[row]._CAN_SELECT_))
-                        ? 'onclick="HtmlBuilder_table_selectRow($(this))"' : '';
-        var tr = '<tr data-id="' + primary + '" ' + canSelect + ' class="' + tr_class + '">';
+    for(let row in data.list){
+        let tr_class = row % 2 ? 'odd' : 'even';
         
-        for(var i in options.fields){
-            var def = options.fields[i]; // defined
-            var val = data.list[row][def.name] || ''; // 当前字段值，不存在则为空
+        let primary = [];
+        if(typeof(options.primary) === 'object'){ // 用 - 连接多个字段
+            options.primary.map(key=>primary.push(data.list[row][key]));
+            primary = primary.join('-');
+        }else{
+            primary = data.list[row][options.primary || 'id'];            
+        }
+        
+        let canSelect = (options.selectMode && (!data.list[row].hasOwnProperty('_CAN_SELECT_') || data.list[row]._CAN_SELECT_))
+                        ? 'onclick="HtmlBuilder_table_selectRow($(this))"' : '';
+        let tr = '<tr data-id="' + primary + '" ' + canSelect + ' class="' + tr_class + '">';
+        
+        for(let i in options.fields){
+            let def = options.fields[i]; // defined
+            let val = data.list[row][def.name] || ''; // 当前字段值，不存在则为空
             val = def.render ? eval(def.render)(val, data.list[row], def) : val; // 使用 render 函数处理内容
-            var cls = def.hasOwnProperty('class') ? def.class : '';
+            let cls = def.hasOwnProperty('class') ? def.class : '';
             cls += (def.hasOwnProperty('show') && def.show == 0) ? ' hidden' : '';
             tr += '<td data-field="' + def.name + '" class="' + cls + '">' + val + '</td>';
         }
         if(options.canEdit){
-            var updateApi = options.updateApi.replace('_ID_', primary);
-            var edit_str = '&nbsp;';
+            let updateApi = options.updateApi.replace('_ID_', primary);
+            let edit_str = '&nbsp;';
             if(!data.list[row].hasOwnProperty('_CAN_UPDATE_') || data.list[row]._CAN_UPDATE_){
                 edit_str += '<a title="编辑" href="' + updateApi + '"><i class="fa fa-edit" style="font-size:18px"></i></a>&nbsp; ';
             }
@@ -540,19 +548,19 @@ function HtmlBuilder_table_setData(data, id) {
     data.page = parseInt(data.page);
     data.size = parseInt(data.size);
     data.total = parseInt(data.total);
-    var offset = (data.page - 1 ) * data.size + 1;
-    var end = offset + parseInt((data.list.length < data.size ? data.list.length : data.size)) - 1;
+    let offset = (data.page - 1 ) * data.size + 1;
+    let end = offset + parseInt((data.list.length < data.size ? data.list.length : data.size)) - 1;
     obj.find('.page-status').text(offset + '-' + end + ' of ' + data.total);
     obj.find('.input-sm.page-size').val(data.size);
-    var po = obj.find('.dataTables_paginate');
-    var totalPages = Math.ceil(data.total/data.size)||1;
-    var startPage = data.page > totalPages ? totalPages : data.page;
+    let po = obj.find('.dataTables_paginate');
+    let totalPages = Math.ceil(data.total/data.size)||1;
+    let startPage = data.page > totalPages ? totalPages : data.page;
     po.twbsPagination('destroy');
     po.twbsPagination({
         totalPages: totalPages,
         startPage: startPage,
         onPageClick: function (event, page) {
-            var tmp = Object.assign({}, window[id].query.limit);
+            let tmp = Object.assign({}, window[id].query.limit);
             if($.isEmptyObject(tmp) || parseInt(tmp.page) === page) return;
             options.query.limit.page = page;
             window[id] = options;
@@ -565,18 +573,18 @@ function HtmlBuilder_table_setData(data, id) {
 
 // 设置固定表头的宽度（在固定表头时）
 function HtmlBuilder_table_fixedColumnWidth(id){
-    var obj = $('#'+id);
-    var refer = obj.find('.htmlbuild-table-header th');
-    var options = window[id];
+    let obj = $('#'+id);
+    let refer = obj.find('.htmlbuild-table-header th');
+    let options = window[id];
 
     obj.find('.htmlbuild-table-header').css({
         position: 'absolute',
         'z-index': 12,
         'background-color': '#fff',
     });
-    var tds = '';
-    for(var index=0; index<refer.length; index++){
-        var width = $(refer[index]).outerWidth();
+    let tds = '';
+    for(let index=0; index<refer.length; index++){
+        let width = $(refer[index]).outerWidth();
         tds += '<td width="' + width + 'px"' + (index === 0 ? (' height="' + $(refer[index]).outerHeight() + '"' ) : '') + ' style="min-width:' + width + 'px;">';
     }
     obj.find('.htmlbuild-table-body').prepend($('<tr>').append(tds)).css({
