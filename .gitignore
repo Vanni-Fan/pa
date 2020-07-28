@@ -10,3 +10,4 @@ docker/mysql/pa.sql
 docker/cache
 public/dist/bower_components
 data/cache
+plugins/Proxy/node_modules

@@ -235,8 +235,7 @@ $(function() {
                         type:this.menus[i].fields[j].type
                     };
                 }
-
-                showFilter(fields, this.menus[i].filter || [], v => {
+                showFilter(fields, this.menus[i].filters || [], v => {
                     console.log('返回的过滤器', v)
                     this.menus[i].filter = v;
                     this.saveFilters(v);

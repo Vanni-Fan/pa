@@ -2,7 +2,6 @@
 namespace plugins\Tables;
 use PA;
 use Phalcon\Db\Column;
-use Power\Models\Plugins;
 
 class Settings {
     public static function setting(){
@@ -62,24 +61,6 @@ class Settings {
                 new Column('class'   , ['type'=>Column::TYPE_VARCHAR    , 'size'=>255    , 'notNull'=>0]),
             ]]
         );
-        return true;
-
-        // 2、 创建 model
-        $db_name = 'System';
-        $template = file_get_contents(__DIR__ .'/ModelTemplate.php');
-        $dir = POWER_DATA . 'TablesPlugins/Tables/'.$db_name.'/';
-        is_dir($dir) || mkdir($dir,0777, true);
-        file_put_contents($dir . 'PluginsTableMenus.php',str_replace(
-            ['__DB_NAME__','__TABLE_NAME__','__MODEL_NAME__','__DB_INFO__'],
-            [$db_name, (PA::$config['pa']['prefix']??'').'plugins_table_menus','PluginsTableMenus', var_export(PA::$config['pa_db']->toArray(),1)],
-            $template
-        ));
-        file_put_contents($dir . 'PluginsTableSources.php',str_replace(
-            ['__DB_NAME__','__TABLE_NAME__','__MODEL_NAME__','__DB_INFO__'],
-            [$db_name, (PA::$config['pa']['prefix']??'').'plugins_table_sources', 'PluginsTableSources', var_export(PA::$config['pa_db']->toArray(),1)],
-            $template
-        ));
-
         return true;
     }
     public static function uninstall($controller, $plugin){

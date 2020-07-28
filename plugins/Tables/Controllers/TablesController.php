@@ -26,6 +26,11 @@ class TablesController extends AdminBaseController
     {
         parent::initialize();
         $this->table    = TablesMenus::findFirst($this->getParam()['table_id'])->toArray();
+        $this->table['filters'] = $this->table['filters'] ? json_decode($this->table['filters'],1) : [];
+        if($this->table['filters'] && !isset($this->table['filters']['op'])){
+            $this->table['filters'] = ['op'=>'AND', 'sub'=>$this->table['filters']];
+        }
+
         $this->title    = $this->table['menu_name'];
         $this->fields   = TablesFields::find(['table_id=?0','bind'=>[$this->table['id']]])->toArray();
         $this->subtitle = '表格管理插件:<u>TablesPlugins</u>.';
@@ -33,7 +38,6 @@ class TablesController extends AdminBaseController
 
     # 首页
     public function indexAction(){
-        $params = $this->getParam();
         $fields = [];
         $primary = [];
         # 过滤掉，不能显示的字段
@@ -47,24 +51,23 @@ class TablesController extends AdminBaseController
         }
         # 表格对象
         $table = Components::table($this->table['title'])->fields($fields)->primary($primary);
+        $table->query(['filters'=>$this->table['filters']]);
         $table->selectMode($this->table['canSelect'] ? 'multi' : null);
         $table->canMin($this->table['canMin']);
         $table->canClose($this->table['canClose']);
-        $table->canEdit($this->table['canEdit'] ? '编辑' : null);
-        $table->canAppend($this->table['canAppend']);
-        $table->canDelete($this->table['canDelete']);
+        $table->canEdit(($this->table['canEdit'] & $this->isAllowed('update')) ? '编辑' : 0);
+        $table->canAppend($this->table['canAppend'] & $this->isAllowed('append'));
+        $table->canDelete($this->table['canDelete'] & $this->isAllowed('delete'));
         $table->canFilter($this->table['canFilter']);
         $table->createApi($this->url('append'));
         $table->queryApi($this->url('list'));
         $table->updateApi($this->url('update',['item_id'=>'_ID_']));
         $table->deleteApi($this->url('delete',['item_id'=>'_ID_']));
 
-
         $parse  = new Parser();
         $table_str  = $parse->parse($table);
         $parse->setResources($this);
 
-//        $this->view->contents = '<pre>'.print_r($this->table,1).print_r($params,1).print_r($this->fields,1).'</pre>'.$table_str;
         $this->view->contents = $table_str;
         $this->render(null);
     }
@@ -79,11 +82,18 @@ class TablesController extends AdminBaseController
             'offset'     => ($page - 1) * $size,
             'bind'       => []
         ];
-    
+
         # 条件
+        $filters = $this->table['filters'];
+        if(isset($_POST['filters'])){ # 合并条件
+            $filters = [
+                'op'=>'AND',
+                'sub'=>[$filters,$_POST['filters']]
+            ];
+        }
         $model = BaseModel::get($this->table['source_id'],$this->table['table']);
-        if(isset($_POST['filters'])){
-            call_user_func_array([$model,'parseWhere'],[['where'=>&$_POST['filters']], &$where]);
+        if($filters){
+            call_user_func_array([$model,'parseWhere'],[['where'=>&$filters], &$where]);
         }
 
         # 排序
@@ -140,7 +150,13 @@ class TablesController extends AdminBaseController
             Forms::button('','返回')->on('click','history.back()')->style('default'),
             Forms::button('','提交')->action('submit'),
         ));
+        if($error = $this->dispatcher->getParam('error')){
+            $error_info = Layouts::box('错误:'.$error)->style('danger');
+        }else{
+            $error_info = Element::create('div');
+        }
         $this->view->contents = $parse->parse(
+            $error_info,
             Forms::form($this->item_id ? $this->url('update') : $this->url('new'),'POST')->add($box)
         );
         $parse->setResources($this);
@@ -151,18 +167,22 @@ class TablesController extends AdminBaseController
     public function appendAction(){ $this->updateAction(); }
     public function updateAction(){
         $model = BaseModel::get($this->table['source_id'], $this->table['table']);
-        if($this->item_id){
-            $param = [];
-            foreach ($this->fields as $index => $field) {
-                if ($field['primary']) $param[] = "{$field['field']}=?$index";
+        try {
+            if ($this->item_id) {
+                $param = [];
+                foreach ($this->fields as $index => $field) {
+                    if ($field['primary']) $param[] = "{$field['field']}=?$index";
+                }
+                $where[0] = implode(' AND ', $param);
+                $where['bind'] = explode('-', $this->item_id);
+                $model::findFirst($where)->assign($_POST)->update();
+            } else {
+                $model->assign($_POST)->create();
             }
-            $where[0] = implode(' AND ', $param);
-            $where['bind'] = explode('-', $this->item_id);
-            $model::findFirst($where)->assign($_POST)->update();
-        }else{
-            $model->assign($_POST)->create();
+        }catch (\Throwable $e){
+            return $this->dispatcher->forward(['action'=>'display','params'=>['error'=>$e->getMessage()]]);
         }
-        $this->response->redirect($this->url(),true);
+        return $this->response->redirect($this->url(),true);
     }
 
 

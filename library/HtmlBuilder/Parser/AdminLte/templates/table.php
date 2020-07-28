@@ -108,7 +108,6 @@ OUT
 
 // HTML 模板，缓存
 $this->html(/** @lang HTML */<<<'OUT'
-<div id="test"></div>
 <div class="box box-primary" id="htmlbuilder-table-template" style="display:none;">
     <div class="box-header with-border">
         <h3 class="box-title"><?=$name?></h3>
@@ -117,12 +116,12 @@ $this->html(/** @lang HTML */<<<'OUT'
             <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
             <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
         </div>
-        <div class="pull-right table-edit-btn" style="display: inline-block;margin-right:50px;">
+        <div class="pull-right table-edit-btn" style="display: inline-block;">
             <span onclick="HtmlBuilder_table_selectAll(this.getAttribute('data-id'),event)" class="text-light-blue select-el"><i class="check-all fa fa-square-o"></i> 全选 </span>&nbsp;
             <span onclick="HtmlBuilder_table_inverse(this.getAttribute('data-id'))" class="text-light-blue select-el"><i class="glyphicon glyphicon-transfer"></i> 反选 </span>&nbsp;
             <span onclick="HtmlBuilder_table_delItems(this.getAttribute('data-id'),HtmlBuilder_table_getSelected(this.getAttribute('data-id')))" class="text-red del-el"><i class="fa fa-trash-o"></i> 删除 </span>&nbsp;
             <span onclick="HtmlBuilder_table_setFilter(this.getAttribute('data-id'))" class="text-light-blue filter-el"><i class="fa fa-filter"></i> 筛选 </span>&nbsp;
-            <span onclick="HtmlBuilder_table_selectFields(this.getAttribute('data-id'))" class="text-light-blue filter-el"><i class="fa fa-tasks"></i> 字段 </span>&nbsp;
+            <span onclick="HtmlBuilder_table_selectFields(this.getAttribute('data-id'))" class="text-light-blue"><i class="fa fa-tasks"></i> 字段 </span>&nbsp;
             <span class="text-aqua add-el"><a><i class="fa fa-plus"></i> 添加 </a></span>
         </div>
     </div>
@@ -284,12 +283,12 @@ function HtmlBuilder_table_init(id){
     // 初始化表头
     let html = '';
     obj.find('.table-edit-btn>*').attr('data-id', id);
-    if(options.canEdit){ // 去掉编辑按钮
+    if(['0',false,0,null,'',undefined].indexOf(options.canEdit) === -1){ // 去掉编辑按钮
         obj.find('.add-el a').attr('href', options.createApi);
     }else{
         obj.find('.del-el,.add-el').remove();
     }
-    if(!options.canAppend){
+    if(['0',false,0,null,'',undefined].indexOf(options.canAppend) > -1){
         obj.find('.add-el').remove();
     }
     if(!options.selectMode){ // 去掉选择模块
@@ -301,11 +300,21 @@ function HtmlBuilder_table_init(id){
     }else{
         obj.find('.table-description').remove();
     }
-    if(!options.canMin){ // 去掉最小化
+    let edit_but_right_margin = 50;
+    if(['0',false,0,null,'',undefined].indexOf(options.canMin) > -1){ // 去掉最小化
+        edit_but_right_margin -= 25;
         obj.find('.box-tools button[data-widget="collapse"]').remove();
     }
-    if(!options.canClose){ // 去掉关闭按钮
+    if(['0',false,0,null,'',undefined].indexOf(options.canClose) > -1){ // 去掉关闭按钮
+        edit_but_right_margin -= 25;
         obj.find('.box-tools button[data-widget="remove"]').remove();
+    }
+    obj.find('.table-edit-btn').css('margin-right',edit_but_right_margin+'px');
+    if(['0',false,0,null,'',undefined].indexOf(options.canDelete) > -1){
+        obj.find('.del-el').remove();
+    }
+    if(['0',false,0,null,'',undefined].indexOf(options.canFilter) > -1){
+        obj.find('.filter-el').remove();
     }
     
     for(let index in options.fields){
